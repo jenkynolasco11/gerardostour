@@ -1,0 +1,2 @@
+#1 - Use React Native Router Flux for routing in between pages
+#2 - Create Refresh function on 'Main > Body' when scrolling down <= -100
