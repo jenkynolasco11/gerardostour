@@ -9,7 +9,8 @@ import {
 
 import styles from './styles'
 
-import ListItem from './ListItem'
+// import ListItem from './ListItem'
+import ListView from './ListView'
 import RideInfo from '../rideinfo'
 
 const BASEURL = 'http://192.168.0.101:8000/api'
@@ -52,7 +53,7 @@ class Body extends Component {
 
     } catch (e) {
       const self = this
-      self.setState({ rides : rides, errorFetch : true })
+      self.setState({ rides, errorFetch : true })
       return setTimeout(() => {
         self.setState({ errorFetch : false, fetching : false })
         return setTimeout(self._fetchData, TIMEOUT)
@@ -74,15 +75,10 @@ class Body extends Component {
 
   _renderListItems() {
     const { onPress } = this.props
-
-    const listItem = (ride, index) => <ListItem {...{ key : index, index, ride, onPress}}/>
+    const { rides } = this.state
 
     return (
-      <View style={ styles.body }>
-      {
-        this.state.rides.map( listItem )
-      }
-      </View>
+      <ListView {...{ onPress, rides }} />
     )
   }
 

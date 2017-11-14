@@ -4,10 +4,13 @@ import {
   TextInput,
   KeyboardAvoidingView,
   Button,
+  Animated,
   Platform
 } from 'react-native'
 
 import styles from './styles'
+
+const AnimatedKeyboardAvoidingView = Animated.createAnimatedComponent(KeyboardAvoidingView)
 
 const UserPassInputs = props => {
   const commonProps = {
@@ -27,8 +30,8 @@ const UserPassInputs = props => {
   if(Platform.OS === "ios") buttonProps.color = 'white'
 
   return (
-    <KeyboardAvoidingView 
-      style={ [ styles.inputs, props.extraHeight ] }
+    <AnimatedKeyboardAvoidingView 
+      style={ [ styles.inputs, props.extraHeight, { opacity : props.opacity } ] }
       behavior={ 'padding' }
     >
       <TextInput
@@ -51,7 +54,7 @@ const UserPassInputs = props => {
       >
         <Button { ...buttonProps }/>
       </View>
-    </KeyboardAvoidingView>
+    </AnimatedKeyboardAvoidingView>
   )
 }
 

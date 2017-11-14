@@ -15,31 +15,25 @@ const styles = StyleSheet.create({
     paddingTop : 30,
   },
   header : {
-    // backgroundColor : 'blue',
     height : height * 0.07,
+    // width : width,
     flexDirection : 'row',
-    borderBottomWidth : 1,
-    borderBottomColor : '#333333',
-    alignItems : 'flex-end',
-    // padding : 10,
+    shadowOffset : { width : 0, height : 4},
+    shadowOpacity : 0.06,
+    shadowColor : 'black',
   },
   headerContent : {
     height : height * 0.07,
     flex : 1,
-    // backgroundColor : 'red',
     justifyContent : 'center',
     alignItems : 'center',
   },
   greeting : {
-    // alignSelf : 'center',
-    // flex : 1,
     fontSize : 18,
-    // textAlign : 'center',
-    // alignContent : 'center',
-    // justifyContent : 'center',
-    // alignItems : 'center',
+    color : '#fcfcfc'
   },
   logout : {
+    marginLeft : 10,
     width : width * 0.25,
     height : height * 0.06,
     backgroundColor : '#3563eb',
@@ -52,7 +46,36 @@ const styles = StyleSheet.create({
     fontSize : 14
   },
   body : {
-    
+    // marginTop : height * 0.07
+  },
+  listItem : {
+    backgroundColor : 'transparent',
+    justifyContent : 'center',
+    alignItems : 'center',
+    paddingTop : 10,
+    paddingBottom : 10,
+    borderBottomColor : '#aaa',
+    borderBottomWidth : 1,
+  },
+  listItemText : {
+    color : '#fcfcfc'
+  },
+  separator : {
+    backgroundColor : '#f3f3f3',
+    marginTop : 3,
+    marginBottom : 3,
+    flex : 1,
+  },
+  errorText : {
+    textAlign : 'center',
+    color : 'red'
+  },
+  messageBox : {
+    paddingTop : 40,
+    flex : 1,
+    backgroundColor : 'transparent',
+    // justifyContent : 'center',
+    alignItems : 'center',
   }
 })
 

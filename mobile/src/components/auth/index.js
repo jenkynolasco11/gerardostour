@@ -5,8 +5,8 @@ import {
   View,
   Text,
   Keyboard,
-  // Animated,
-  // Easing,
+  Animated,
+  Easing,
   Modal,
 } from 'react-native'
 
@@ -21,6 +21,10 @@ class Auth extends Component{
 
   constructor(props) {
     super(props)
+
+    this.state = {
+      opacity : new Animated.Value(0)
+    }
 
     this._onUsernameChange = this._onUsernameChange.bind(this)
     this._onPasswordChange = this._onPasswordChange.bind(this)
@@ -53,6 +57,15 @@ class Auth extends Component{
   }
 
   componentDidMount() {
+    const { opacity } = this.state
+
+    Animated.timing(opacity, {
+      toValue : 1,
+      delay : 200,
+      duration : 500,
+      easing : Easing.linear
+    }).start()
+
     // Keyboard.addListener('keyboardWillShow', this._extraHeight)
     // Keyboard.addListener('keyboardWillHide', this._remomveExtraHeight)
 
@@ -89,6 +102,7 @@ class Auth extends Component{
           onPasswordChange={this._onPasswordChange}
           shouldDisable={false}
           checkInputs={this._checkInputs}
+          opacity={this.state.opacity}
         />
         <Text style={ styles.trademark }>{`Created by Jenky Nolasco @ ${ new Date().getFullYear() }`}</Text>
         {

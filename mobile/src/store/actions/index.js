@@ -1,3 +1,5 @@
+import { Actions, ActionConst } from 'react-native-router-flux'
+
 const BASEURL = 'http://192.168.0.101:8000/api'
 
 //////////////////// ACTIONS //////////////////////
@@ -56,6 +58,9 @@ export const requestLogin = userInfo => {
       
       if(data.isAuth) {
         dispatch(clearMeta())
+        //Actions.push()
+        Actions.app()
+
         return dispatch(login(data))
       }
       return dispatch(badAuthentication({ badAuth : true}))
@@ -76,7 +81,11 @@ export const requestLogout = id => {
         const res = await fetch(`${BASEURL}/auth/logout/${id}`, options)
         const data = await res.json()
 
-        if(data.ok) dispatch(logout())
+        if(data.ok) {
+          // TODO : Fix this later
+          dispatch(logout())
+          Actions.reset('auth')
+        }
       }
     } catch (e) {
       //

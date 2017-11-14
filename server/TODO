@@ -1,0 +1,5 @@
+#1 - Create a websocket to keep pending of connected users. 
+     If socket doesn't respond, then try persisting. Update 
+     with new Data after reconnection
+
+#2 - 
