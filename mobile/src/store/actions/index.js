@@ -1,6 +1,5 @@
 import { Actions, ActionConst } from 'react-native-router-flux'
-
-const BASEURL = 'http://192.168.0.101:8000/api'
+import { BASEURL, TIMEOUT } from '../../../config'
 
 //////////////////// ACTIONS //////////////////////
 
@@ -40,7 +39,7 @@ export const makeAvailable = payload => ({ type: 'MAKE_AVAILABLE', payload })
 export const requestLogin = userInfo => {
   return async dispatch => {
     const method = 'POST'
-    const TIMEOUT = 4000
+    // const TIMEOUT = 4000
 
     // TODO : Add security here
     const body = new FormData()
