@@ -1,6 +1,5 @@
 import { Actions, ActionConst } from 'react-native-router-flux'
 import { BASEURL, TIMEOUT } from '../../../config'
-
 //////////////////// ACTIONS //////////////////////
 
 // Payload : { user : String, id : Number }
@@ -39,7 +38,6 @@ export const makeAvailable = payload => ({ type: 'MAKE_AVAILABLE', payload })
 export const requestLogin = userInfo => {
   return async dispatch => {
     const method = 'POST'
-    // const TIMEOUT = 4000
 
     // TODO : Add security here
     const body = new FormData()
@@ -65,6 +63,7 @@ export const requestLogin = userInfo => {
       return dispatch(badAuthentication({ badAuth : true}))
 
     } catch(e) {
+      console.log(`Something happened while authenticating: ${e}`)
       dispatch(cantAuthenticate({ cantAuth : true }))
       return dispatch(logout())
     }
