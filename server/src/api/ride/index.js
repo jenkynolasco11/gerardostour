@@ -1,9 +1,9 @@
 import Router from 'koa-router'
 
-const ride = new Router()
-const routes = new Router()
+const ride = new Router({ prefix : 'ride' })
+// const routes = new Router()
 
-routes.get('/all', ctx => {
+ride.get('/all', ctx => {
   const maxPerDay = () => Math.floor((Math.random() * 5) + 1)
   const maxPerView = Math.floor((Math.random() * 10) + 1)
   const passengers = () => Math.floor((Math.random() * 31) + 20)
@@ -62,7 +62,7 @@ routes.get('/all', ctx => {
   //   })
 })
 
-routes.get('/:id', ctx => {
+ride.get('/:id', ctx => {
   console.log('right here...')
   return ctx.body = {
     id : '0001',
@@ -74,7 +74,7 @@ routes.get('/:id', ctx => {
   }
 })
 
-routes.get('/:id/passengers', ctx => {
+ride.get('/:id/passengers', ctx => {
   const randNumber = () => Math.floor((Math.random() * 10))
   const passengersNum = () => Math.floor((Math.random() * 31) + 20)
   const names = [
@@ -106,6 +106,6 @@ routes.get('/:id/passengers', ctx => {
   return ctx.body = { passengers }
 })
 
-ride.use('/rides', routes.routes(), routes.allowedMethods())
+// ride.use('/rides', routes.routes(), routes.allowedMethods())
 
 export default ride

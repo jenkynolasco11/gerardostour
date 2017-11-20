@@ -1,19 +1,19 @@
 import Router from 'koa-router'
 
-const user = new Router()
-const routes = new Router()
+const user = new Router({ prefix : 'user' })
+// const routes = new Router()
 
-routes.get('/available', ctx => {
+user.get('/available', ctx => {
   // console.log('check available')
   return ctx.body = { ok : true }
 })
 
-routes.get('/no-available', ctx => {
+user.get('/no-available', ctx => {
   // console.log('check non available')
   return ctx.body = { ok : true }
 })
 
-routes.get('/passenger/:id', ctx => {
+user.get('/passenger/:id', ctx => {
   return ctx.body = {
     id : 'x0001',
     name : 'Fulanito de tal',
@@ -23,6 +23,6 @@ routes.get('/passenger/:id', ctx => {
   }
 })
 
-user.use('/user', routes.routes(), routes.allowedMethods())
+// user.use('/user', routes.routes(), routes.allowedMethods())
 
 export default user

@@ -2,4 +2,5 @@
      If socket doesn't respond, then try persisting. Update 
      with new Data after reconnection
 
-#2 - 
+#2 - Make session to be saved in an external store
+#3 - Check passport in /api/admin/auth.js file

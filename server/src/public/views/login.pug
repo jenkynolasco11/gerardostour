@@ -1,0 +1,10 @@
+doctype html
+html.no-js(lang='')
+  include partials/head.pug
+  body
+    div
+    form(method='POST', action='/admin/auth/login').login
+      input(type='text', placeholder='Username', name='username')
+      input(type='password', placeholder='Password', name='password')
+      input(type='submit', value='Login')
+    p.message(class=msg.type === error ? 'error' : '') #{ msg.message }

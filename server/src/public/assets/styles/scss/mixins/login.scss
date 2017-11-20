@@ -1,0 +1,8 @@
+@mixin placeholders($color : white, $colorfocus : gray, $time : 0.2s) {
+  color : $color;
+  transition : color $time linear;
+
+  &:focus {
+    color : $colorfocus;
+  }
+}
