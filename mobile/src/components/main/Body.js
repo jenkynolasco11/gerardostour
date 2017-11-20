@@ -13,8 +13,7 @@ import styles from './styles'
 import ListView from './ListView'
 import RideInfo from '../rideinfo'
 
-const BASEURL = 'http://192.168.0.101:8000/api'
-const TIMEOUT = 5000
+import { BASEURL, TIMEOUT } from '../../../config'
 
 class Body extends Component { 
   constructor(props) {

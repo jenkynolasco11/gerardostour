@@ -8,8 +8,6 @@ import {
 } from 'react-native'
 import styles from './styles'
 
-const BASEURL = 'http://192.168.0.101:8000/api'
-
 const ListItem = ({ index, ride, onPress }) => {
   // TODO : This is an Anti-pattern
   const opacity = new Animated.Value(0)
