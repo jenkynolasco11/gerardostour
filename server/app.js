@@ -1,6 +1,7 @@
 import Koa from 'koa'
 import logger from 'koa-logger'
 import bodyparser from 'koa-body'
+// import bodyparser from 'koa-better-body'
 import Pug from 'koa-pug'
 import mongoose from 'mongoose'
 import serve from 'koa-static'

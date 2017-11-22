@@ -25,15 +25,15 @@ apiRoutes.forEach(route => {
   api.use('/', route.routes(), route.allowedMethods())
 })
 
-rootRoute.use('/', api.routes())
-// rootRoute.use('', pblc.routes(), pblc.allowedMethods())
+rootRoute.use('/', api.routes(), api.allowedMethods())
 rootRoute.use('/', admin.routes(), admin.allowedMethods())
 
 rootRoute.get('/', ctx => {
+  // TODO : Reconsider this redirect in here
   if(ctx.isAuthenticated()) return ctx.redirect('/admin/dashboard')
   return ctx.redirect('/admin/auth')
 })
 
-rootRoute.stack.forEach(p => console.log(p.path/*, p.methods*/))
+// rootRoute.stack.forEach(p => console.log(p.path/*, p.methods*/))
 
 export default rootRoute.routes()

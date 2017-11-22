@@ -1,10 +1,11 @@
 doctype html
-html.no-js(lang='')
+html.no-js(lang='en-US')
   include partials/head.pug
   body
-    div
-    form(method='POST', action='/admin/auth/login').login
-      input(type='text', placeholder='Username', name='username')
-      input(type='password', placeholder='Password', name='password')
-      input(type='submit', value='Login')
-    p.message(class=msg.type === error ? 'error' : '') #{ msg.message }
+    div#main
+    script(src=script type='text/javascript')
+    //- form(method='POST', action='/admin/auth/login').login
+    //-   input(type='text', placeholder='Username', name='username')
+    //-   input(type='password', placeholder='Password', name='password')
+    //-   input(type='submit', value='Login')
+    //- p.message(class=msg.type === error ? 'error' : '') #{ msg.message }

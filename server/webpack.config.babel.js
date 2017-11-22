@@ -1,58 +1,33 @@
 import webpack from 'webpack'
+
 import Extract from 'extract-text-webpack-plugin'
 import path from 'path'
 
-const styles = './src/public/assets/styles'
+const assets = './src/public/assets'
+
+const styles = `${ assets }/styles`
+const js = `${ assets }/js`
+const components = './src/components'
 
 const extractSass = new Extract({
-  filename : './src/public/assets/styles/css/[name].css',
+  filename : '[name].css',
   // allChunks : true
 })
 
-export default {
+const uglify = new webpack.optimize.UglifyJsPlugin({ compress : { warnings : false }})
+
+const cssConfig = {
   watch : true,
-  entry : {
-    //
-    style : `${ styles }/scss/style.scss`,
-    // 'dist/' : './app.js',
-  }, 
-  output : {
-    path : path.resolve(__dirname, '.'),
-    filename : 'bundle'
+  entry : { style : `${ styles }/scss/style.scss` }, 
+  output : { 
+    path : path.resolve(__dirname, styles, 'css' ),
+    filename : '[name].css'
   },
-  // exclude : [ 'node_modules' ],
-    // chatClient : './chat/index.jsx',
-    // chatServer : './chat-server/index.jsx'
-  // output : {
-  //   // path : join(__dirname,'public/js'),
-  //   filename : '[name].js',
-  // },
-  // debug : true,
-  // target : 'node',
-  // externals : [nodeExternals()],
-  // resolve : {
-  //   modulesDirectories : ['node_modules','.','chat'],
-  //   extensions : ['','*.jsx']
-  // },
   module : {
-    // loaders : [
-    //   {
-    //     test : /\.jsx?$/,
-    //     exclude : /nodule_modules/,
-    //     // include : [
-    //     //   path.join(__dirname,'chat')
-    //     // ],
-    //     loader : 'babel',
-    //     query : {
-    //       //
-    //       presets : ['es2015', 'react']
-    //     }
-    //   }
-    // ],
     loaders : [
       {
         test : /\.css$/,
-        include : [ path.resolve(__dirname, styles, 'css') ],
+        // include : [ path.resolve(__dirname, styles, 'css') ],
         loader : Extract.extract(
           { 
             use : ['css-loader?importLoaders=1'],
@@ -62,7 +37,7 @@ export default {
       },
       {
         test : /\.s(css|ass)$/,
-        include : [ path.resolve(__dirname, styles, 'scss') ],
+        // include : [ path.resolve(__dirname, styles, 'scss') ],
         loader : Extract.extract(
           {
             use : ['css-loader', 'sass-loader'],
@@ -70,20 +45,44 @@ export default {
           }
         )
       }
-      //   use : [
-      //     { loader : 'style-loader' }, 
-      //     { loader : 'css-loader' },
-      //     { loader : 'sass-loader' }
-      //   ]
-      // }
     ]
   },
-  plugins : [
-    extractSass
-    // new webpack.HotModuleReplacementPlugin(),
-    // new webpack.NoErrorsPlugin(),
-    // new webpack.optimize.UglifyJsPlugin({
-    //   compress : { warnings : false }
-    // })
-  ]
+  plugins : [ extractSass ],
+  resolve : { extensions : ['.css', '.scss'] }
 }
+
+const bundleConfig = {
+  watch : true,
+  entry : {
+    // polyfill : 'babel-polyfill',
+    login : ['babel-polyfill', `${ components }/login/index.jsx`],
+    // ax : `${ components }/index.jsx`
+  }, 
+  output : {
+    path : path.resolve(__dirname, js),
+    filename : '[name].js'
+  },
+  module : {
+    loaders : [
+      {
+        test : /\.jsx?$/,
+        loader : 'babel-loader',
+        exclude : /(nodule_modules|\.git)/,
+        // options : {
+        //   babelrc : true,
+        //   cacheDirectory : true,
+        //   presets : ['es2015', 'react'],
+        // },
+        query : {
+          // cacheDirectory: true,
+          presets : ['es2015', 'react', 'stage-2'],
+          // plugins : [ 'syntax-async-functions', 'transform-regenerator' ]
+        },
+      }
+    ],
+  },
+  // plugins : [ uglify ],
+  resolve: { extensions: ['.js', '.jsx'] },
+}
+
+export default [ /*cssConfig, */bundleConfig ]

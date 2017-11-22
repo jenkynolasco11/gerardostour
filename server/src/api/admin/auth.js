@@ -1,58 +1,47 @@
 import Router from 'koa-router'
 import passport from 'koa-passport'
+// import React from 'react'
+// import { renderToString } from 'react-dom/server'
 
 import { User } from '../../models'
 
+// import Login from '../../components/Login'
+// import { Template } from '../../components'
+
 const auth = new Router({ prefix : 'auth' })
 
-auth.get('/', ctx => {
-  // If user is authenticated
+const isAuthenticated = (ctx, next) => {
   if(ctx.isAuthenticated()) return ctx.redirect('/admin/dashboard')
+  return next()
+}
 
-  const { query } = ctx
-  const msg = { type : 'none', message : '' }
-  // console.log(`Query: ${ JSON.stringify( query ) }`)
-
-  if(query.error) {
-    msg.type = 'error'
-    msg.message = 'Please, try again'
-  }
+auth.get('/', isAuthenticated, ctx => {
+  const script = '/js/login.js'
 
   // ..... Create more query errors depending the situation
-
-  return ctx.render('login', { title : 'login', description : 'duh', msg })
+  return ctx.render('login', { title : 'login', description : 'duh', script })
 })
 
-auth.post('/login', ctx => {
-  return passport.authenticate('local', {
+auth.post('/login', isAuthenticated, ctx => (
+  passport.authenticate('local', {
     successRedirect : '/admin/dashboard',
     failureRedirect : '/admin/auth?valid=false',
-  }, async (err, user, info, done) => {
+  }, async (err, user, msg, done) => {
     if(user) {
       // TODO : Alter session last time connected in here
-      // ctx.body = { success : true }
       await ctx.login(user)
 
-      //  console.log(`Session: ${ JSON.stringify(ctx.session) }`)
-      return ctx.redirect('/admin/dashboard')
-      // console.log(info)
-      // return done(null, true)
+      return ctx.body = { ok : true }
     }
 
-    // return done(null, false)
-    // ctx.body = { success : false }
-    return ctx.redirect('/admin/auth?valid=false')
-    // setTimeout(() => ctx.redirect('/admin/auth?valid=false'), 4000)
-  })(ctx)
-})
-
-// auth.get('/login', ctx => {
-//   console.log(`Session: ${ JSON.stringify(ctx.session) } (/admin/auth/login)`)
-// })
+    return ctx.body = { ok : false, msg }
+  })(ctx))
+)
 
 auth.get('/logout', ctx => {
   console.log('logging out...')
   ctx.logout()
+
   return ctx.redirect('/admin/auth')
 })
 
