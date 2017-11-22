@@ -1,6 +1,7 @@
 import webpack from 'webpack'
 
 import Extract from 'extract-text-webpack-plugin'
+import HtmlWebpackPlugin from 'html-webpack-plugin'
 import path from 'path'
 
 const assets = './src/public/assets'
@@ -9,32 +10,41 @@ const styles = `${ assets }/styles`
 const js = `${ assets }/js`
 const components = './src/components'
 
-const extractSass = new Extract({
-  filename : '[name].css',
-  // allChunks : true
-})
-
+const extractSass = new Extract({ filename : '[name].css'/*, allChunks : true */ })
+const htmlExtract = new HtmlWebpackPlugin({ hash : true, })
 const uglify = new webpack.optimize.UglifyJsPlugin({ compress : { warnings : false }})
+const HMR = new webpack.HotModuleReplacementPlugin()
+const namedModules = new webpack.NamedModulesPlugin()
+// const occurenceOrder = new webpack.optimize.OccurrenceOrderPlugin()
+const noErrors = new webpack.NoEmitOnErrorsPlugin()
+// const chunking = new webpack.optimize.CommonsChunkPlugin({ minChunks : Infinity, name : 'vendor', filename : 'vendor.js' })
 
-const cssConfig = {
+export const cssConfig = {
   watch : true,
-  entry : { style : `${ styles }/scss/style.scss` }, 
+  entry : { 
+    login : `${ styles }/scss/login.scss`,
+    dashboard : `${ styles }/scss/dashboard.scss`,
+
+    // // Testing
+    // style : `${ styles }/scss/style.dev.scss`
+  }, 
   output : { 
     path : path.resolve(__dirname, styles, 'css' ),
     filename : '[name].css'
   },
   module : {
     loaders : [
-      {
-        test : /\.css$/,
-        // include : [ path.resolve(__dirname, styles, 'css') ],
-        loader : Extract.extract(
-          { 
-            use : ['css-loader?importLoaders=1'],
-            fallback : 'style-loader'
-          }
-        ),
-      },
+      // {
+      //   test : /\.css$/,
+      //   // use : [ 'style-loader', 'css-loader', 'sass-loader' ],
+      //   // include : [ path.resolve(__dirname, styles, 'css') ],
+      //   loader : Extract.extract(
+      //     { 
+      //       use : ['css-loader?importLoaders=1'],
+      //       fallback : 'style-loader'
+      //     }
+      //   ),
+      // },
       {
         test : /\.s(css|ass)$/,
         // include : [ path.resolve(__dirname, styles, 'scss') ],
@@ -47,20 +57,24 @@ const cssConfig = {
       }
     ]
   },
-  plugins : [ extractSass ],
-  resolve : { extensions : ['.css', '.scss'] }
+  plugins : [ /*uglify, */extractSass /*, HMR, namedModules */],
+  resolve : { extensions : ['.js', '.css', '.scss'] },
+  devServer : { hot : true, compress : true, },
+  devtool : 'inline-source-map',
 }
 
-const bundleConfig = {
+export const bundleConfig = {
   watch : true,
   entry : {
-    // polyfill : 'babel-polyfill',
-    login : ['babel-polyfill', `${ components }/login/index.jsx`],
-    // ax : `${ components }/index.jsx`
+    // login : ['webpack-hot-middleware/client', 'babel-polyfill', `${ components }/login/index.jsx`],
+    login : [ 'babel-polyfill', `${ components }/login/index.jsx`],
+    dashboard : [ 'babel-polyfill', `${ components }/dashboard/index.jsx`],
+    // 'script.dev' : [ 'babel-polyfill', `${ components }/index.jsx`],
   }, 
   output : {
     path : path.resolve(__dirname, js),
-    filename : '[name].js'
+    filename : '[name].js',
+    publicPath : './src/public',
   },
   module : {
     loaders : [
@@ -74,15 +88,18 @@ const bundleConfig = {
         //   presets : ['es2015', 'react'],
         // },
         query : {
+          compact : false,
           // cacheDirectory: true,
-          presets : ['es2015', 'react', 'stage-2'],
+          presets : ['es2015', 'react', 'stage-2'/*, 'react-hmre' */],
           // plugins : [ 'syntax-async-functions', 'transform-regenerator' ]
         },
       }
     ],
   },
-  // plugins : [ uglify ],
+  // plugins : [ uglify, /*, HMR,*/ namedModules, noErrors ],
   resolve: { extensions: ['.js', '.jsx'] },
+  // devServer : { hot : true, compress : true, },
+  // devtool : 'inline-source-map',
 }
 
-export default [ /*cssConfig, */bundleConfig ]
+export default [ cssConfig, bundleConfig ]

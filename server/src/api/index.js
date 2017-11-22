@@ -29,6 +29,10 @@ rootRoute.use('/', api.routes(), api.allowedMethods())
 rootRoute.use('/', admin.routes(), admin.allowedMethods())
 
 rootRoute.get('/', ctx => {
+  // // Testing
+  // const script = '/js/script.dev.js'
+  // return ctx.render('index.dev', { script })
+  
   // TODO : Reconsider this redirect in here
   if(ctx.isAuthenticated()) return ctx.redirect('/admin/dashboard')
   return ctx.redirect('/admin/auth')

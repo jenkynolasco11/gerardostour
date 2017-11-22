@@ -17,9 +17,10 @@ const isAuthenticated = (ctx, next) => {
 
 auth.get('/', isAuthenticated, ctx => {
   const script = '/js/login.js'
+  const params = { title : 'login', description : 'duh', script }
 
   // ..... Create more query errors depending the situation
-  return ctx.render('login', { title : 'login', description : 'duh', script })
+  return ctx.render('login', params)
 })
 
 auth.post('/login', isAuthenticated, ctx => (
@@ -39,7 +40,7 @@ auth.post('/login', isAuthenticated, ctx => (
 )
 
 auth.get('/logout', ctx => {
-  console.log('logging out...')
+  console.log(`${ ctx.state.user.username } is logging out...`)
   ctx.logout()
 
   return ctx.redirect('/admin/auth')

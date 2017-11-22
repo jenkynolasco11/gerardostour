@@ -1,0 +1,10 @@
+.dashboard {
+  position : absolute;
+  width : 100vw;
+  height : 100vh;
+  box-shadow : 0px 0px 5px black;
+
+  @include alignCenter();
+  transition: left $trans linear;
+  background : rgb(62, 62, 150);
+}

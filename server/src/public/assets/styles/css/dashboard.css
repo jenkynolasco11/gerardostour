@@ -1,0 +1,122 @@
+ul {
+  margin: 0;
+  padding: 0; }
+
+li {
+  list-style: none;
+  margin: 0; }
+
+a, a:visited, a:active, a:link, a:hover {
+  color: black;
+  outline: none;
+  text-decoration: none; }
+
+body {
+  margin: 0; }
+  body #main {
+    overflow: hidden;
+    min-width: 100vw;
+    min-height: 100vh;
+    position: relative;
+    margin: 0; }
+    body #main .sidebar {
+      position: absolute;
+      height: 100vh;
+      background: #1a1a1a;
+      width: 200px;
+      margin-left: 0px;
+      transition: margin-left 0.2s linear, background 0.2s linear; }
+      body #main .sidebar.closed {
+        margin-left: -40px;
+        background: #070707; }
+      body #main .sidebar__menu-list {
+        display: flex;
+        flex-direction: column;
+        padding-top: 80px; }
+        body #main .sidebar__menu-list-item {
+          box-sizing: border-box;
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          height: 60px;
+          border-bottom: 1px solid gray;
+          transition: background .1s linear; }
+          body #main .sidebar__menu-list-item:first-child {
+            border-top: 1px solid gray; }
+          body #main .sidebar__menu-list-item:hover {
+            background: #4d4d4d; }
+            body #main .sidebar__menu-list-item:hover a {
+              color: white; }
+          body #main .sidebar__menu-list-item a {
+            transition: color .1s linear;
+            color: #d08383; }
+    body #main .burger-menu .toggle-menu, body #main .burger-menu .toggle-menu:before, body #main .burger-menu .toggle-menu:after {
+      height: 3.2px;
+      width: 32px;
+      background: #ef5c5c;
+      border-radius: 4px; }
+    body #main .burger-menu {
+      box-shadow: inset 0px 0px 5px black;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 40px;
+      width: 40px;
+      background: #151545;
+      border-radius: 2px;
+      position: absolute;
+      margin: 20px;
+      z-index: 1;
+      transition: background .1s linear; }
+      body #main .burger-menu:hover {
+        background: #191953; }
+      body #main .burger-menu .toggle-menu {
+        transition: background .1s linear; }
+        body #main .burger-menu .toggle-menu:before {
+          content: '';
+          position: absolute;
+          margin-top: -10px;
+          transition: transform .1s linear, margin .1s linear, width .1s linear, background .1s linear;
+          transform-origin: 0 50%; }
+        body #main .burger-menu .toggle-menu:after {
+          content: '';
+          position: absolute;
+          margin-top: 10px;
+          transition: transform .1s linear, margin .1s linear, width .1s linear, background .1s linear;
+          transform-origin: 0 50%; }
+        body #main .burger-menu .toggle-menu.open {
+          background: transparent; }
+          body #main .burger-menu .toggle-menu.open:before {
+            content: '';
+            position: absolute;
+            background: #d08383;
+            transform: rotate(45deg);
+            margin-top: -14px;
+            margin-left: 2px;
+            width: 40px; }
+          body #main .burger-menu .toggle-menu.open:after {
+            content: '';
+            position: absolute;
+            background: #d08383;
+            transform: rotate(-45deg);
+            margin-top: 14px;
+            margin-left: 2px;
+            width: 40px; }
+    body #main .dashboard {
+      position: absolute;
+      width: 100vw;
+      height: 100vh;
+      box-shadow: 0px 0px 5px black;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      transition: left 0.2s linear;
+      background: #3e3e96; }
+    body #main .navbar {
+      width: 100%;
+      height: 80px;
+      align-self: flex-start;
+      background: #1e1e1e;
+      border-bottom: 1px solid #898989; }
+
+/*# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbXSwibmFtZXMiOltdLCJtYXBwaW5ncyI6IiIsImZpbGUiOiJkYXNoYm9hcmQuY3NzIiwic291cmNlUm9vdCI6IiJ9*/

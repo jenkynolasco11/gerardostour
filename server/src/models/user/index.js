@@ -2,17 +2,16 @@ import mongoose, { Schema, SchemaTypes } from 'mongoose'
 import bcrypt from 'bcrypt-nodejs'
 
 const UserSchema = new Schema({
+  personid : { type : Schema.Types.ObjectId, required : true, unique : true },
   username : { type : String, index : { unique : true }},
   password : { type : String, required : true, },
-  firstname : String,
-  lastname : String,
   position : {
     type : String,
     default : 'NONE',
     enum :  [ 'ADMIN', 'CHAUFFER', 'NONE'],
   },
-  created_at : { type : Date, default : Date.now() },
-  last_session : { type : Date, required : true, default : Date.now() }
+  createdAt : { type : Date, default : Date.now() },
+  lastSession : { type : Date, required : true, default : Date.now() }
 })
 
 UserSchema.methods.generateHash = function(password){ 
@@ -23,6 +22,11 @@ UserSchema.methods.validPassword = function(password){
   const isValid = bcrypt.compareSync(password, this.password) 
   console.log(`Password is ${ isValid ? 'valid' : 'not valid' }`)
   return isValid
+}
+
+UserSchema.methods.updateLastSession = function() {
+  this.lastSession = Date.now()
+  this.save()
 }
 
 UserSchema.pre('validate', function(next){

@@ -1,0 +1,43 @@
+.sidebar {
+  position : absolute;
+  height : 100vh;
+  background : rgb(26, 26, 26);
+  width : 200px;
+  margin-left : 0px;
+  transition : margin-left $trans linear, background $trans linear;
+
+  &.closed {
+    margin-left : -40px;
+    background : rgb(7, 7, 7);
+  }
+
+  &__menu-list {
+    display : flex;
+    flex-direction : column;
+    padding-top : 80px;
+
+    &-item {
+      box-sizing : border-box;
+      @include alignCenter();
+      height : 60px;
+      border-bottom : 1px solid gray;
+      transition : background .1s linear;
+
+      &:first-child {
+        border-top : 1px solid gray;
+      }
+
+      &:hover {
+        background : rgb(77, 77, 77);
+        a {
+          color : white;
+        }
+      }
+
+      a {
+        transition :  color .1s linear;
+        color : rgb(208, 131, 131);
+      }
+    }
+  }
+}

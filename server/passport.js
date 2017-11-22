@@ -29,6 +29,8 @@ passport.use('local', new Strategy({
       // If password is not valid
       if(!user.validPassword(password)) return done(null, false, 'Invalid password')
 
+      user.updateLastSession()
+
       return done(null, user)
     }
 

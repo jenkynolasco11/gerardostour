@@ -1,4 +1,7 @@
 {
   "ignore" : [
+    "components"
+    , "public"
+    , "webpack.config.*"
   ]
 }

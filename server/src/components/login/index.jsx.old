@@ -1,3 +1,6 @@
+// import 'babel-polyfill'
+// import '../../public/assets/styles/scss/styles.scss'
+
 import React, { Component } from 'react'
 import { render } from 'react-dom'
 import axios from 'axios'
@@ -78,4 +81,6 @@ class LoginForm extends Component {
 
 render(<LoginForm />, main)
 
-// export default LoginForm
+// if(module.hot) {
+//   module.hot.accept('')
+// }

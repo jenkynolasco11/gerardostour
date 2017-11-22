@@ -11,13 +11,24 @@ import SessionStore from 'koa-session-mongoose'
 import bluebird from 'bluebird'
 import passport from 'koa-passport'
 
+/* Dev configuration */
+// import webpackDM from 'koa-webpack-dev-middleware'
+// import webpackHM from 'koa-webpack-hot-middleware'
+// import webpack from 'webpack'
+// import { bundleConfig } from './webpack.config.babel'
+// const compiler = webpack(bundleConfig)
+// /////////
+
 import config from './config'
 import routes from './src/api'
 
 import './passport'
 
+// Assign better Promise to global/mongoose
+global.Promise = bluebird.Promise
+// mongoose.Promise = bluebird.Promise
+
 const server = async () => {
-  mongoose.Promise = bluebird.Promise
   try {
     await mongoose.connect(config.DBURI, { useMongoClient : true })
 
@@ -46,6 +57,10 @@ const server = async () => {
     app.keys = config.KEYS
 
     app
+    /* Dev purposes */
+      // .use(webpackDM(compiler, { noInfo : true, stats : { colors : true }, publicPath : bundleConfig.output.publicPath }))
+      // .use(webpackHM(compiler))
+    //////////////////
       .use(bodyparser({ multipart : true }))
       .use(serve('./src/public/assets'))
       .use(session(sessionParams, app))

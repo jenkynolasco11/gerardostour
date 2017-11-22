@@ -2,8 +2,9 @@ doctype html
 html.no-js(lang='')
   include partials/head.pug
   body
-    div
-    | You made it
+    div#main
+    script(src=script, text='text/javascript')
+    //- | You made it
     //- form(method='POST', action='/admin/auth/login').login
     //-   input(type='text', placeholder='Username', name='username')
     //-   input(type='password', placeholder='Password', name='password')
