@@ -1,20 +1,27 @@
 import React, { Component } from 'react'
+import { connect } from 'react-redux'
 import PropTypes from 'prop-types'
+
+import { changeRoute } from '../../store-redux/actions'
 
 const MenuItems = props => (
   <ul className="sidebar__menu-list">
    {
       props.items.map( (itm, indx) => (
         <li key={ indx } className={ 'sidebar__menu-list-item' }>
-          <a onClick={ e => props.switchComp(e, itm.name) } href={ itm.href }>
-            { itm.name }
-          </a>
+          {/*
+            <a onClick={ e => props.switchComp(e, itm.name) } href={ itm.href }>
+              { itm.name }
+            </a>
+          */}
+          { itm }
         </li>
      ))
    }
   </ul>
 )
 
+/*
 const menuItems = [
   {
     name : 'dashboard',
@@ -33,13 +40,15 @@ const menuItems = [
     href : '/driver',
   },
 ]
+*/
 
-class Sidebar extends Component {
+class Sidebar extends Component{
   constructor(props) {
     super(props)
   }
 
   render() {
+    const { menuItems } = this.props
     return (
       <aside className={`sidebar ${ this.props.hidden ? 'closed' : '' }`}>
         <div className="sidebar__menu">
@@ -50,9 +59,20 @@ class Sidebar extends Component {
   }
 }
 
+const mapStateToProps = state => {
+  const { switches } = state.router
+
+  return { menuItems : switches }
+}
+
+const mapDispatchToProps = dispatch => ({
+  //
+  switchComp : which => dispatch(changeRoute(which)),
+})
+
 Sidebar.PropTypes = {
   switchComp : PropTypes.func,
   items : PropTypes.arrayOf(PropTypes.object),
 }
 
-export default Sidebar
+export default connect(mapStateToProps, mapDispatchToProps)(Sidebar)

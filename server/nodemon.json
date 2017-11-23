@@ -3,5 +3,6 @@
     "components"
     , "public"
     , "webpack.config.*"
+    , "store-redux"
   ]
 }

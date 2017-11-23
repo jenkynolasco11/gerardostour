@@ -5,3 +5,4 @@
 #2 - Make session to be saved in an external store
 #3 - Check passport in /api/admin/auth.js file
 #4 - Separate routes by admin/public/mobile
+#5 - Check why React is loading route every time I open the menu

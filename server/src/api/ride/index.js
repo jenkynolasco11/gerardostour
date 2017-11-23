@@ -1,65 +1,21 @@
 import Router from 'koa-router'
 
+import RideModel from '../../models/ride'
+
 const ride = new Router({ prefix : 'ride' })
 // const routes = new Router()
 
-ride.get('/all', ctx => {
-  const maxPerDay = () => Math.floor((Math.random() * 5) + 1)
-  const maxPerView = Math.floor((Math.random() * 10) + 1)
-  const passengers = () => Math.floor((Math.random() * 31) + 20)
-  const status = () => {
-    const indx = Math.floor((Math.random() * 4))
-    return [
-      'COMPLETED',
-      'PENDING',
-      'NON-STARTED',
-      'VIP'
-    ][ indx ]
+ride.get('/all', async ctx => {
+  const { limit = 10, skip = 0 } = ctx.request.body
+  try {
+    const rides = await RideModel.find({}).skip(skip).limit(limit).exec()
+    
+    console.log(rides.length)
+    
+    return ctx.body = { data : rides }
+  } catch (e) {
+    return ctx.body = { data : null, message : 'Error retrieving rides' }
   }
-  // const date = (start, end) => {
-  //   const calc = start.getTime() + Math.random() 
-  //               * (end.getTime() - start.getTime())
-  //   return new Date( calc )
-  // }
-  
-  function randomDate(start, end, startHour, endHour) {
-    const date = new Date(+start + Math.random() * (end - start))
-    const hour = startHour + Math.random() * (endHour - startHour) | 0
-    date.setHours(hour)
-    return date
-  }
-
-  let indx = 0
-  const rides = Array.apply(null, Array(maxPerView)).map( (_, i) => {
-    const day = randomDate(new Date(2017,11,1),new Date(), 0, 23)
-
-    indx += passengers()
-
-    const content = Array
-                    .apply(null, Array(maxPerDay()))
-                    .map( () => ({
-                      id : indx,
-                      passengers : passengers(),
-                      status : status(),
-                    }))
-
-    return {
-      day,
-      content
-    }
-  })
-
-  return ctx.body = { rides }
-  // return ctx.body = {
-  //   rides : Array.apply(null, Array(max)).map( _ => {
-  //     indx += passengers()
-  //     return {
-  //       id : indx,
-  //       passengers : passengers(),
-  //       status : status(),
-  //       date : date(new Date(2012,0,1), new Date())
-  //     }
-  //   })
 })
 
 ride.get('/:id', ctx => {

@@ -1,7 +1,13 @@
 import { combineReducers } from 'redux'
 
-const reducers = combineReducers([
+import { router } from './router'
+import { meta } from './meta'
+import { rides } from './rides'
 
-])
+const reducers = combineReducers({
+  router,
+  meta,
+  rides,
+})
 
 export default reducers

@@ -22,6 +22,7 @@
       height : 60px;
       border-bottom : 1px solid gray;
       transition : background .1s linear;
+      cursor : pointer;
 
       &:first-child {
         border-top : 1px solid gray;
