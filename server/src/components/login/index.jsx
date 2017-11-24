@@ -52,8 +52,6 @@ class LoginForm extends Component {
       // this.setState({ errorMessage : e.message, isError : true })
       return error('Error at the server. Please try again later.')
     }
-
-    // return false
   }
 
   renderError(msg) {

@@ -8,13 +8,11 @@ const MenuItems = props => (
   <ul className="sidebar__menu-list">
    {
       props.items.map( (itm, indx) => (
-        <li key={ indx } className={ 'sidebar__menu-list-item' }>
-          {/*
-            <a onClick={ e => props.switchComp(e, itm.name) } href={ itm.href }>
-              { itm.name }
-            </a>
-          */}
-          { itm }
+        <li 
+          onClick={ () => props.switchComp(itm) } 
+          key={ indx } className={ 'sidebar__menu-list-item' }
+        >
+          <span>{ itm }</span>
         </li>
      ))
    }

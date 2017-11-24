@@ -1,12 +1,7 @@
 import Router from 'koa-router'
 import passport from 'koa-passport'
-// import React from 'react'
-// import { renderToString } from 'react-dom/server'
 
 import { User } from '../../models'
-
-// import Login from '../../components/Login'
-// import { Template } from '../../components'
 
 const auth = new Router({ prefix : 'auth' })
 
@@ -30,6 +25,8 @@ auth.post('/login', isAuthenticated, ctx => (
   }, async (err, user, msg, done) => {
     if(user) {
       // TODO : Alter session last time connected in here
+      if(user.position !== 'ADMIN') return ctx.body = { ok : false, msg : 'You are not authorized to log in. Contact an Admin.' }
+
       await ctx.login(user)
 
       return ctx.body = { ok : true }
@@ -40,10 +37,13 @@ auth.post('/login', isAuthenticated, ctx => (
 )
 
 auth.get('/logout', ctx => {
+
+  if(!ctx.state.user) return ctx.body = { data : { ok : true }, message : '' }
+
   console.log(`${ ctx.state.user.username } is logging out...`)
   ctx.logout()
 
-  return ctx.redirect('/admin/auth')
+  return ctx.body = { data : { ok : true }, message : '' }
 })
 
 export default auth

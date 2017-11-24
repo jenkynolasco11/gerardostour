@@ -10,8 +10,7 @@ export const router = (state = defaultState, action) => {
     case 'ANOTHER' :
       return { ...state }
     case 'SWITCH' :
-      // const which = action.payload
-      return { ...state, ...action.payload }
+      return { ...state, which : action.payload }
     default :
       return state
   }

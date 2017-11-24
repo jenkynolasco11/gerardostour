@@ -11,7 +11,8 @@ export class Rtr extends Component{
     super(props)
     this.state = {
       components : null,
-      initial : ''
+      initial : '',
+      which : '',
     }
 
     this._mapKeyToComponents = this._mapKeyToComponents.bind(this)
@@ -24,9 +25,14 @@ export class Rtr extends Component{
     let initial = ''
 
     if(Array.isArray(children)) {
+      let prefix = 1
       children.forEach( child => {
+        let extr = ''
+
         if(child.props.initial) initial = child.props.name
-        components[ child.props.name ] = child.props.component
+        if(components[ child.props.name ]) extr = `-${ prefix++ }`
+
+        components[ child.props.name + extr ] = child.props.component
         switches.push(child.props.name)
       })
 
@@ -38,7 +44,7 @@ export class Rtr extends Component{
     }
 
     setTimeout(() => self.props.addSwitches(switches), 10)
-    return this.setState({ components, initial })
+    return this.setState({ components, initial, which : initial })
   }
 
   componentWillMount() {
@@ -48,9 +54,16 @@ export class Rtr extends Component{
     else console.log('No children provided to Router. Are you sure you\'re doing it right?')
   }
 
+  componentWillReceiveProps(nextProps) {
+    const { which } = nextProps
+    const { swhich } = this.state
+
+    if( which !== swhich ) return this.setState({ which })
+    console.log('it got here -> ', which, swhich )
+  }
+
   render() {
-    const { which } = this.props
-    const { components, initial } = this.state
+    const { components, initial, which } = this.state
 
     if(components) {
       const Component = components[ which ? which : initial ]

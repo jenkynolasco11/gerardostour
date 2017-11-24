@@ -55,12 +55,15 @@ const createPerson = async (fn, ln ) => {
 
 const createUser = async (id, user, pass, pos) => {
   try {
-    const usr = await new User({
+    const usl = new User({
       personid : id,
       username : user,
-      password : pass,
-      position : pos,
-    }).save() 
+      position : user === 'jenky' ? 'ADMIN' : pos,
+    })
+
+    usl.password = usl.generateHash(pass)
+
+    await usl.save()
   } catch (e) {
     console.log('error while saving [User] mockup data...', e, ' (models/mockupData.js)')
   }
@@ -96,7 +99,7 @@ const createTicket = async (id, rid, lug, pick, leave, sts) => {
   }
 }
 
-const createAdmins = () => {
+const createAdmins = async () => {
   const ext = limit()
   for(let i = 0; i < ext; i++) setTimeout(async () => {
     const rnd1 = genRand(firstNames.length)
@@ -106,13 +109,18 @@ const createAdmins = () => {
     const last = lastNames[ rnd2 ]
     const pos = positions[ rnd3 ]
 
-
-    // console.log(last + ', ' + user)
-
     const id = await createPerson( user, last)
     // console.log(id)
-    createUser(id, user, 'lllll', pos )
+    if(id) createUser(id, user, 'lllll', pos )
   }, 100)
+
+  // Forcing my user
+  try {
+    const id = await createPerson('jenky', 'nolasco')
+    if(id) createUser(id, 'jenky', 'lllll', 'ADMIN')
+  } catch(e) {
+    //
+  }
 }
 
 const createRides = () => {

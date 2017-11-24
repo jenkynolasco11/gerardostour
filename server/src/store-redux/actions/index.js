@@ -1,6 +1,12 @@
 import Meta from './meta'
 import Rides from './rides'
 import Router from './router'
+import Users from './users'
+
+export const {
+  addUsers,
+  retrieveUsers
+} = Users
 
 export const { 
   addSwitches,
@@ -13,12 +19,16 @@ export const {
 } = Rides
 
 export const {
-  //
-  clearMeta
+  clearMeta,
+  assignLoggedUser,
+  retrieveCurrentUser,
+  logout,
+  logUserOut
 } = Meta
 
 export default {
   ...Router,
   ...Rides,
-  ...Meta
+  ...Meta,
+  ...Users
 }

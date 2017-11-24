@@ -1,7 +1,7 @@
 .sidebar {
   position : absolute;
   height : 100vh;
-  background : rgb(26, 26, 26);
+  background : $navColor;
   width : 200px;
   margin-left : 0px;
   transition : margin-left $trans linear, background $trans linear;

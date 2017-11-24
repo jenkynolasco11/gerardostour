@@ -1,6 +1,9 @@
 import React, { Component } from 'react'
 import { render } from 'react-dom'
 import { Provider } from 'react-redux'
+// import { BrowserRouter as Router } from 'react-router-dom'
+// import { routerReducer, routerMiddleware, push } from 'react-router-redux'
+// import browserHistory from 'history/createBrowserHistory'
 import thunk from 'redux-thunk'
 import { compose, applyMiddleware, createStore } from 'redux'
 
@@ -11,9 +14,13 @@ import NavBar from './NavTop'
 
 import { Router, Route } from '../Router'
 
-import Ride from '../Ride'
+import Rides from '../RideS'
+import Users from '../Users'
 
-const middlewares = [ thunk, ]
+// const history = browserHistory()
+// const historyMid = routerMiddleware(history)
+
+const middlewares = [ thunk/*, historyMid*/ ]
 const store = createStore(
   reducers,
   compose(applyMiddleware(...middlewares)),
@@ -57,9 +64,14 @@ class Dashboard extends Component {
           <Sidebar hidden={ hideMenu } />
           <div className="dashboard" style={{ left :`${ hideMenu ? '0px' : '200px' }` }}>
             <NavBar closed={ hideMenu } toggle={ this._toggleMenu } />
-            <Router className="router">            
-              <Route initial={ true } name="ride" component={ Ride } props={{}}/>
-            </Router>
+            {/*<Router>
+            </Router>*/}
+            <div className="main-content">
+              <Router className="router">
+                <Route initial={ true } name="rides" component={ Rides } props={{}}/>
+                <Route name="users" component={ Users } props={{}}/>
+              </Router>
+            </div>
           </div>
         </div>
       </Provider>

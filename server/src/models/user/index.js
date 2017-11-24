@@ -29,16 +29,9 @@ UserSchema.methods.updateLastSession = function() {
   this.save()
 }
 
-UserSchema.pre('validate', function(next){
-  this.password = this.generateHash(this.password)
-  next()
-})
-
-// UserSchema.post('save', doc => {  
-//   console.log(doc)
-//   console.log(doc.generateHash(doc.password))
-//   // doc.password = doc.generateHash(doc.password)
-//   // doc.save(console.log)
+// UserSchema.pre('save', function(next) {  
+//   this.password = this.generateHash(this.password)
+//   next()
 // })
 
 export default mongoose.model('user', UserSchema)

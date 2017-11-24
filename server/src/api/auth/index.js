@@ -1,12 +1,10 @@
 import Router from 'koa-router'
+// import { User } from '../../models'
 
 const auth = new Router({ prefix : 'auth' })
-// const routes = new Router()
 
 auth.post('/login', ctx => {
   const { user, pass } = ctx.request.body.fields
-
-  // console.log(ctx.request.body)
 
   const canAuth = (user === 'jenky' && pass === 'lllll')
   // console.log(`YOU SHALL ${ canAuth ? '' : 'NOT ' }PASS!`)

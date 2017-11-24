@@ -3,6 +3,7 @@ import PropTypes from 'prop-types'
 
 const Route = props => {
   const Component = props.component
+
   return <Component {...props.props} />
 }
 

@@ -24,7 +24,9 @@ passport.use('local', new Strategy({
   passwordField : 'password',
 }, async (username, password, done) => {
   try {
+    console.log(username, password)
     const user = await User.findOne({ username })
+
     if(user) {
       // If password is not valid
       if(!user.validPassword(password)) return done(null, false, 'Invalid password')
@@ -37,6 +39,7 @@ passport.use('local', new Strategy({
     // If user doesn't exist
     return done(null, false, 'User doesn\'t exist')
   } catch (e) {
+    console.log('here')
     return done(e)
   }
 }))

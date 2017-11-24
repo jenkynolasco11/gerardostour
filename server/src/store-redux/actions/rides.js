@@ -13,10 +13,10 @@ export const addRides = payload => ({ type : 'ADD_RIDES', payload })
 export const retrieveRides = ({ limit = 10, skip = 0 }) => {
   return async dispatch => {
     try {
-      const res = await axios.get('http://localhost:8000/api/ride/all', { limit, skip })
+      const res = await axios.get('/api/ride/all', { params : { limit, skip }})
+      if(res.data.data) return dispatch(addRides(res.data.data))
 
-      return dispatch(addRides(res.data.data))
-
+      return dispatch(addRides([]))
     } catch (e) {
       console.log(e)
       return dispatch(clearMeta(/*  */))
