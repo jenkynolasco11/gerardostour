@@ -39,7 +39,7 @@ passport.use('local', new Strategy({
     // If user doesn't exist
     return done(null, false, 'User doesn\'t exist')
   } catch (e) {
-    console.log('here')
+    
     return done(e)
   }
 }))

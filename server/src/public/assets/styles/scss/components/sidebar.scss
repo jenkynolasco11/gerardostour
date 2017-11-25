@@ -14,7 +14,15 @@
   &__menu-list {
     display : flex;
     flex-direction : column;
-    padding-top : 80px;
+
+    &-title {
+      box-sizing : border-box;
+      height : 80px;
+      @include alignCenter();
+      font-size : 1.4em;
+      color : white;
+      user-select : none;
+    }
 
     &-item {
       box-sizing : border-box;

@@ -1,12 +1,9 @@
 doctype html
 html.no-js(lang='')
-  include partials/head.pug
+  head
+    include partials/head.pug
+    //- link( rel='stylesheet', href='https://unpkg.com/simplebar@latest/dist/simplebar.css')
   body
     div#main
-    script(src=script, text='text/javascript')
-    //- | You made it
-    //- form(method='POST', action='/admin/auth/login').login
-    //-   input(type='text', placeholder='Username', name='username')
-    //-   input(type='password', placeholder='Password', name='password')
-    //-   input(type='submit', value='Login')
-    //- p.message(class=msg.type === error ? 'error' : '') #{ msg.message }
+    //- script(src='https://unpkg.com/simplebar@latest/dist/simplebar.js', type='text/javascript')
+    script(src=script, type='text/javascript')

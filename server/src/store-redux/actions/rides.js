@@ -1,6 +1,6 @@
 import axios from 'axios'
 
-import { clearMeta } from './meta'
+import { clearMeta, fetchingMeta } from './meta'
 
 // ///////////////////////
 // Rides
@@ -13,12 +13,18 @@ export const addRides = payload => ({ type : 'ADD_RIDES', payload })
 export const retrieveRides = ({ limit = 10, skip = 0 }) => {
   return async dispatch => {
     try {
+      dispatch(fetchingMeta(true))
+      
       const res = await axios.get('/api/ride/all', { params : { limit, skip }})
+
+      dispatch(fetchingMeta(false))
+      
       if(res.data.data) return dispatch(addRides(res.data.data))
 
       return dispatch(addRides([]))
     } catch (e) {
       console.log(e)
+      dispatch(fetchingMeta(false))
       return dispatch(clearMeta(/*  */))
     }
   }

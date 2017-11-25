@@ -16,30 +16,38 @@ const ridesHeader = [
 class RidList extends Component{
   constructor(props) {
     super(props)
+
+    const { type = 'ADMIN' } = props
+
+    this.state = {
+      type,
+      fetching : false,
+      overlayHeight : 0,
+    }
+
+    this.renderData = this.renderData.bind(this)
   }
 
   renderHeader() {
-    // 80, 120, 180
-    const cls = [1,1,3,2,1,3,1]
-    // 80 + 80 + 180 + 120 + 80 + 180 + 80
     return (
-      <thead>
-        <tr>
+      <div className="view-table__head">
+        <div className="view-table__row">
         {
           ridesHeader.map( (th, indx) => (
-            <th className={`space-${ cls[ indx ] }`} key={ indx }>{ th }</th>
+            <div className="view-table__header" key={ indx }>{ th }</div>
           ))
         }
-        </tr>
-      </thead>
+        </div>
+      </div>
     )
   }
 
   renderData() {
-    const { rides } = this.props
-    
+    const { rides, fetching } = this.props
+    const { overlayHeight } = this.state
+
     return (
-      <tbody>
+      <div className="view-table__body">
         {
           rides
           ? rides.map((tr, indx) => {
@@ -47,43 +55,63 @@ class RidList extends Component{
             const modified = tr.modifiedAt.slice(0,16).split('T').join(' at ')
 
             return (
-              <tr className="ride-data" key={ indx }>
-                <td className="space-1">{ tr.from }</td>
-                <td className="space-1">{ tr.to }</td>
-                <td className="space-3">{ date }</td>
-                <td className="space-2">{ hr }</td>
-                <td className="space-1">{ tr.assignedTo }</td>
-                <td className="space-3">{ tr.ticketCount }</td>
-                <td className="space-2">{ modified }</td>
-              </tr>
+              <div className="view-table__row" key={ indx }>
+                <div className="view-table__data">{ tr.from }</div>
+                <div className="view-table__data">{ tr.to }</div>
+                <div className="view-table__data">{ date }</div>
+                <div className="view-table__data">{ hr }</div>
+                <div className="view-table__data">{ tr.assignedTo }</div>
+                <div className="view-table__data">{ tr.ticketCount }</div>
+                <div className="view-table__data">{ modified }</div>
+              </div>
             )
           })
-          : <tr><td>{ 'There is no data available' }</td></tr>
+          : <div className="view-table__row">
+              <div className="view-table__data">
+                { 'There is no data available' }
+              </div>
+            </div>
         }
-      </tbody>
+        {
+          fetching &&
+          <div className="overlay-fetching" style={{ height : `${ overlayHeight }px` }}>{ 'fetching' }</div>
+        }
+      </div>
     )
   }
 
   componentWillMount() {
     // setTimeout(() => this.props.getRides(5), 2000)
     this.props.getRides(10)
+    this.setState({ fetching : true })
+  }
+
+  componentDidUpdate() {
+    const { clientHeight } = document.querySelector('.view-table__body')
+    
+    this.setState({ overlayHeight : clientHeight })
   }
 
   render() {
+    const { overlayHeight } = this.state
+
     return (
-      <table className="table-list ride-list">
+      <div className="view-table">
         { this.renderHeader() }
         { this.renderData() }
         {/* this.renderFooter() */}
-      </table>
+      </div>
     )
   }
 }
 
 const mapStateToProps = state => {
-  const { rides } = state.rides
+  const { rides, meta } = state
 
-  return { rides }
+  return { 
+    rides : rides.rides,
+    fetching : meta.fetching
+  }
 }
 
 const mapDispatchToProps = dispatch => ({

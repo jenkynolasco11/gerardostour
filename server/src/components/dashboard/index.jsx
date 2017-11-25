@@ -49,10 +49,9 @@ class Dashboard extends Component {
     this.setState({ hideMenu })
   }
 
-  // _switchComponent(e, which) {
-  //   e.preventDefault()
-
-  //   console.log(which)
+  // componentDidMount() {
+  //   const el = document.querySelector('.main-content')
+  //   new SimpleBar(el)
   // }
 
   render() {

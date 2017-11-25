@@ -16,35 +16,37 @@ class UserList extends Component{
   constructor(props) {
     super(props)
 
+    const { type = 'ADMIN' } = props
+
     this.state = {
-      type : props.type
+      type,
+      fetching : false,
+      overlayHeight : 0,
     }
 
     this.renderData = this.renderData.bind(this)
   }
 
   renderHeader() {
-    // 80, 120, 180
-    const cls = [2,2,1,2,3,3]
-    // 120, 240, 320, 440, 620, 
     return (
-      <thead>
-        <tr>
+      <div className="view-table__head">
+        <div className="view-table__row">
         {
           header.map( (th, indx) => (
-            <th className={`space-${ cls[ indx ] }`} key={ indx }>{ th }</th>
+            <div className="view-table__header" key={ indx }>{ th }</div>
           ))
         }
-        </tr>
-      </thead>
+        </div>
+      </div>
     )
   }
 
   renderData() {
-    const { users } = this.props
-
+    const { users, fetching } = this.props
+    const { overlayHeight } = this.state
+    console.log(fetching)
     return (
-      <tbody>
+      <div className="view-table__body">
         {
           users
           ? users.map((tr, indx) => {
@@ -56,42 +58,58 @@ class UserList extends Component{
             const lastSession = tr.lastSession.slice(0,16).split('T').join(' at ')
 
             return (
-              <tr onClick={() => console.log(tr._id) } className="user-data" key={ indx }>
-                <td className="space-2">{ tr.username }</td>
-                <td className="space-2">{ tr.firstname }</td>
-                <td className="space-1">{ tr.lastname }</td>
-                <td className="space-2">{ this.state.type }</td>
-                <td className="space-3">{ `(${ ft })-${ snd }-${ trd }` }</td>
-                <td className="space-2">{ lastSession }</td>
-              </tr>
+              <div className="view-table__row" onClick={() => console.log(tr._id)} key={ indx }>
+                <div className="view-table__data">{ tr.username }</div>
+                <div className="view-table__data">{ tr.firstname }</div>
+                <div className="view-table__data">{ tr.lastname }</div>
+                <div className="view-table__data">{ this.state.type }</div>
+                <div className="view-table__data">{ `(${ ft })-${ snd }-${ trd }` }</div>
+                <div className="view-table__data">{ lastSession }</div>
+              </div>
             )
           })
-          : <tr><td>{ 'There is no data available' }</td></tr>
+          : <div className="view-table__row">
+              <div className="view-table__data">
+                { 'There is no data available' }
+              </div>
+            </div>
         }
-      </tbody>
+        {
+          fetching &&
+          <div className="overlay-fetching" style={{ height : `${ overlayHeight }px` }}>{ 'fetching' }</div>
+        }
+      </div>
     )
   }
 
   componentWillMount() {
-    // setTimeout(() => this.props.getUsers(5), 2000)
     this.props.getUsers(50)
   }
 
-  render() {
+  componentDidUpdate() {
+    const { clientHeight } = document.querySelector('.view-table__body')
+
+    this.setState({ overlayHeight : clientHeight })
+  }
+
+  render() {    
     return (
-      <table className="table-list ride-list">
+      <div className="view-table">
         { this.renderHeader() }
         { this.renderData() }
         {/* this.renderFooter() */}
-      </table>
+      </div>
     )
   }
 }
 
 const mapStateToProps = state => {
-  const { users } = state.users
+  const { users, meta } = state
 
-  return { users }
+  return { 
+    users : users.users,
+    fetching : meta.fetching
+  }
 }
 
 const mapDispatchToProps = dispatch => ({

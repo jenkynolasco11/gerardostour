@@ -32221,7 +32221,7 @@ function verifyPlainObject(value, displayName, methodName) {
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.logUserOut = exports.retrieveCurrentUser = exports.errorMeta = exports.logout = exports.assignLoggedUser = exports.clearMeta = undefined;
+exports.logUserOut = exports.retrieveCurrentUser = exports.fetchingMeta = exports.errorMeta = exports.logout = exports.assignLoggedUser = exports.clearMeta = undefined;
 
 var _axios = __webpack_require__(362);
 
@@ -32248,6 +32248,10 @@ var logout = exports.logout = function logout(payload) {
 
 var errorMeta = exports.errorMeta = function errorMeta(payload) {
   return { type: 'ERROR', payload: payload };
+};
+
+var fetchingMeta = exports.fetchingMeta = function fetchingMeta(payload) {
+  return { type: 'FETCHING', payload: payload };
 };
 
 // ///////////////////////
@@ -32332,7 +32336,9 @@ exports.default = {
   assignLoggedUser: assignLoggedUser,
   retrieveCurrentUser: retrieveCurrentUser,
   logout: logout,
-  logUserOut: logUserOut
+  logUserOut: logUserOut,
+  fetchingMeta: fetchingMeta,
+  errorMeta: errorMeta
 };
 
 /***/ }),
@@ -32440,10 +32446,9 @@ var Dashboard = function (_Component) {
       this.setState({ hideMenu: hideMenu });
     }
 
-    // _switchComponent(e, which) {
-    //   e.preventDefault()
-
-    //   console.log(which)
+    // componentDidMount() {
+    //   const el = document.querySelector('.main-content')
+    //   new SimpleBar(el)
     // }
 
   }, {
@@ -34677,6 +34682,7 @@ var _extends = Object.assign || function (target) { for (var i = 1; i < argument
 
 var defaultState = {
   error: '',
+  fetching: true,
   user: {}
 };
 
@@ -34685,6 +34691,8 @@ var meta = exports.meta = function meta() {
   var action = arguments[1];
 
   switch (action.type) {
+    case 'FETCHING':
+      return _extends({}, state, { fetching: action.payload });
     case 'ERROR':
       return _extends({}, state, { error: action.payload });
     case 'USER':
@@ -34767,6 +34775,11 @@ var MenuItems = function MenuItems(props) {
   return _react2.default.createElement(
     'ul',
     { className: 'sidebar__menu-list' },
+    _react2.default.createElement(
+      'li',
+      { className: 'sidebar__menu-list-title' },
+      'Gerardo\'s Tours'
+    ),
     props.items.map(function (itm, indx) {
       return _react2.default.createElement(
         'li',
@@ -34905,35 +34918,42 @@ var retrieveRides = exports.retrieveRides = function retrieveRides(_ref) {
           switch (_context.prev = _context.next) {
             case 0:
               _context.prev = 0;
-              _context.next = 3;
+
+              dispatch((0, _meta.fetchingMeta)(true));
+
+              _context.next = 4;
               return _axios2.default.get('/api/ride/all', { params: { limit: limit, skip: skip } });
 
-            case 3:
+            case 4:
               res = _context.sent;
 
+
+              dispatch((0, _meta.fetchingMeta)(false));
+
               if (!res.data.data) {
-                _context.next = 6;
+                _context.next = 8;
                 break;
               }
 
               return _context.abrupt('return', dispatch(addRides(res.data.data)));
 
-            case 6:
+            case 8:
               return _context.abrupt('return', dispatch(addRides([])));
 
-            case 9:
-              _context.prev = 9;
+            case 11:
+              _context.prev = 11;
               _context.t0 = _context['catch'](0);
 
               console.log(_context.t0);
+              dispatch((0, _meta.fetchingMeta)(false));
               return _context.abrupt('return', dispatch((0, _meta.clearMeta)() /*  */));
 
-            case 13:
+            case 16:
             case 'end':
               return _context.stop();
           }
         }
-      }, _callee, undefined, [[0, 9]]);
+      }, _callee, undefined, [[0, 11]]);
     }));
 
     return function (_x) {
@@ -35451,25 +35471,35 @@ var RidList = function (_Component) {
   function RidList(props) {
     _classCallCheck(this, RidList);
 
-    return _possibleConstructorReturn(this, (RidList.__proto__ || Object.getPrototypeOf(RidList)).call(this, props));
+    var _this = _possibleConstructorReturn(this, (RidList.__proto__ || Object.getPrototypeOf(RidList)).call(this, props));
+
+    var _props$type = props.type,
+        type = _props$type === undefined ? 'ADMIN' : _props$type;
+
+
+    _this.state = {
+      type: type,
+      fetching: false,
+      overlayHeight: 0
+    };
+
+    _this.renderData = _this.renderData.bind(_this);
+    return _this;
   }
 
   _createClass(RidList, [{
     key: 'renderHeader',
     value: function renderHeader() {
-      // 80, 120, 180
-      var cls = [1, 1, 3, 2, 1, 3, 1];
-      // 80 + 80 + 180 + 120 + 80 + 180 + 80
       return _react2.default.createElement(
-        'thead',
-        null,
+        'div',
+        { className: 'view-table__head' },
         _react2.default.createElement(
-          'tr',
-          null,
+          'div',
+          { className: 'view-table__row' },
           ridesHeader.map(function (th, indx) {
             return _react2.default.createElement(
-              'th',
-              { className: 'space-' + cls[indx], key: indx },
+              'div',
+              { className: 'view-table__header', key: indx },
               th
             );
           })
@@ -35479,12 +35509,15 @@ var RidList = function (_Component) {
   }, {
     key: 'renderData',
     value: function renderData() {
-      var rides = this.props.rides;
+      var _props = this.props,
+          rides = _props.rides,
+          fetching = _props.fetching;
+      var overlayHeight = this.state.overlayHeight;
 
 
       return _react2.default.createElement(
-        'tbody',
-        null,
+        'div',
+        { className: 'view-table__body' },
         rides ? rides.map(function (tr, indx) {
           var _tr$departing$slice$s = tr.departing.slice(0, 16).split('T'),
               _tr$departing$slice$s2 = _slicedToArray(_tr$departing$slice$s, 2),
@@ -35494,52 +35527,57 @@ var RidList = function (_Component) {
           var modified = tr.modifiedAt.slice(0, 16).split('T').join(' at ');
 
           return _react2.default.createElement(
-            'tr',
-            { className: 'ride-data', key: indx },
+            'div',
+            { className: 'view-table__row', key: indx },
             _react2.default.createElement(
-              'td',
-              { className: 'space-1' },
+              'div',
+              { className: 'view-table__data' },
               tr.from
             ),
             _react2.default.createElement(
-              'td',
-              { className: 'space-1' },
+              'div',
+              { className: 'view-table__data' },
               tr.to
             ),
             _react2.default.createElement(
-              'td',
-              { className: 'space-3' },
+              'div',
+              { className: 'view-table__data' },
               date
             ),
             _react2.default.createElement(
-              'td',
-              { className: 'space-2' },
+              'div',
+              { className: 'view-table__data' },
               hr
             ),
             _react2.default.createElement(
-              'td',
-              { className: 'space-1' },
+              'div',
+              { className: 'view-table__data' },
               tr.assignedTo
             ),
             _react2.default.createElement(
-              'td',
-              { className: 'space-3' },
+              'div',
+              { className: 'view-table__data' },
               tr.ticketCount
             ),
             _react2.default.createElement(
-              'td',
-              { className: 'space-2' },
+              'div',
+              { className: 'view-table__data' },
               modified
             )
           );
         }) : _react2.default.createElement(
-          'tr',
-          null,
+          'div',
+          { className: 'view-table__row' },
           _react2.default.createElement(
-            'td',
-            null,
+            'div',
+            { className: 'view-table__data' },
             'There is no data available'
           )
+        ),
+        fetching && _react2.default.createElement(
+          'div',
+          { className: 'overlay-fetching', style: { height: overlayHeight + 'px' } },
+          'fetching'
         )
       );
     }
@@ -35548,13 +35586,25 @@ var RidList = function (_Component) {
     value: function componentWillMount() {
       // setTimeout(() => this.props.getRides(5), 2000)
       this.props.getRides(10);
+      this.setState({ fetching: true });
+    }
+  }, {
+    key: 'componentDidUpdate',
+    value: function componentDidUpdate() {
+      var _document$querySelect = document.querySelector('.view-table__body'),
+          clientHeight = _document$querySelect.clientHeight;
+
+      this.setState({ overlayHeight: clientHeight });
     }
   }, {
     key: 'render',
     value: function render() {
+      var overlayHeight = this.state.overlayHeight;
+
+
       return _react2.default.createElement(
-        'table',
-        { className: 'table-list ride-list' },
+        'div',
+        { className: 'view-table' },
         this.renderHeader(),
         this.renderData()
       );
@@ -35565,10 +35615,14 @@ var RidList = function (_Component) {
 }(_react.PureComponent);
 
 var mapStateToProps = function mapStateToProps(state) {
-  var rides = state.rides.rides;
+  var rides = state.rides,
+      meta = state.meta;
 
 
-  return { rides: rides };
+  return {
+    rides: rides.rides,
+    fetching: meta.fetching
+  };
 };
 
 var mapDispatchToProps = function mapDispatchToProps(dispatch) {
@@ -35682,8 +35736,14 @@ var UserList = function (_Component) {
 
     var _this = _possibleConstructorReturn(this, (UserList.__proto__ || Object.getPrototypeOf(UserList)).call(this, props));
 
+    var _props$type = props.type,
+        type = _props$type === undefined ? 'ADMIN' : _props$type;
+
+
     _this.state = {
-      type: props.type
+      type: type,
+      fetching: false,
+      overlayHeight: 0
     };
 
     _this.renderData = _this.renderData.bind(_this);
@@ -35693,19 +35753,16 @@ var UserList = function (_Component) {
   _createClass(UserList, [{
     key: 'renderHeader',
     value: function renderHeader() {
-      // 80, 120, 180
-      var cls = [2, 2, 1, 2, 3, 3];
-      // 120, 240, 320, 440, 620, 
       return _react2.default.createElement(
-        'thead',
-        null,
+        'div',
+        { className: 'view-table__head' },
         _react2.default.createElement(
-          'tr',
-          null,
+          'div',
+          { className: 'view-table__row' },
           header.map(function (th, indx) {
             return _react2.default.createElement(
-              'th',
-              { className: 'space-' + cls[indx], key: indx },
+              'div',
+              { className: 'view-table__header', key: indx },
               th
             );
           })
@@ -35717,12 +35774,15 @@ var UserList = function (_Component) {
     value: function renderData() {
       var _this2 = this;
 
-      var users = this.props.users;
+      var _props = this.props,
+          users = _props.users,
+          fetching = _props.fetching;
+      var overlayHeight = this.state.overlayHeight;
 
-
+      console.log(fetching);
       return _react2.default.createElement(
-        'tbody',
-        null,
+        'div',
+        { className: 'view-table__body' },
         users ? users.map(function (tr, indx) {
           var _ref = [tr.phoneNumber.slice(0, 3), tr.phoneNumber.slice(3, 6), tr.phoneNumber.slice(6)],
               ft = _ref[0],
@@ -35732,64 +35792,76 @@ var UserList = function (_Component) {
           var lastSession = tr.lastSession.slice(0, 16).split('T').join(' at ');
 
           return _react2.default.createElement(
-            'tr',
-            { onClick: function onClick() {
+            'div',
+            { className: 'view-table__row', onClick: function onClick() {
                 return console.log(tr._id);
-              }, className: 'user-data', key: indx },
+              }, key: indx },
             _react2.default.createElement(
-              'td',
-              { className: 'space-2' },
+              'div',
+              { className: 'view-table__data' },
               tr.username
             ),
             _react2.default.createElement(
-              'td',
-              { className: 'space-2' },
+              'div',
+              { className: 'view-table__data' },
               tr.firstname
             ),
             _react2.default.createElement(
-              'td',
-              { className: 'space-1' },
+              'div',
+              { className: 'view-table__data' },
               tr.lastname
             ),
             _react2.default.createElement(
-              'td',
-              { className: 'space-2' },
+              'div',
+              { className: 'view-table__data' },
               _this2.state.type
             ),
             _react2.default.createElement(
-              'td',
-              { className: 'space-3' },
+              'div',
+              { className: 'view-table__data' },
               '(' + ft + ')-' + snd + '-' + trd
             ),
             _react2.default.createElement(
-              'td',
-              { className: 'space-2' },
+              'div',
+              { className: 'view-table__data' },
               lastSession
             )
           );
         }) : _react2.default.createElement(
-          'tr',
-          null,
+          'div',
+          { className: 'view-table__row' },
           _react2.default.createElement(
-            'td',
-            null,
+            'div',
+            { className: 'view-table__data' },
             'There is no data available'
           )
+        ),
+        fetching && _react2.default.createElement(
+          'div',
+          { className: 'overlay-fetching', style: { height: overlayHeight + 'px' } },
+          'fetching'
         )
       );
     }
   }, {
     key: 'componentWillMount',
     value: function componentWillMount() {
-      // setTimeout(() => this.props.getUsers(5), 2000)
       this.props.getUsers(50);
+    }
+  }, {
+    key: 'componentDidUpdate',
+    value: function componentDidUpdate() {
+      var _document$querySelect = document.querySelector('.view-table__body'),
+          clientHeight = _document$querySelect.clientHeight;
+
+      this.setState({ overlayHeight: clientHeight });
     }
   }, {
     key: 'render',
     value: function render() {
       return _react2.default.createElement(
-        'table',
-        { className: 'table-list ride-list' },
+        'div',
+        { className: 'view-table' },
         this.renderHeader(),
         this.renderData()
       );
@@ -35800,10 +35872,14 @@ var UserList = function (_Component) {
 }(_react.PureComponent);
 
 var mapStateToProps = function mapStateToProps(state) {
-  var users = state.users.users;
+  var users = state.users,
+      meta = state.meta;
 
 
-  return { users: users };
+  return {
+    users: users.users,
+    fetching: meta.fetching
+  };
 };
 
 var mapDispatchToProps = function mapDispatchToProps(dispatch) {
@@ -35870,34 +35946,41 @@ var retrieveUsers = exports.retrieveUsers = function retrieveUsers(_ref) {
           switch (_context.prev = _context.next) {
             case 0:
               _context.prev = 0;
-              _context.next = 3;
+
+              dispatch((0, _meta.fetchingMeta)(true));
+
+              _context.next = 4;
               return _axios2.default.get('/api/user/all', { params: { limit: limit, skip: skip, type: type } });
 
-            case 3:
+            case 4:
               res = _context.sent;
 
+
+              dispatch((0, _meta.fetchingMeta)(false));
+
               if (!res.data.data) {
-                _context.next = 6;
+                _context.next = 8;
                 break;
               }
 
               return _context.abrupt('return', dispatch(addUsers(res.data.data)));
 
-            case 6:
+            case 8:
               return _context.abrupt('return', dispatch(addUsers([])));
 
-            case 9:
-              _context.prev = 9;
+            case 11:
+              _context.prev = 11;
               _context.t0 = _context['catch'](0);
 
+              dispatch((0, _meta.fetchingMeta)(false));
               dispatch((0, _meta.clearMeta)() /**/);
 
-            case 12:
+            case 15:
             case 'end':
               return _context.stop();
           }
         }
-      }, _callee, undefined, [[0, 9]]);
+      }, _callee, undefined, [[0, 11]]);
     }));
 
     return function (_x) {

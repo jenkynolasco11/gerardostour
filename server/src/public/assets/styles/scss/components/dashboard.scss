@@ -9,10 +9,10 @@
   background : rgb(62, 62, 150);
 
   .main-content {
-    // position : absolute;
+    overflow-x : hidden;
+    overflow-y : auto;
     display : flex;
     justify-content : center;
-    // width : 100vw;
     margin-top : 80px;
     padding : 80px;
 
@@ -59,6 +59,67 @@
           // border : 1px solid rgb(214, 214, 214);
           color : white;
         }
+      }
+    }
+
+    .view-table {
+      // display : table;
+      width : 1000px;
+      background : gray;
+      border-collapse : collapse;
+      display : flex;
+      flex-flow : column nowrap;
+
+      &__head, &__body, &__row {
+        display : flex;
+        flex : 1;
+        box-sizing : border-box;
+      }
+
+      &__body {
+        flex-flow : column nowrap;
+        box-sizing : border-box;
+        position : relative;
+
+        .overlay-fetching {
+          position : absolute;
+          width : 100%;
+          min-height : 80px;
+          background : rgba(92, 218, 218, 0.6);
+          @include alignCenter();
+        }
+      }
+      &__row {
+        position : relative;
+        box-sizing : border-box;
+        &:hover {
+          .view-table__data {
+            background : gray * 0.5;
+            color : white;
+          }
+        }
+      }
+
+      &__data, &__header {
+        position : relative;
+        outline : 1px solid black;
+        padding : 6px;
+        box-sizing : border-box;
+        @include alignCenter;
+        flex : 1;
+
+        &:last-child {
+          flex : 1.5;
+        }
+      }
+
+      &__data {
+        background : gray;        
+        transition : background .2s linear, color .2s linear;
+      }
+
+      &__header {
+        background : rgb(77, 77, 77);
       }
     }
   }

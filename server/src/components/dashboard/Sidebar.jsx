@@ -6,6 +6,7 @@ import { changeRoute } from '../../store-redux/actions'
 
 const MenuItems = props => (
   <ul className="sidebar__menu-list">
+    <li className="sidebar__menu-list-title">Gerardo's Tours</li>
    {
       props.items.map( (itm, indx) => (
         <li 

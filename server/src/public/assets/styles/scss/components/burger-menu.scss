@@ -12,17 +12,13 @@
   width : $burgerMenuSize;
   background : $burgerMenuOutside;
   border-radius : 2px;
-  // position : absolute;
-  // margin : 20px;
-  // z-index : 1;
-
+  margin-left : 20px;
   transition : background .1s linear;
 
   &:hover {
-    background : $burgerMenuOutside * 1.2;
+    background : $burgerMenuOutside * 1.4;
   }
   
-
   .toggle-menu {
     @extend %burger;
     transition : background .1s linear;

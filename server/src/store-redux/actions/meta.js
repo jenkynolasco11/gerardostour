@@ -11,6 +11,8 @@ export const logout = payload => ({ type : 'LOGOUT', payload })
 
 export const errorMeta = payload => ({ type : 'ERROR', payload })
 
+export const fetchingMeta = payload => ({ type : 'FETCHING', payload })
+
 // ///////////////////////
 // Thunks
 // ///////////////////////
@@ -44,4 +46,6 @@ export default {
   retrieveCurrentUser,
   logout,
   logUserOut,
+  fetchingMeta,
+  errorMeta
 }
