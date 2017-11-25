@@ -16,6 +16,7 @@ import { Router, Route } from '../Router'
 
 import Rides from '../RideS'
 import Users from '../Users'
+import UserForm from '../Users/UserForm'
 
 // const history = browserHistory()
 // const historyMid = routerMiddleware(history)
@@ -28,25 +29,23 @@ const store = createStore(
 
 const main = document.getElementById('main')
 
-class Dashboard extends Component {
-  state = {
-    hideMenu : true,
-  }
-
+class Dashboard extends Component{
   constructor(props) {
     super(props)
 
-    this._toggleMenu = this._toggleMenu.bind(this)
-    // this._switchComponent = this._switchComponent.bind(this)
+    this.state = { hideMenu : true }
+
+    this._slideDash = this._slideDash.bind(this)
   }
 
-  _toggleMenu(e) {
-    e.preventDefault()
+  _slideDash(willHide) {
+    // console.log(willHide)
+    // e.preventDefault()
 
-    let { hideMenu } = this.state
-    hideMenu = !hideMenu
+    // let { hideMenu } = this.state
+    // hideMenu = !hideMenu
 
-    this.setState({ hideMenu })
+    this.setState({ hideMenu : willHide })
   }
 
   // componentDidMount() {
@@ -62,13 +61,12 @@ class Dashboard extends Component {
         <div>
           <Sidebar hidden={ hideMenu } />
           <div className="dashboard" style={{ left :`${ hideMenu ? '0px' : '200px' }` }}>
-            <NavBar closed={ hideMenu } toggle={ this._toggleMenu } />
-            {/*<Router>
-            </Router>*/}
+            <NavBar slideDash={ this._slideDash } />
             <div className="main-content">
               <Router className="router">
-                <Route initial={ true } name="rides" component={ Rides } props={{}}/>
-                <Route name="users" component={ Users } props={{}}/>
+                <Route initial={ true } name="rides" component={ Rides } props={{}} />
+                <Route name="users" component={ Users } props={{}} />
+                <Route name="add user" component={ UserForm } props={{}} />
               </Router>
             </div>
           </div>

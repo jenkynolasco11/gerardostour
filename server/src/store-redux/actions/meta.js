@@ -1,9 +1,14 @@
 import axios from 'axios'
 
+const ERROR_TIMEOUT = 5000
+const ERROR_CLEAR = { error : false, errorMsg : '' }
+
 // ///////////////////////
 // Meta
 // ///////////////////////
-export const clearMeta = payload => ({ type : 'CLEAR_META', payload : '' })
+export const toggleMenu = payload => ({ type : 'TOGGLE_MENU', payload })
+
+export const clearMeta = payload => ({ type : 'CLEAR_META', payload })
 
 export const assignLoggedUser = payload => ({ type : 'USER', payload })
 
@@ -12,6 +17,8 @@ export const logout = payload => ({ type : 'LOGOUT', payload })
 export const errorMeta = payload => ({ type : 'ERROR', payload })
 
 export const fetchingMeta = payload => ({ type : 'FETCHING', payload })
+
+export const savingMeta = payload => ({ type : 'SAVING', payload })
 
 // ///////////////////////
 // Thunks
@@ -24,6 +31,12 @@ export const retrieveCurrentUser = () => {
       return dispatch(assignLoggedUser(user.data.data))
     } catch (e) {
       return dispatch(assignLoggedUser({}))
+      // Not sure about this part
+      // return dispatch(errorMeta({ 
+      //   error : true, 
+      //   errorMsg : 'Error retrieving current logged user...' 
+      // }))
+      // return setTimeout(() => dispatch(errorMeta(ERROR_CLEAR)), ERROR_TIMEOUT)
     }
   }
 }
@@ -36,7 +49,9 @@ export const logUserOut = () => {
       dispatch(logout())
       return window.location.href = '/admin/auth'
     }
-    return dispatch(errorMeta('Error logging out...'))
+    return dispatch(errorMeta({ error : true, errorMsg : 'Error logging out...' }))
+    // Not sure about this part
+    // return setTimeout(() => dispatch(errorMeta(ERROR_CLEAR)), ERROR_TIMEOUT)
   }
 }
 
@@ -47,5 +62,7 @@ export default {
   logout,
   logUserOut,
   fetchingMeta,
-  errorMeta
+  errorMeta,
+  toggleMenu,
+  savingMeta
 }

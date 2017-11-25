@@ -5,17 +5,19 @@ import Users from './users'
 
 export const {
   addUsers,
-  retrieveUsers
+  retrieveUsers,
 } = Users
 
 export const { 
   addSwitches,
-  changeRoute
+  changeRoute,
+  popHistory,
+  pushHistory
 } = Router
 
 export const {
   addRides,
-  retrieveRides
+  retrieveRides,
 } = Rides
 
 export const {
@@ -23,7 +25,11 @@ export const {
   assignLoggedUser,
   retrieveCurrentUser,
   logout,
-  logUserOut
+  logUserOut,
+  toggleMenu,
+  savingMeta,
+  fetchingMeta,
+  errorMeta
 } = Meta
 
 export default {

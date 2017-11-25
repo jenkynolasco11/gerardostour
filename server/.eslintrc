@@ -11,7 +11,7 @@
       ##### BEST PRACTICES
       "array-callback-return" : [1],
       "class-methods-use-this" : [1],
-      "complexity": [2, 4],
+      "complexity": [2, 10],
       "consistent-return" : [2],
       "curly" : [2, "multi"],
       "default-case" : [1, { "commentPattern" :"^No\\sdefault"}],
@@ -21,7 +21,7 @@
 
       "no-alert" : [1],
       "no-caller" : [2],
-      "no-case-declarations" : [2],
+      "no-case-declarations" : [1],
       "no-div-regex" : [1],
       "no-else-return" : [2],
       "no-empty-function" : [2, { "allow" : ["arrowFunctions", "methods", "functions", "constructors"]}],

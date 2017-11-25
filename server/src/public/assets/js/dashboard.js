@@ -31307,7 +31307,7 @@ exports.default = isPlainObject;
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.logUserOut = exports.logout = exports.retrieveCurrentUser = exports.assignLoggedUser = exports.clearMeta = exports.retrieveRides = exports.addRides = exports.changeRoute = exports.addSwitches = exports.retrieveUsers = exports.addUsers = undefined;
+exports.errorMeta = exports.fetchingMeta = exports.savingMeta = exports.toggleMenu = exports.logUserOut = exports.logout = exports.retrieveCurrentUser = exports.assignLoggedUser = exports.clearMeta = exports.retrieveRides = exports.addRides = exports.pushHistory = exports.popHistory = exports.changeRoute = exports.addSwitches = exports.retrieveUsers = exports.addUsers = undefined;
 
 var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
 
@@ -31334,9 +31334,13 @@ var addUsers = _users2.default.addUsers,
 exports.addUsers = addUsers;
 exports.retrieveUsers = retrieveUsers;
 var addSwitches = _router2.default.addSwitches,
-    changeRoute = _router2.default.changeRoute;
+    changeRoute = _router2.default.changeRoute,
+    popHistory = _router2.default.popHistory,
+    pushHistory = _router2.default.pushHistory;
 exports.addSwitches = addSwitches;
 exports.changeRoute = changeRoute;
+exports.popHistory = popHistory;
+exports.pushHistory = pushHistory;
 var addRides = _rides2.default.addRides,
     retrieveRides = _rides2.default.retrieveRides;
 exports.addRides = addRides;
@@ -31345,12 +31349,20 @@ var clearMeta = _meta2.default.clearMeta,
     assignLoggedUser = _meta2.default.assignLoggedUser,
     retrieveCurrentUser = _meta2.default.retrieveCurrentUser,
     logout = _meta2.default.logout,
-    logUserOut = _meta2.default.logUserOut;
+    logUserOut = _meta2.default.logUserOut,
+    toggleMenu = _meta2.default.toggleMenu,
+    savingMeta = _meta2.default.savingMeta,
+    fetchingMeta = _meta2.default.fetchingMeta,
+    errorMeta = _meta2.default.errorMeta;
 exports.clearMeta = clearMeta;
 exports.assignLoggedUser = assignLoggedUser;
 exports.retrieveCurrentUser = retrieveCurrentUser;
 exports.logout = logout;
 exports.logUserOut = logUserOut;
+exports.toggleMenu = toggleMenu;
+exports.savingMeta = savingMeta;
+exports.fetchingMeta = fetchingMeta;
+exports.errorMeta = errorMeta;
 exports.default = _extends({}, _router2.default, _rides2.default, _meta2.default, _users2.default);
 
 /***/ }),
@@ -32221,7 +32233,7 @@ function verifyPlainObject(value, displayName, methodName) {
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.logUserOut = exports.retrieveCurrentUser = exports.fetchingMeta = exports.errorMeta = exports.logout = exports.assignLoggedUser = exports.clearMeta = undefined;
+exports.logUserOut = exports.retrieveCurrentUser = exports.savingMeta = exports.fetchingMeta = exports.errorMeta = exports.logout = exports.assignLoggedUser = exports.clearMeta = exports.toggleMenu = undefined;
 
 var _axios = __webpack_require__(362);
 
@@ -32231,11 +32243,18 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, arguments); return new Promise(function (resolve, reject) { function step(key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { return Promise.resolve(value).then(function (value) { step("next", value); }, function (err) { step("throw", err); }); } } return step("next"); }); }; }
 
-// ///////////////////////
-// Meta
-// ///////////////////////
+var ERROR_TIMEOUT = 5000;
+var ERROR_CLEAR = { error: false, errorMsg: ''
+
+  // ///////////////////////
+  // Meta
+  // ///////////////////////
+};var toggleMenu = exports.toggleMenu = function toggleMenu(payload) {
+  return { type: 'TOGGLE_MENU', payload: payload };
+};
+
 var clearMeta = exports.clearMeta = function clearMeta(payload) {
-  return { type: 'CLEAR_META', payload: '' };
+  return { type: 'CLEAR_META', payload: payload };
 };
 
 var assignLoggedUser = exports.assignLoggedUser = function assignLoggedUser(payload) {
@@ -32252,6 +32271,10 @@ var errorMeta = exports.errorMeta = function errorMeta(payload) {
 
 var fetchingMeta = exports.fetchingMeta = function fetchingMeta(payload) {
   return { type: 'FETCHING', payload: payload };
+};
+
+var savingMeta = exports.savingMeta = function savingMeta(payload) {
+  return { type: 'SAVING', payload: payload };
 };
 
 // ///////////////////////
@@ -32315,7 +32338,7 @@ var logUserOut = exports.logUserOut = function logUserOut() {
               return _context2.abrupt('return', window.location.href = '/admin/auth');
 
             case 6:
-              return _context2.abrupt('return', dispatch(errorMeta('Error logging out...')));
+              return _context2.abrupt('return', dispatch(errorMeta({ error: true, errorMsg: 'Error logging out...' })));
 
             case 7:
             case 'end':
@@ -32338,7 +32361,9 @@ exports.default = {
   logout: logout,
   logUserOut: logUserOut,
   fetchingMeta: fetchingMeta,
-  errorMeta: errorMeta
+  errorMeta: errorMeta,
+  toggleMenu: toggleMenu,
+  savingMeta: savingMeta
 };
 
 /***/ }),
@@ -32396,6 +32421,10 @@ var _Users = __webpack_require__(442);
 
 var _Users2 = _interopRequireDefault(_Users);
 
+var _UserForm = __webpack_require__(490);
+
+var _UserForm2 = _interopRequireDefault(_UserForm);
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
@@ -32424,26 +32453,22 @@ var Dashboard = function (_Component) {
 
     var _this = _possibleConstructorReturn(this, (Dashboard.__proto__ || Object.getPrototypeOf(Dashboard)).call(this, props));
 
-    _this.state = {
-      hideMenu: true
-    };
+    _this.state = { hideMenu: true };
 
-
-    _this._toggleMenu = _this._toggleMenu.bind(_this);
-    // this._switchComponent = this._switchComponent.bind(this)
+    _this._slideDash = _this._slideDash.bind(_this);
     return _this;
   }
 
   _createClass(Dashboard, [{
-    key: '_toggleMenu',
-    value: function _toggleMenu(e) {
-      e.preventDefault();
+    key: '_slideDash',
+    value: function _slideDash(willHide) {
+      // console.log(willHide)
+      // e.preventDefault()
 
-      var hideMenu = this.state.hideMenu;
+      // let { hideMenu } = this.state
+      // hideMenu = !hideMenu
 
-      hideMenu = !hideMenu;
-
-      this.setState({ hideMenu: hideMenu });
+      this.setState({ hideMenu: willHide });
     }
 
     // componentDidMount() {
@@ -32467,7 +32492,7 @@ var Dashboard = function (_Component) {
           _react2.default.createElement(
             'div',
             { className: 'dashboard', style: { left: '' + (hideMenu ? '0px' : '200px') } },
-            _react2.default.createElement(_NavTop2.default, { closed: hideMenu, toggle: this._toggleMenu }),
+            _react2.default.createElement(_NavTop2.default, { slideDash: this._slideDash }),
             _react2.default.createElement(
               'div',
               { className: 'main-content' },
@@ -32475,7 +32500,8 @@ var Dashboard = function (_Component) {
                 _Router.Router,
                 { className: 'router' },
                 _react2.default.createElement(_Router.Route, { initial: true, name: 'rides', component: _RideS2.default, props: {} }),
-                _react2.default.createElement(_Router.Route, { name: 'users', component: _Users2.default, props: {} })
+                _react2.default.createElement(_Router.Route, { name: 'users', component: _Users2.default, props: {} }),
+                _react2.default.createElement(_Router.Route, { name: 'add user', component: _UserForm2.default, props: {} })
               )
             )
           )
@@ -34648,7 +34674,9 @@ var _extends = Object.assign || function (target) { for (var i = 1; i < argument
 
 var defaultState = {
   switches: [],
-  which: null
+  which: null,
+  passingProps: {},
+  history: []
 };
 
 var router = exports.router = function router() {
@@ -34660,8 +34688,19 @@ var router = exports.router = function router() {
       return _extends({}, state, { switches: [].concat(action.payload) });
     case 'ANOTHER':
       return _extends({}, state);
+    case 'POP_HISTORY':
+      return _extends({}, state, {
+        history: [].concat(state.history.slice(0, -1))
+      });
+    case 'PUSH_HISTORY':
+      return _extends({}, state, {
+        history: [].push(state.history, action.payload)
+      });
     case 'SWITCH':
-      return _extends({}, state, { which: action.payload });
+      return _extends({}, state, {
+        which: action.payload.which,
+        passingProps: action.payload.props || {}
+      });
     default:
       return state;
   }
@@ -34681,9 +34720,12 @@ Object.defineProperty(exports, "__esModule", {
 var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
 
 var defaultState = {
-  error: '',
-  fetching: true,
-  user: {}
+  isFetching: false,
+  error: { isError: false, errorMsg: '' },
+  config: { listLimit: 10 },
+  user: { firstname: '', lastname: '' },
+  isMenuOpen: false,
+  isSaving: true
 };
 
 var meta = exports.meta = function meta() {
@@ -34691,8 +34733,13 @@ var meta = exports.meta = function meta() {
   var action = arguments[1];
 
   switch (action.type) {
+    case 'TOGGLE_MENU':
+      // console.log(action.payload)
+      return _extends({}, state, { isMenuOpen: action.payload });
+    case 'SAVING':
+      return _extends({}, state, { isSaving: action.payload });
     case 'FETCHING':
-      return _extends({}, state, { fetching: action.payload });
+      return _extends({}, state, { isFetching: action.payload });
     case 'ERROR':
       return _extends({}, state, { error: action.payload });
     case 'USER':
@@ -34860,7 +34907,7 @@ var mapDispatchToProps = function mapDispatchToProps(dispatch) {
   return {
     //
     switchComp: function switchComp(which) {
-      return dispatch((0, _actions.changeRoute)(which));
+      return dispatch((0, _actions.changeRoute)({ which: which, props: {} }));
     }
   };
 };
@@ -34988,9 +35035,19 @@ var addSwitches = exports.addSwitches = function addSwitches(payload) {
   return { type: 'ADD_SWITCH', payload: payload };
 };
 
+var pushHistory = exports.pushHistory = function pushHistory(payload) {
+  return { type: 'PUSH_HISTORY', payload: payload };
+};
+
+var popHistory = exports.popHistory = function popHistory(payload) {
+  return { type: 'POP_HISTORY', payload: payload };
+};
+
 exports.default = {
   changeRoute: changeRoute,
-  addSwitches: addSwitches
+  addSwitches: addSwitches,
+  pushHistory: pushHistory,
+  popHistory: popHistory
 };
 
 /***/ }),
@@ -35027,10 +35084,21 @@ function _possibleConstructorReturn(self, call) { if (!self) { throw new Referen
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
 var BurgerMenu = function BurgerMenu(props) {
+  var slideDash = props.slideDash,
+      isMenuOpen = props.isMenuOpen,
+      toggle = props.toggle;
+
+
   return _react2.default.createElement(
     'div',
-    { className: 'burger-menu', onClick: props.toggle },
-    _react2.default.createElement('div', { className: 'toggle-menu  ' + (props.closed ? '' : 'open') })
+    {
+      className: 'burger-menu',
+      onClick: function onClick() {
+        slideDash(isMenuOpen);
+        props.toggle(!isMenuOpen);
+      }
+    },
+    _react2.default.createElement('div', { className: 'toggle-menu  ' + (isMenuOpen ? 'open' : '') })
   );
 };
 
@@ -35038,7 +35106,7 @@ var LogOutButton = function LogOutButton(props) {
   return _react2.default.createElement(
     'div',
     { className: 'logout-button', onClick: props.logout },
-    "Logout"
+    'Logout'
   );
 };
 
@@ -35060,14 +35128,17 @@ var NavBar = function (_Component) {
     key: 'render',
     value: function render() {
       var _props = this.props,
-          closed = _props.closed,
+          isMenuOpen = _props.isMenuOpen,
           toggle = _props.toggle,
-          user = _props.user;
+          user = _props.user,
+          slideDash = _props.slideDash,
+          logout = _props.logout;
+
 
       return _react2.default.createElement(
         'nav',
         { className: 'navbar' },
-        _react2.default.createElement(BurgerMenu, { closed: closed, toggle: toggle }),
+        _react2.default.createElement(BurgerMenu, { isMenuOpen: isMenuOpen, toggle: toggle, slideDash: slideDash }),
         _react2.default.createElement(
           'div',
           { className: 'logged-user' },
@@ -35081,7 +35152,7 @@ var NavBar = function (_Component) {
             ' Retrieving user... '
           )
         ),
-        _react2.default.createElement(LogOutButton, { logout: this.props.logout })
+        _react2.default.createElement(LogOutButton, { logout: logout })
       );
     }
   }]);
@@ -35090,15 +35161,17 @@ var NavBar = function (_Component) {
 }(_react.Component);
 
 NavBar.PropTypes = {
-  hideMenu: _propTypes2.default.bool,
-  toggleMenu: _propTypes2.default.func
+  //
+  slideDash: _propTypes2.default.func
 };
 
 var mapStateToProps = function mapStateToProps(state) {
-  var user = state.meta.user;
+  var _state$meta = state.meta,
+      user = _state$meta.user,
+      isMenuOpen = _state$meta.isMenuOpen;
 
 
-  return { user: user };
+  return { user: user, isMenuOpen: isMenuOpen };
 };
 
 var mapDispatchToProps = function mapDispatchToProps(dispatch) {
@@ -35108,6 +35181,9 @@ var mapDispatchToProps = function mapDispatchToProps(dispatch) {
     },
     logout: function logout() {
       return dispatch((0, _actions.logUserOut)());
+    },
+    toggle: function toggle(isOpen) {
+      return dispatch((0, _actions.toggleMenu)(isOpen));
     }
   };
 };
@@ -35443,8 +35519,6 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 
-var _slicedToArray = function () { function sliceIterator(arr, i) { var _arr = []; var _n = true; var _d = false; var _e = undefined; try { for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"]) _i["return"](); } finally { if (_d) throw _e; } } return _arr; } return function (arr, i) { if (Array.isArray(arr)) { return arr; } else if (Symbol.iterator in Object(arr)) { return sliceIterator(arr, i); } else { throw new TypeError("Invalid attempt to destructure non-iterable instance"); } }; }();
-
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
 var _react = __webpack_require__(44);
@@ -35455,6 +35529,10 @@ var _reactRedux = __webpack_require__(148);
 
 var _actions = __webpack_require__(384);
 
+var _TableList = __webpack_require__(489);
+
+var _TableList2 = _interopRequireDefault(_TableList);
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
@@ -35463,7 +35541,7 @@ function _possibleConstructorReturn(self, call) { if (!self) { throw new Referen
 
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
-var ridesHeader = ['from', 'to', 'date', 'hour', 'assigned to', 'tickets', 'last time modified'];
+var header = ['from', 'to', 'date', 'hour', 'assigned to', 'last time modified', 'tickets'];
 
 var RidList = function (_Component) {
   _inherits(RidList, _Component);
@@ -35471,142 +35549,47 @@ var RidList = function (_Component) {
   function RidList(props) {
     _classCallCheck(this, RidList);
 
-    var _this = _possibleConstructorReturn(this, (RidList.__proto__ || Object.getPrototypeOf(RidList)).call(this, props));
-
-    var _props$type = props.type,
-        type = _props$type === undefined ? 'ADMIN' : _props$type;
-
-
-    _this.state = {
-      type: type,
-      fetching: false,
-      overlayHeight: 0
-    };
-
-    _this.renderData = _this.renderData.bind(_this);
-    return _this;
+    return _possibleConstructorReturn(this, (RidList.__proto__ || Object.getPrototypeOf(RidList)).call(this, props));
   }
 
   _createClass(RidList, [{
-    key: 'renderHeader',
-    value: function renderHeader() {
-      return _react2.default.createElement(
-        'div',
-        { className: 'view-table__head' },
-        _react2.default.createElement(
-          'div',
-          { className: 'view-table__row' },
-          ridesHeader.map(function (th, indx) {
-            return _react2.default.createElement(
-              'div',
-              { className: 'view-table__header', key: indx },
-              th
-            );
-          })
-        )
-      );
-    }
-  }, {
-    key: 'renderData',
-    value: function renderData() {
-      var _props = this.props,
-          rides = _props.rides,
-          fetching = _props.fetching;
-      var overlayHeight = this.state.overlayHeight;
-
-
-      return _react2.default.createElement(
-        'div',
-        { className: 'view-table__body' },
-        rides ? rides.map(function (tr, indx) {
-          var _tr$departing$slice$s = tr.departing.slice(0, 16).split('T'),
-              _tr$departing$slice$s2 = _slicedToArray(_tr$departing$slice$s, 2),
-              date = _tr$departing$slice$s2[0],
-              hr = _tr$departing$slice$s2[1];
-
-          var modified = tr.modifiedAt.slice(0, 16).split('T').join(' at ');
-
-          return _react2.default.createElement(
-            'div',
-            { className: 'view-table__row', key: indx },
-            _react2.default.createElement(
-              'div',
-              { className: 'view-table__data' },
-              tr.from
-            ),
-            _react2.default.createElement(
-              'div',
-              { className: 'view-table__data' },
-              tr.to
-            ),
-            _react2.default.createElement(
-              'div',
-              { className: 'view-table__data' },
-              date
-            ),
-            _react2.default.createElement(
-              'div',
-              { className: 'view-table__data' },
-              hr
-            ),
-            _react2.default.createElement(
-              'div',
-              { className: 'view-table__data' },
-              tr.assignedTo
-            ),
-            _react2.default.createElement(
-              'div',
-              { className: 'view-table__data' },
-              tr.ticketCount
-            ),
-            _react2.default.createElement(
-              'div',
-              { className: 'view-table__data' },
-              modified
-            )
-          );
-        }) : _react2.default.createElement(
-          'div',
-          { className: 'view-table__row' },
-          _react2.default.createElement(
-            'div',
-            { className: 'view-table__data' },
-            'There is no data available'
-          )
-        ),
-        fetching && _react2.default.createElement(
-          'div',
-          { className: 'overlay-fetching', style: { height: overlayHeight + 'px' } },
-          'fetching'
-        )
-      );
-    }
-  }, {
     key: 'componentWillMount',
     value: function componentWillMount() {
-      // setTimeout(() => this.props.getRides(5), 2000)
-      this.props.getRides(10);
-      this.setState({ fetching: true });
-    }
-  }, {
-    key: 'componentDidUpdate',
-    value: function componentDidUpdate() {
-      var _document$querySelect = document.querySelector('.view-table__body'),
-          clientHeight = _document$querySelect.clientHeight;
+      var limit = this.props.limit;
 
-      this.setState({ overlayHeight: clientHeight });
+
+      this.props.getRides(limit);
     }
+
+    // fixData
+
   }, {
     key: 'render',
     value: function render() {
-      var overlayHeight = this.state.overlayHeight;
+      var _props = this.props,
+          rides = _props.rides,
+          fetching = _props.fetching,
+          getRides = _props.getRides,
+          limit = _props.limit,
+          count = _props.count,
+          onRowClick = _props.onRowClick;
 
+
+      var props = {
+        tdata: rides,
+        thead: header,
+        fetching: fetching,
+        updateList: getRides,
+        limit: limit,
+        count: count,
+        onRowClick: onRowClick,
+        switchToRoute: 'add ride'
+      };
 
       return _react2.default.createElement(
         'div',
         { className: 'view-table' },
-        this.renderHeader(),
-        this.renderData()
+        _react2.default.createElement(_TableList2.default, props)
       );
     }
   }]);
@@ -35621,7 +35604,9 @@ var mapStateToProps = function mapStateToProps(state) {
 
   return {
     rides: rides.rides,
-    fetching: meta.fetching
+    count: rides.count,
+    fetching: meta.fetching,
+    limit: meta.config.listLimit
   };
 };
 
@@ -35632,6 +35617,9 @@ var mapDispatchToProps = function mapDispatchToProps(dispatch) {
       var limit = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 10;
       var skip = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 0;
       return dispatch((0, _actions.retrieveRides)({ limit: limit, skip: skip }));
+    },
+    onRowClick: function onRowClick(which, props) {
+      return dispatch((0, _actions.changeRoute)({ which: which, props: props }));
     }
   };
 };
@@ -35707,6 +35695,7 @@ exports.default = UsersDash;
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
+exports.UserForm = undefined;
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
@@ -35717,6 +35706,14 @@ var _react2 = _interopRequireDefault(_react);
 var _reactRedux = __webpack_require__(148);
 
 var _actions = __webpack_require__(384);
+
+var _TableList = __webpack_require__(489);
+
+var _TableList2 = _interopRequireDefault(_TableList);
+
+var _UserForm = __webpack_require__(490);
+
+var _UserForm2 = _interopRequireDefault(_UserForm);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -35734,136 +35731,47 @@ var UserList = function (_Component) {
   function UserList(props) {
     _classCallCheck(this, UserList);
 
-    var _this = _possibleConstructorReturn(this, (UserList.__proto__ || Object.getPrototypeOf(UserList)).call(this, props));
+    return _possibleConstructorReturn(this, (UserList.__proto__ || Object.getPrototypeOf(UserList)).call(this, props));
 
-    var _props$type = props.type,
-        type = _props$type === undefined ? 'ADMIN' : _props$type;
-
-
-    _this.state = {
-      type: type,
-      fetching: false,
-      overlayHeight: 0
-    };
-
-    _this.renderData = _this.renderData.bind(_this);
-    return _this;
+    // this.state = { skip : 0 }
   }
 
   _createClass(UserList, [{
-    key: 'renderHeader',
-    value: function renderHeader() {
-      return _react2.default.createElement(
-        'div',
-        { className: 'view-table__head' },
-        _react2.default.createElement(
-          'div',
-          { className: 'view-table__row' },
-          header.map(function (th, indx) {
-            return _react2.default.createElement(
-              'div',
-              { className: 'view-table__header', key: indx },
-              th
-            );
-          })
-        )
-      );
-    }
-  }, {
-    key: 'renderData',
-    value: function renderData() {
-      var _this2 = this;
-
-      var _props = this.props,
-          users = _props.users,
-          fetching = _props.fetching;
-      var overlayHeight = this.state.overlayHeight;
-
-      console.log(fetching);
-      return _react2.default.createElement(
-        'div',
-        { className: 'view-table__body' },
-        users ? users.map(function (tr, indx) {
-          var _ref = [tr.phoneNumber.slice(0, 3), tr.phoneNumber.slice(3, 6), tr.phoneNumber.slice(6)],
-              ft = _ref[0],
-              snd = _ref[1],
-              trd = _ref[2];
-
-          var lastSession = tr.lastSession.slice(0, 16).split('T').join(' at ');
-
-          return _react2.default.createElement(
-            'div',
-            { className: 'view-table__row', onClick: function onClick() {
-                return console.log(tr._id);
-              }, key: indx },
-            _react2.default.createElement(
-              'div',
-              { className: 'view-table__data' },
-              tr.username
-            ),
-            _react2.default.createElement(
-              'div',
-              { className: 'view-table__data' },
-              tr.firstname
-            ),
-            _react2.default.createElement(
-              'div',
-              { className: 'view-table__data' },
-              tr.lastname
-            ),
-            _react2.default.createElement(
-              'div',
-              { className: 'view-table__data' },
-              _this2.state.type
-            ),
-            _react2.default.createElement(
-              'div',
-              { className: 'view-table__data' },
-              '(' + ft + ')-' + snd + '-' + trd
-            ),
-            _react2.default.createElement(
-              'div',
-              { className: 'view-table__data' },
-              lastSession
-            )
-          );
-        }) : _react2.default.createElement(
-          'div',
-          { className: 'view-table__row' },
-          _react2.default.createElement(
-            'div',
-            { className: 'view-table__data' },
-            'There is no data available'
-          )
-        ),
-        fetching && _react2.default.createElement(
-          'div',
-          { className: 'overlay-fetching', style: { height: overlayHeight + 'px' } },
-          'fetching'
-        )
-      );
-    }
-  }, {
     key: 'componentWillMount',
     value: function componentWillMount() {
-      this.props.getUsers(50);
-    }
-  }, {
-    key: 'componentDidUpdate',
-    value: function componentDidUpdate() {
-      var _document$querySelect = document.querySelector('.view-table__body'),
-          clientHeight = _document$querySelect.clientHeight;
+      var limit = this.props.limit;
 
-      this.setState({ overlayHeight: clientHeight });
+
+      this.props.getUsers(limit);
     }
   }, {
     key: 'render',
     value: function render() {
+      var _props = this.props,
+          users = _props.users,
+          fetching = _props.fetching,
+          getUsers = _props.getUsers,
+          limit = _props.limit,
+          count = _props.count,
+          onRowClick = _props.onRowClick;
+      // const { skip } = this.state
+
+      var props = {
+        tdata: users,
+        thead: header,
+        fetching: fetching,
+        // skip,
+        count: count,
+        updateList: getUsers,
+        limit: limit,
+        onRowClick: onRowClick,
+        switchToRoute: 'add user'
+      };
+
       return _react2.default.createElement(
         'div',
         { className: 'view-table' },
-        this.renderHeader(),
-        this.renderData()
+        _react2.default.createElement(_TableList2.default, props)
       );
     }
   }]);
@@ -35878,7 +35786,9 @@ var mapStateToProps = function mapStateToProps(state) {
 
   return {
     users: users.users,
-    fetching: meta.fetching
+    count: users.count,
+    fetching: meta.fetching,
+    limit: meta.config.listLimit
   };
 };
 
@@ -35890,10 +35800,14 @@ var mapDispatchToProps = function mapDispatchToProps(dispatch) {
       var skip = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 0;
       var type = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 'ADMIN';
       return dispatch((0, _actions.retrieveUsers)({ limit: limit, skip: skip, type: type }));
+    },
+    onRowClick: function onRowClick(which, props) {
+      return dispatch((0, _actions.changeRoute)({ which: which, props: props }));
     }
   };
 };
 
+var UserForm = exports.UserForm = _UserForm2.default;
 exports.default = (0, _reactRedux.connect)(mapStateToProps, mapDispatchToProps)(UserList);
 
 /***/ }),
@@ -35907,13 +35821,15 @@ exports.default = (0, _reactRedux.connect)(mapStateToProps, mapDispatchToProps)(
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.retrieveUsers = exports.addUsers = undefined;
+exports.saveUser = exports.retrieveUsers = exports.addUsers = undefined;
 
 var _axios = __webpack_require__(362);
 
 var _axios2 = _interopRequireDefault(_axios);
 
 var _meta = __webpack_require__(393);
+
+var _router = __webpack_require__(433);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -35937,7 +35853,6 @@ var retrieveUsers = exports.retrieveUsers = function retrieveUsers(_ref) {
       _ref$type = _ref.type,
       type = _ref$type === undefined ? 'ADMIN' : _ref$type;
 
-  console.log({ limit: limit, skip: skip, type: type });
   return function () {
     var _ref2 = _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee(dispatch) {
       var res;
@@ -35989,10 +35904,637 @@ var retrieveUsers = exports.retrieveUsers = function retrieveUsers(_ref) {
   }();
 };
 
+var saveUser = exports.saveUser = function saveUser(_ref3) {
+  var username = _ref3.username,
+      firstname = _ref3.firstname,
+      lastname = _ref3.lastname,
+      password = _ref3.password,
+      phoneNumber = _ref3.phoneNumber;
+
+  return function () {
+    var _ref4 = _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee2(dispatch) {
+      var res;
+      return regeneratorRuntime.wrap(function _callee2$(_context2) {
+        while (1) {
+          switch (_context2.prev = _context2.next) {
+            case 0:
+              _context2.prev = 0;
+
+              dispatch((0, _meta.savingMeta)(true));
+
+              _context2.next = 4;
+              return _axios2.default.post('/api/user/insert', { username: username, firstname: firstname, lastname: lastname, password: password, phoneNumber: phoneNumber });
+
+            case 4:
+              res = _context2.sent;
+
+
+              if (res.data.data) {
+                dispatch((0, _meta.savingMeta)(false));
+                // No error
+              }
+              // return dispatch(errorMeta(true))
+              _context2.next = 11;
+              break;
+
+            case 8:
+              _context2.prev = 8;
+              _context2.t0 = _context2['catch'](0);
+
+              dispatch((0, _meta.savingMeta)(false));
+              // dispatch(errorMeta(true))
+
+            case 11:
+
+              dispatch((0, _router.changeRoute)({ which: 'users', props: {} }));
+
+            case 12:
+            case 'end':
+              return _context2.stop();
+          }
+        }
+      }, _callee2, undefined, [[0, 8]]);
+    }));
+
+    return function (_x2) {
+      return _ref4.apply(this, arguments);
+    };
+  }();
+};
+
 exports.default = {
   retrieveUsers: retrieveUsers,
-  addUsers: addUsers
+  addUsers: addUsers,
+  saveUser: saveUser
 };
+
+/***/ }),
+/* 446 */,
+/* 447 */,
+/* 448 */,
+/* 449 */,
+/* 450 */,
+/* 451 */,
+/* 452 */,
+/* 453 */,
+/* 454 */,
+/* 455 */,
+/* 456 */,
+/* 457 */,
+/* 458 */,
+/* 459 */,
+/* 460 */,
+/* 461 */,
+/* 462 */,
+/* 463 */,
+/* 464 */,
+/* 465 */,
+/* 466 */,
+/* 467 */,
+/* 468 */,
+/* 469 */,
+/* 470 */,
+/* 471 */,
+/* 472 */,
+/* 473 */,
+/* 474 */,
+/* 475 */,
+/* 476 */,
+/* 477 */,
+/* 478 */,
+/* 479 */,
+/* 480 */,
+/* 481 */,
+/* 482 */,
+/* 483 */,
+/* 484 */,
+/* 485 */,
+/* 486 */,
+/* 487 */,
+/* 488 */,
+/* 489 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _slicedToArray = function () { function sliceIterator(arr, i) { var _arr = []; var _n = true; var _d = false; var _e = undefined; try { for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"]) _i["return"](); } finally { if (_d) throw _e; } } return _arr; } return function (arr, i) { if (Array.isArray(arr)) { return arr; } else if (Symbol.iterator in Object(arr)) { return sliceIterator(arr, i); } else { throw new TypeError("Invalid attempt to destructure non-iterable instance"); } }; }();
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _react = __webpack_require__(44);
+
+var _react2 = _interopRequireDefault(_react);
+
+var _propTypes = __webpack_require__(100);
+
+var _propTypes2 = _interopRequireDefault(_propTypes);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+var extraspace = ['last time modified', 'last session'];
+
+var TableList = function (_Component) {
+  _inherits(TableList, _Component);
+
+  function TableList(props) {
+    _classCallCheck(this, TableList);
+
+    var _this = _possibleConstructorReturn(this, (TableList.__proto__ || Object.getPrototypeOf(TableList)).call(this, props));
+
+    _this.state = {
+      overlayHeight: 0,
+      canNext: false,
+      canPrev: false,
+      skip: 0
+    };
+
+    _this.renderData = _this.renderData.bind(_this);
+    _this.renderDataCell = _this.renderDataCell.bind(_this);
+    _this.renderFooter = _this.renderFooter.bind(_this);
+    _this._onClickNav = _this._onClickNav.bind(_this);
+    return _this;
+  }
+
+  _createClass(TableList, [{
+    key: 'renderHeader',
+    value: function renderHeader() {
+      var thead = this.props.thead;
+
+      return _react2.default.createElement(
+        'div',
+        { className: 'view-table__head' },
+        _react2.default.createElement(
+          'div',
+          { className: 'view-table__row' },
+          thead.map(function (th, indx) {
+            return _react2.default.createElement(
+              'div',
+              {
+                className: 'view-table__header ' + (extraspace.includes(th) ? 'extra-space' : ''),
+                key: indx
+              },
+              th
+            );
+          })
+        )
+      );
+    }
+  }, {
+    key: 'getDateAndHour',
+    value: function getDateAndHour(time) {
+      return time.slice(0, 16).split('T');
+    }
+  }, {
+    key: 'renderDataCell',
+    value: function renderDataCell(key, indx, obj) {
+      switch (key) {
+        case 'phoneNumber':
+          var _ref = [obj[key].slice(0, 3), obj[key].slice(3, 6), obj[key].slice(6)],
+              ft = _ref[0],
+              snd = _ref[1],
+              trd = _ref[2];
+
+
+          return _react2.default.createElement(
+            'div',
+            { key: indx, className: 'view-table__data' },
+            '(' + ft + ')-' + snd + '-' + trd
+          );
+        case 'departing':
+          var _getDateAndHour = this.getDateAndHour(obj[key]),
+              _getDateAndHour2 = _slicedToArray(_getDateAndHour, 2),
+              date = _getDateAndHour2[0],
+              time = _getDateAndHour2[1];
+
+          return [_react2.default.createElement(
+            'div',
+            { key: indx, className: 'view-table__data' },
+            date
+          ), _react2.default.createElement(
+            'div',
+            { key: indx + 100, className: 'view-table__data' },
+            time
+          )];
+        case 'modifiedAt':
+        case 'lastSession':
+          var lastSession = this.getDateAndHour(obj[key]).join(' at ');
+
+          return _react2.default.createElement(
+            'div',
+            { key: indx, className: 'view-table__data extra-space' },
+            lastSession
+          );
+        default:
+          return _react2.default.createElement(
+            'div',
+            { key: indx, className: 'view-table__data' },
+            obj[key]
+          );
+      }
+    }
+  }, {
+    key: 'renderData',
+    value: function renderData() {
+      var _this2 = this;
+
+      var _props = this.props,
+          tdata = _props.tdata,
+          fetching = _props.fetching,
+          onRowClick = _props.onRowClick,
+          switchToRoute = _props.switchToRoute;
+      var overlayHeight = this.state.overlayHeight;
+
+
+      return _react2.default.createElement(
+        'div',
+        { className: 'view-table__body' },
+        tdata.length ? tdata.map(function (td, indx) {
+          return _react2.default.createElement(
+            'div',
+            { className: 'view-table__row', onClick: function onClick() {
+                return onRowClick(switchToRoute, td);
+              }, key: indx },
+            Object.keys(td).filter(function (key) {
+              return !['personid', '_id', '__v', 'created_at'].includes(key);
+            }).map(function (key, index) {
+              return _this2.renderDataCell(key, index, td);
+            })
+          );
+        }) : _react2.default.createElement(
+          'div',
+          { className: 'view-table__row' },
+          _react2.default.createElement(
+            'div',
+            { className: 'view-table__data' },
+            'There is no data available'
+          )
+        ),
+        fetching && _react2.default.createElement(
+          'div',
+          { className: 'overlay-fetching', style: { height: overlayHeight + 'px' } },
+          'fetching'
+        )
+      );
+    }
+  }, {
+    key: 'renderFooter',
+    value: function renderFooter() {
+      var _this3 = this;
+
+      var _state = this.state,
+          canNext = _state.canNext,
+          canPrev = _state.canPrev;
+      // const { canNext, canPrev, clickNext, clickPrev } = this.props
+
+      return _react2.default.createElement(
+        'div',
+        { className: 'view-table__footer' },
+        _react2.default.createElement(
+          'div',
+          {
+            className: 'view-table__footer-prev ' + (canPrev ? '' : 'disabled'),
+            onClick: function onClick() {
+              return _this3._onClickNav('prev');
+            }
+          },
+          "<<<"
+        ),
+        _react2.default.createElement('div', { className: 'view-table__footer-nav' }),
+        _react2.default.createElement(
+          'div',
+          {
+            className: 'view-table__footer-next ' + (canNext ? '' : 'disabled'),
+            onClick: function onClick() {
+              return _this3._onClickNav('next');
+            }
+          },
+          ">>>"
+        )
+      );
+    }
+  }, {
+    key: '_onClickNav',
+    value: function _onClickNav(where) {
+      var _props2 = this.props,
+          limit = _props2.limit,
+          count = _props2.count,
+          updateList = _props2.updateList;
+      var _state2 = this.state,
+          skip = _state2.skip,
+          canNext = _state2.canNext,
+          canPrev = _state2.canPrev;
+
+
+      if (where === 'next') {
+        if (canNext) {
+          skip += limit;
+
+          this.setState({ skip: skip });
+          return updateList(limit, skip);
+        }
+      } else {
+        if (canPrev) {
+          if (skip - limit < 0) skip = 0;else skip -= limit;
+
+          this.setState({ skip: skip });
+          return updateList(limit, skip);
+        }
+      }
+
+      return null;
+    }
+  }, {
+    key: 'componentDidUpdate',
+    value: function componentDidUpdate() {
+      var _document$querySelect = document.querySelector('.view-table__body'),
+          clientHeight = _document$querySelect.clientHeight;
+
+      this.setState({ overlayHeight: clientHeight });
+    }
+  }, {
+    key: 'componentWillReceiveProps',
+    value: function componentWillReceiveProps(props) {
+      var count = props.count,
+          limit = props.limit;
+      var skip = this.state.skip;
+      var canNext = false,
+          canPrev = false;
+
+
+      if (skip + limit < count) canNext = true;
+      if (skip - limit >= 0) canPrev = true;
+
+      this.setState({ canNext: canNext, canPrev: canPrev });
+    }
+  }, {
+    key: 'render',
+    value: function render() {
+      return _react2.default.createElement(
+        'div',
+        { className: 'view-table' },
+        this.renderHeader(),
+        this.renderData(),
+        this.renderFooter()
+      );
+    }
+  }]);
+
+  return TableList;
+}(_react.PureComponent);
+
+TableList.PropTypes = {
+  thead: _propTypes2.default.array.isRequired,
+  tdata: _propTypes2.default.arrayOf(_propTypes2.default.object),
+  fetching: _propTypes2.default.bool.isRequired,
+  updateList: _propTypes2.default.func.isRequired,
+  limit: _propTypes2.default.number.isRequired,
+  count: _propTypes2.default.number.isRequired,
+  onRowClick: _propTypes2.default.func.isRequired,
+  switchToRoute: _propTypes2.default.string.isRequired
+};
+
+exports.default = TableList;
+
+/***/ }),
+/* 490 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _react = __webpack_require__(44);
+
+var _react2 = _interopRequireDefault(_react);
+
+var _reactRedux = __webpack_require__(148);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+// import { retrieveUsers } from '../../store-redux/actions'
+
+var UserForm = function (_Component) {
+  _inherits(UserForm, _Component);
+
+  function UserForm(props) {
+    _classCallCheck(this, UserForm);
+
+    var _this = _possibleConstructorReturn(this, (UserForm.__proto__ || Object.getPrototypeOf(UserForm)).call(this, props));
+
+    console.log(props);
+
+    var _props$user = props.user,
+        _props$user$firstname = _props$user.firstname,
+        firstname = _props$user$firstname === undefined ? '' : _props$user$firstname,
+        _props$user$lastname = _props$user.lastname,
+        lastname = _props$user$lastname === undefined ? '' : _props$user$lastname,
+        _props$user$username = _props$user.username,
+        username = _props$user$username === undefined ? '' : _props$user$username,
+        _props$user$password = _props$user.password,
+        password = _props$user$password === undefined ? '' : _props$user$password,
+        _props$user$phoneNumb = _props$user.phoneNumber,
+        phoneNumber = _props$user$phoneNumb === undefined ? '' : _props$user$phoneNumb,
+        _props$user$personid = _props$user.personid,
+        personid = _props$user$personid === undefined ? '' : _props$user$personid,
+        _props$user$_id = _props$user._id,
+        _id = _props$user$_id === undefined ? '' : _props$user$_id,
+        _props$user$type = _props$user.type,
+        type = _props$user$type === undefined ? 'NONE' : _props$user$type;
+
+    _this.state = {
+      firstname: firstname,
+      lastname: lastname,
+      password: password,
+      username: username,
+      _id: _id,
+      personid: personid,
+      type: type,
+      // phoneNumber : this.formatNumber(phoneNumber),
+      phoneNumber: phoneNumber
+    };
+
+    _this.onChange = _this.onChange.bind(_this);
+    return _this;
+  }
+
+  _createClass(UserForm, [{
+    key: 'formatNumber',
+    value: function formatNumber(number) {
+      // console.log(`Number => ${ number }`)
+      if (!number) return '';
+
+      var num = '' + number;
+      var regx = num.replace(/\D/g, '').match(/(\d{3})(\d{3})(\d{4})/);
+
+      // console.log(`Regex => ${ regx ? regx : '' }`)
+
+      return regx ? '' : '(' + regx[1] + ') ' + regx[2] + '-' + regx[3];
+    }
+  }, {
+    key: 'onChange',
+    value: function onChange(e, name) {
+      var val = e.target.value;
+
+      // if(name === 'phoneNumber') val = this.formatNumber(val)
+
+      this.setState(_extends({}, this.state, _defineProperty({}, name, val)));
+    }
+  }, {
+    key: 'onSubmit',
+    value: function onSubmit(type) {
+      console.log('About to ' + type);
+      // if(type === 'cancel') window.location.href =
+    }
+  }, {
+    key: 'render',
+    value: function render() {
+      var _this2 = this;
+
+      var _state = this.state,
+          firstname = _state.firstname,
+          lastname = _state.lastname,
+          username = _state.username,
+          password = _state.password,
+          phoneNumber = _state.phoneNumber,
+          _id = _state._id,
+          type = _state.type,
+          personid = _state.personid;
+
+
+      return _react2.default.createElement(
+        'div',
+        { className: 'users__add' },
+        _react2.default.createElement('input', {
+          placeholder: 'First Name',
+          value: firstname,
+          required: true,
+          name: 'firstname',
+          type: 'text',
+          onChange: function onChange(e) {
+            return _this2.onChange(e, 'firstname');
+          }
+        }),
+        _react2.default.createElement('input', {
+          placeholder: 'Last Name',
+          value: lastname,
+          required: true,
+          name: 'lastname',
+          type: 'text',
+          onChange: function onChange(e) {
+            return _this2.onChange(e, 'lastname');
+          }
+        }),
+        _react2.default.createElement('input', {
+          placeholder: 'Username',
+          value: username,
+          required: true,
+          name: 'username',
+          type: 'text',
+          onChange: function onChange(e) {
+            return _this2.onChange(e, 'username');
+          }
+        }),
+        _react2.default.createElement('input', {
+          placeholder: 'Password',
+          value: password,
+          required: true,
+          name: 'password',
+          type: 'password',
+          onChange: function onChange(e) {
+            return _this2.onChange(e, 'password');
+          }
+        }),
+        _react2.default.createElement('input', {
+          placeholder: 'Phone Number',
+          value: phoneNumber,
+          required: true,
+          name: 'phoneNumber',
+          pattern: '(\\d{3}) (\\d{3})-(\\d[4])',
+          type: 'tel',
+          onChange: function onChange(e) {
+            return _this2.onChange(e, 'phoneNumber');
+          }
+        }),
+        _react2.default.createElement(
+          'select',
+          { onChange: function onChange(e) {
+              return _this2.onChange(e, 'type');
+            }, value: type },
+          ['ADMIN', 'CHAUFFER', 'NONE'].map(function (itm, indx) {
+            return _react2.default.createElement(
+              'option',
+              { key: indx, value: itm },
+              itm
+            );
+          })
+        ),
+        _react2.default.createElement(
+          'div',
+          { className: 'submit-buttons' },
+          _react2.default.createElement('input', {
+            className: 'submit-button cancel',
+            type: 'submit',
+            value: 'Cancel',
+            onClick: function onClick() {
+              return _this2.onSubmit('cancel');
+            }
+          }),
+          _react2.default.createElement('input', {
+            className: 'submit-button save',
+            type: 'submit',
+            value: 'Save',
+            onClick: function onClick() {
+              return _this2.onSubmit('submit');
+            }
+          })
+        )
+      );
+    }
+  }]);
+
+  return UserForm;
+}(_react.PureComponent);
+
+var mapStateToProps = function mapStateToProps(state) {
+  var passingProps = state.router.passingProps;
+
+
+  return { user: passingProps };
+};
+
+// const mapDispatchToProps = dispatch => ({
+//   //
+//   getUsers : (limit = 10, skip = 0, type = 'ADMIN') => dispatch(retrieveUsers({ limit, skip, type }))
+// })
+
+exports.default = (0, _reactRedux.connect)(mapStateToProps /*, mapDispatchToProps*/)(UserForm);
+// export default UserForm
 
 /***/ })
 /******/ ]);

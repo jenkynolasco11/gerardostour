@@ -66,7 +66,7 @@ const mapStateToProps = state => {
 
 const mapDispatchToProps = dispatch => ({
   //
-  switchComp : which => dispatch(changeRoute(which)),
+  switchComp : which => dispatch(changeRoute({ which, props : {}})),
 })
 
 Sidebar.PropTypes = {

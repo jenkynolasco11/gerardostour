@@ -1,6 +1,7 @@
 import axios from 'axios'
 
-import { clearMeta, fetchingMeta } from './meta'
+import { clearMeta, fetchingMeta, savingMeta, errorMeta } from './meta'
+import { changeRoute } from './router'
 
 // ///////////////////////
 // Users
@@ -11,7 +12,6 @@ export const addUsers = payload => ({ type : 'ADD_USERS', payload })
 // Thunks
 // ///////////////////////
 export const retrieveUsers = ({ limit = 10, skip = 0, type = 'ADMIN' }) => {
-  console.log({limit, skip, type})
   return async dispatch => {
     try {
       dispatch(fetchingMeta(true))
@@ -30,7 +30,29 @@ export const retrieveUsers = ({ limit = 10, skip = 0, type = 'ADMIN' }) => {
   }
 }
 
+export const saveUser = ({ username, firstname, lastname, password, phoneNumber }) => {
+  return async dispatch => {
+    try {
+      dispatch(savingMeta(true))
+
+      const res = await axios.post('/api/user/insert', { username, firstname, lastname, password, phoneNumber })
+
+      if(res.data.data) {
+        dispatch(savingMeta(false))
+        // No error
+      }
+      // return dispatch(errorMeta(true))
+    } catch (e) {
+      dispatch(savingMeta(false))
+      // dispatch(errorMeta(true))
+    }
+
+    dispatch(changeRoute({ which : 'users', props : {}}))
+  }
+}
+
 export default {
   retrieveUsers,
-  addUsers
+  addUsers,
+  saveUser
 }

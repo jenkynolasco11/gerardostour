@@ -14,8 +14,9 @@
     display : flex;
     justify-content : center;
     margin-top : 80px;
+    // margin-bottom : 40px;
     padding : 80px;
-
+/*
     .table-list {
       right : 0;
       width : 900px;
@@ -61,16 +62,16 @@
         }
       }
     }
-
+*/
     .view-table {
-      // display : table;
-      width : 1000px;
-      background : gray;
-      border-collapse : collapse;
+      margin-bottom : 40px;
+      width : 900px;
+      // background : gray;
+      // border-collapse : collapse;
       display : flex;
       flex-flow : column nowrap;
 
-      &__head, &__body, &__row {
+      &__head, &__body, &__row, &__footer {
         display : flex;
         flex : 1;
         box-sizing : border-box;
@@ -84,8 +85,10 @@
         .overlay-fetching {
           position : absolute;
           width : 100%;
-          min-height : 80px;
-          background : rgba(92, 218, 218, 0.6);
+          min-height : 20px;
+          background : rgba(41, 58, 58, 0.6);
+          color : white;
+          font-size : 1.4em;
           @include alignCenter();
         }
       }
@@ -103,23 +106,51 @@
       &__data, &__header {
         position : relative;
         outline : 1px solid black;
-        padding : 6px;
+        padding : 5px;
         box-sizing : border-box;
         @include alignCenter;
         flex : 1;
 
-        &:last-child {
+        &.extra-space {
           flex : 1.5;
         }
+
+        // &:last-child {
+        //   flex : 1.5;
+        // }
       }
 
       &__data {
         background : gray;        
-        transition : background .2s linear, color .2s linear;
+        transition : background .1s linear, color .1s linear;
       }
 
-      &__header {
+      &__header, &__footer {
         background : rgb(77, 77, 77);
+      }
+
+      &__footer {
+        justify-content : space-between;
+
+        &-prev, &-next {
+          margin : 10px;
+          padding : 4px;
+          background : rgb(213, 106, 106);
+          color : white;
+          font-weight : 900;
+          cursor: pointer;
+
+          &.disabled {
+            cursor : default;
+            background : rgb(172, 172, 172);
+          }
+        }
+        &-nav {
+          display : none;
+        }
+        // &-next {
+        //   cursor: pointer;
+        // }
       }
     }
   }

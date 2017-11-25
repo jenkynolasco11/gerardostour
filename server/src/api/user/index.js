@@ -18,7 +18,7 @@ user.get('/all', async ctx => {
 
       const { firstname, lastname, phoneNumber } = person
 
-      return { _id, personid, username, lastSession, firstname, lastname, phoneNumber }
+      return { _id, personid, username, firstname, lastname, type, phoneNumber, lastSession }
     }))
 
     return ctx.body = { data : { users, count }, message : null }
@@ -37,6 +37,54 @@ user.get('/current', async ctx => {
     return ctx.body = {}
   }
   // return ctx.body = ctx.state.user
+})
+
+user.post('/insert', async ctx => {
+  const { uid = '', pid = '', username, firstname, lastname, password, phoneNumber, position = 'NONE' } = ctx.request.body
+
+  try {
+    const p = await Person.findById(pid)
+    const u = await User.findById(uid)
+
+    if(p) {
+      await Person.update({ _id : pid }, {
+        firstname, 
+        lastname, 
+        phoneNumber
+      })
+
+      const pass = u.generateHash(password)
+
+      await User.update({ _id : uid }, {
+        username,
+        password : pass,
+        position
+      })
+
+      return ctx.body = { data : true, message : 'User saved satisfactorily!' }
+    } else {
+      const person = await new Person({
+        firstname,
+        lastname, 
+        phoneNumber
+      }).save()
+
+      const usr = new User({
+        username,
+        position,
+        personid : person._id,
+      })
+
+      usr.password = usr.generateHash(password)
+
+      await usr.save()
+
+      return ctx.body = { data : true, message : '' }
+    }
+
+  } catch (e) {
+    return ctx.body = { data : null, message : 'Error while saving the user to the DB' }
+  }
 })
 
 user.get('/available', ctx => {

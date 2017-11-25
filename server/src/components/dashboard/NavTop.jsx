@@ -2,17 +2,27 @@ import React, { Component } from 'react'
 import PropTypes from 'prop-types'
 import { connect } from 'react-redux'
 
-import { retrieveCurrentUser, logUserOut } from '../../store-redux/actions'
+import { retrieveCurrentUser, logUserOut, toggleMenu } from '../../store-redux/actions'
 
-const BurgerMenu = props => (
-  <div className="burger-menu" onClick={ props.toggle }>
-    <div className={`toggle-menu  ${ props.closed ? '' : 'open' }`} />
-  </div>
-)
+const BurgerMenu = props => {
+  const { slideDash, isMenuOpen, toggle } = props
+
+  return (
+    <div 
+      className="burger-menu"
+      onClick={ () => {
+        slideDash(isMenuOpen)
+        props.toggle(!isMenuOpen)
+      }}
+    >
+      <div className={`toggle-menu  ${ isMenuOpen ? 'open' : '' }`} />
+    </div>
+  )
+}
 
 const LogOutButton = props => (
   <div className="logout-button" onClick={ props.logout }>
-    { "Logout" }
+    { 'Logout' }
   </div>
 )
 
@@ -26,10 +36,11 @@ class NavBar extends Component{
   }
 
   render() {
-    const { closed, toggle, user } = this.props
+    const { isMenuOpen, toggle, user, slideDash, logout } = this.props
+
     return (
       <nav className="navbar">
-        <BurgerMenu {...{ closed, toggle }} />
+        <BurgerMenu {...{ isMenuOpen, toggle, slideDash }} />
         <div className="logged-user">
           { 
             user.firstname
@@ -41,26 +52,27 @@ class NavBar extends Component{
             : <span> Retrieving user... </span>
           }
         </div>
-        <LogOutButton logout={ this.props.logout } />
+        <LogOutButton {...{ logout }} />
       </nav>
     )
   }
 }
 
 NavBar.PropTypes = {
-  hideMenu : PropTypes.bool,
-  toggleMenu : PropTypes.func,
+  //
+  slideDash : PropTypes.func,
 }
 
 const mapStateToProps = state => {
-  const { user } = state.meta
+  const { user, isMenuOpen } = state.meta
 
-  return { user }
+  return { user, isMenuOpen }
 }
 
 const mapDispatchToProps = dispatch => ({
   getLoggedUser : () => dispatch(retrieveCurrentUser()),
   logout : () => dispatch(logUserOut()),
+  toggle : isOpen => dispatch(toggleMenu(isOpen)),
 })
 
 export default connect(mapStateToProps, mapDispatchToProps)(NavBar)

@@ -9,6 +9,7 @@ import { addSwitches } from '../../store-redux/actions'
 export class Rtr extends Component{
   constructor(props) {
     super(props)
+
     this.state = {
       components : null,
       initial : '',

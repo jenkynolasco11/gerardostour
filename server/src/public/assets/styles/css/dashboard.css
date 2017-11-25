@@ -74,43 +74,60 @@ body {
         display: flex;
         justify-content: center;
         margin-top: 80px;
-        padding: 80px; }
-        body #main .dashboard .main-content .table-list {
-          right: 0;
-          width: 900px;
-          margin: 20px;
-          border-collapse: collapse;
-          flex-flow: column nowrap; }
-          body #main .dashboard .main-content .table-list tr:hover td {
-            background: #484848;
-            color: #f0f0f0; }
-          body #main .dashboard .main-content .table-list tr td, body #main .dashboard .main-content .table-list tr th {
-            border-collapse: collapse;
-            border: 1px solid #020202;
-            padding: 10px;
-            vertical-align: middle;
-            text-align: center; }
-            body #main .dashboard .main-content .table-list tr td.flex-1, body #main .dashboard .main-content .table-list tr th.flex-1 {
-              flex: 100px; }
-            body #main .dashboard .main-content .table-list tr td.flex-2, body #main .dashboard .main-content .table-list tr th.flex-2 {
-              flex: 140px; }
-            body #main .dashboard .main-content .table-list tr td.flex-3, body #main .dashboard .main-content .table-list tr th.flex-3 {
-              flex: 200px; }
-          body #main .dashboard .main-content .table-list tr td {
-            transition: background .2s linear;
-            color: #c5c5c5;
-            background: #2d2d2d; }
-          body #main .dashboard .main-content .table-list tr th {
-            text-transform: capitalize;
-            background: #1e1e1e;
-            color: white; }
+        padding: 80px;
+        /*
+    .table-list {
+      right : 0;
+      width : 900px;
+      margin : 20px;
+      border-collapse : collapse;
+      flex-flow : column nowrap;
+
+      tr {
+        &:hover {
+          td {
+            background : $navColor * 2.4;
+            color : rgb(240, 240, 240);
+          }
+        }
+
+        td, th {
+          border-collapse : collapse;
+          border : 1px solid rgb(2, 2, 2);
+          padding : 10px;
+          vertical-align : middle;
+          text-align : center;
+
+          &.flex-1 {
+            flex : 100px;
+          }
+          &.flex-2 {
+            flex : 140px;
+          }
+          &.flex-3 {
+            flex : 200px;
+          }
+        }
+        td {
+          transition : background .2s linear;
+          color : rgb(197, 197, 197);
+          background : $navColor * 1.5;
+        }
+        th {
+          text-transform : capitalize;
+          background : $navColor;
+          // border : 1px solid rgb(214, 214, 214);
+          color : white;
+        }
+      }
+    }
+*/ }
         body #main .dashboard .main-content .view-table {
-          width: 1000px;
-          background: gray;
-          border-collapse: collapse;
+          margin-bottom: 40px;
+          width: 900px;
           display: flex;
           flex-flow: column nowrap; }
-          body #main .dashboard .main-content .view-table__head, body #main .dashboard .main-content .view-table__body, body #main .dashboard .main-content .view-table__row {
+          body #main .dashboard .main-content .view-table__head, body #main .dashboard .main-content .view-table__body, body #main .dashboard .main-content .view-table__row, body #main .dashboard .main-content .view-table__footer {
             display: flex;
             flex: 1;
             box-sizing: border-box; }
@@ -121,8 +138,10 @@ body {
             body #main .dashboard .main-content .view-table__body .overlay-fetching {
               position: absolute;
               width: 100%;
-              min-height: 80px;
-              background: rgba(92, 218, 218, 0.6);
+              min-height: 20px;
+              background: rgba(41, 58, 58, 0.6);
+              color: white;
+              font-size: 1.4em;
               display: flex;
               justify-content: center;
               align-items: center; }
@@ -135,19 +154,33 @@ body {
           body #main .dashboard .main-content .view-table__data, body #main .dashboard .main-content .view-table__header {
             position: relative;
             outline: 1px solid black;
-            padding: 6px;
+            padding: 5px;
             box-sizing: border-box;
             display: flex;
             justify-content: center;
             align-items: center;
             flex: 1; }
-            body #main .dashboard .main-content .view-table__data:last-child, body #main .dashboard .main-content .view-table__header:last-child {
+            body #main .dashboard .main-content .view-table__data.extra-space, body #main .dashboard .main-content .view-table__header.extra-space {
               flex: 1.5; }
           body #main .dashboard .main-content .view-table__data {
             background: gray;
-            transition: background .2s linear, color .2s linear; }
-          body #main .dashboard .main-content .view-table__header {
+            transition: background .1s linear, color .1s linear; }
+          body #main .dashboard .main-content .view-table__header, body #main .dashboard .main-content .view-table__footer {
             background: #4d4d4d; }
+          body #main .dashboard .main-content .view-table__footer {
+            justify-content: space-between; }
+            body #main .dashboard .main-content .view-table__footer-prev, body #main .dashboard .main-content .view-table__footer-next {
+              margin: 10px;
+              padding: 4px;
+              background: #d56a6a;
+              color: white;
+              font-weight: 900;
+              cursor: pointer; }
+              body #main .dashboard .main-content .view-table__footer-prev.disabled, body #main .dashboard .main-content .view-table__footer-next.disabled {
+                cursor: default;
+                background: #acacac; }
+            body #main .dashboard .main-content .view-table__footer-nav {
+              display: none; }
     body #main .navbar {
       width: 100%;
       height: 80px;
@@ -226,5 +259,10 @@ body {
         body #main .navbar .logout-button:hover {
           background: #ffdddd;
           color: #828282; }
+    body #main .users__add {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-flow: column nowrap; }
 
 /*# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbXSwibmFtZXMiOltdLCJtYXBwaW5ncyI6IiIsImZpbGUiOiJkYXNoYm9hcmQuY3NzIiwic291cmNlUm9vdCI6IiJ9*/
