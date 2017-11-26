@@ -20,6 +20,8 @@ class TableList extends Component{
     this.renderData = this.renderData.bind(this)
     this.renderDataCell = this.renderDataCell.bind(this)
     this.renderFooter = this.renderFooter.bind(this)
+    this.requestUpdateList = this.requestUpdateList.bind(this)
+    this._onClickPagination = this._onClickPagination.bind(this)
     this._onClickNav = this._onClickNav.bind(this)
   }
 
@@ -108,27 +110,116 @@ class TableList extends Component{
     )
   }
 
+  renderNavNumbers() {
+    const { skip } = this.state
+    const { limit, count } = this.props
+
+    let pages = Math.ceil(count / limit)
+    let page = skip / limit
+
+    const range = [...Array(pages).keys()]
+
+    const res = range.filter(i => (
+      i == 0 || i == pages - 1 || (i >= page - 2 && i <= page + 2)
+    ))
+
+    return res
+    // TODO : Check this out later
+    // if(res <= 4) return res
+
+    // let pagination = [0]
+
+    // let tmp = res[ 0 ]
+
+    // for(let i = 1; i < res.length - 1; i++) {
+    //   if(res[ i ] > tmp[ i - 1 ] + 1) pagination = [].concat(pagination, '')
+    //   pagination = [].concat(pagination, res[ i ])
+    //   tmp = res[ i ]
+    // }
+
+    // console.log(`Pagination => ${pagination}`)
+    // console.log(pages)
+    // console.log(count, limit)
+    // let res = [0]
+
+    // for(let i = 1; i < pagination.length; i++) {
+    //   if(res[ res.length ] + 1
+    // }
+
+
+    // hardcoded shit
+    // if (pages < 4) res = [].concat([...Array(pages).keys()].map(i => i)) /* This one works */
+    // else if(page > ) res = [].concat([ 0, pages - 3, pages - 2, pages -1 ])
+    // else res = [].concat([ 0, '', page - 1, page, page + 1, '', pages - 1])
+
+  //   console.log(`Paginate                => ${ res }`)
+  //   console.log(`skip/limit              => ${ page } (page)`)
+  //   console.log(`Mat.ceil(count/limit)   => ${ pages } (pages)`)
+  //   console.log(`Count                   => ${ count }`)
+  //   console.log(`Skip                    => ${ skip }`)
+  //   console.log(`Limit                   => ${ limit }`)
+
+    // return pagination
+  }
+
   renderFooter() {
     const { canNext, canPrev } = this.state
+    const { limit } = this.props
     // const { canNext, canPrev, clickNext, clickPrev } = this.props
 
     return (
       <div className="view-table__footer">
-        <div 
+        <div
           className={`view-table__footer-prev ${ canPrev ? '' : 'disabled' }`}
           onClick={ () => this._onClickNav('prev') }
         >
-          {"<<<"}
+          { '<<<'}
         </div>
-        <div className="view-table__footer-nav"></div>
-        <div 
+        <div className="view-table__footer-nav">
+          {
+            this.renderNavNumbers().map((li, indx) => (
+              <div
+                key={ indx }
+                onClick={
+                  Number.isInteger(li)
+                  ? () => this._onClickPagination(limit, li * limit)
+                  : undefined
+                }
+                className={ `view-table__footer-pagination ${ li ? '' : 'no-style' }` }
+              >
+                {
+                  Number.isInteger(li)
+                  ? li + 1
+                  : '...'
+                }
+              </div>
+            ))
+          }
+        </div>
+        <div
           className={ `view-table__footer-next ${ canNext ? '' : 'disabled' }` }
           onClick={ () => this._onClickNav('next') }
         >
-          {">>>"}
+          { '>>>' }
         </div>
       </div>
     )
+  }
+
+  _onClickPagination(limit, nSkip) {
+    // console.log(nSkip)
+    const { skip } = this.state
+
+    if(nSkip !== skip) this.setState({ 
+      //
+      skip : nSkip 
+    }, () => { this.requestUpdateList(limit, nSkip) })
+  }
+
+  requestUpdateList(limit, skip) {
+    const { updateList } = this.props
+
+    return updateList(limit, skip)
   }
 
   _onClickNav(where) {
@@ -140,7 +231,7 @@ class TableList extends Component{
         skip += limit
 
         this.setState({ skip })
-        return updateList(limit, skip)
+        return this.requestUpdateList(limit, skip)
       }
     } else {
       if(canPrev) {
@@ -148,7 +239,7 @@ class TableList extends Component{
         else skip -= limit
 
         this.setState({ skip })
-        return updateList(limit, skip)
+        return this.requestUpdateList(limit, skip)
       }
     }
 

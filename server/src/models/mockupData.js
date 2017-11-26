@@ -20,8 +20,8 @@ const genRandDate = (start, end, startHour, endHour) => {
   return date
 }
 
-const limit = () => genRand(40, 1)
-const ticketLimit = 50
+const limit = () => genRand(100, 1)
+const ticketLimit = 100
 const places = ['NY', 'PENN', 'BOSTON', 'NJ']
 const firstNames = [ 'jenky', 'julian', 'richard', 'diane', 'masmfas', 'bastion', 'august', 'ceasar', 'carlos' ]
 const lastNames = [ 'nolasco', 'matias', 'rodriguez', 'figueroa', 'masmfas', 'bastion', 'august', 'ceasar', 'carlos' ]

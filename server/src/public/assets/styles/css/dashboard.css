@@ -180,7 +180,17 @@ body {
                 cursor: default;
                 background: #acacac; }
             body #main .dashboard .main-content .view-table__footer-nav {
-              display: none; }
+              display: flex;
+              justify-content: center;
+              align-items: center; }
+              body #main .dashboard .main-content .view-table__footer-nav .view-table__footer-pagination {
+                color: white;
+                transition: color .1s linear;
+                cursor: pointer;
+                margin: 3px;
+                font-size: 1.2em; }
+                body #main .dashboard .main-content .view-table__footer-nav .view-table__footer-pagination:hover {
+                  color: #ff8e8e; }
     body #main .navbar {
       width: 100%;
       height: 80px;
