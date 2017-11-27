@@ -1,31 +1,49 @@
 import Router from 'koa-router'
+import passport from 'koa-passport'
+
 // import { User } from '../../models'
 
 const auth = new Router({ prefix : 'auth' })
 
-auth.post('/login', ctx => {
-  const { user, pass } = ctx.request.body.fields
+const isAuthenticated = (ctx, next) => {
+  if(ctx.isAuthenticated()) return ctx.redirect('/admin/dashboard')
+  return next()
+}
 
-  const canAuth = (user === 'jenky' && pass === 'lllll')
-  // console.log(`YOU SHALL ${ canAuth ? '' : 'NOT ' }PASS!`)
+// auth.get('/', isAuthenticated, ctx => {
+//   const script = '/js/login.js'
+//   const params = { title : 'login', description : 'duh', script }
 
-  // Work this out later
-  if(user === 'jenky' && pass === 'lllll') return ctx.body = { user, id : 1, isAuth : true }
+//   // ..... Create more query errors depending the situation
+//   return ctx.render('login', params)
+// })
 
-  return ctx.body = { auth : false }
+auth.post('/login', isAuthenticated, ctx => (
+  passport.authenticate('local', {
+    successRedirect : '/admin/dashboard',
+    failureRedirect : '/admin/auth?valid=false',
+  }, async (err, user, msg, done) => {
+    if(user) {
+      // TODO : Alter session last time connected in here
+      if(user.position !== 'ADMIN') return ctx.body = { ok : false, msg : 'You are not authorized to log in. Contact an Admin.' }
+
+      await ctx.login(user)
+
+      return ctx.body = { ok : true }
+    }
+
+    return ctx.body = { ok : false, msg }
+  })(ctx))
+)
+
+auth.get('/logout', ctx => {
+
+  if(!ctx.state.user) return ctx.body = { data : { ok : true }, message : '' }
+
+  console.log(`${ ctx.state.user.username } is logging out...`)
+  ctx.logout()
+
+  return ctx.body = { data : { ok : true }, message : '' }
 })
-
-auth.get('/logout/:id', ctx => {
-  console.log(`Check logout for user ${ ctx.params.id }...`)
-  return ctx.body = { ok : true }
-})
-
-auth.get('/:id', ctx => {
-  // console.log(ctx.params)
-  if(ctx.params.id === '1') return ctx.body = { ok : true }
-  return ctx.body = { ok : false }
-})
-
-// auth.use('/auth', routes.routes(), routes.allowedMethods())
 
 export default auth

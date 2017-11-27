@@ -170,7 +170,6 @@ const createTickets = () => {
     await Ride.collection.dropIndexes()
     await Ticket.collection.dropIndexes()
 
-    // console.log(a,b,c,d)
     createAdmins()
     createRides()
     createTickets()

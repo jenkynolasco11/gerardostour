@@ -31,17 +31,17 @@ const getRide = async id => {
   }
 }
 
-ride.get('/:id', async ctx => {
+ride.get('/:id', ctx => {
   const { id } = ctx.params
 
   const rid = getRide(id)
 
-  if(rid) return ctx.body = { data : rid, message : null  }
+  if(rid) return ctx.body = { data : rid, message : null }
 
   return ctx.body = { data : null, message : 'Error retrieving ride' }
 })
 
-ride.get('/:id/passengers', async ctx => {
+ride.get('/:id/tickets', async ctx => {
   const { id } = ctx.params
 
   const rid = getRide(id)
@@ -54,10 +54,16 @@ ride.get('/:id/passengers', async ctx => {
 
       return ctx.body = { data : null, message : '' }
     } catch (e) {
-      return ctx.body = { data : null, message : 'Error retrieving tickets' }
+      return ctx.body = {
+        data : null,
+        message : `Error retrieving tickets for this ride`
+      }
     }
 
-  return ctx.body = { data : null, message : `Error retrieving data for ID: ${ id }` }
+  return ctx.body = {
+    data : null,
+    message : `Error retrieving data for ID: ${ id }`
+  }
 })
 
 // ride.use('/rides', routes.routes(), routes.allowedMethods())

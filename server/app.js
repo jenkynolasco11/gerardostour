@@ -1,23 +1,14 @@
 import Koa from 'koa'
 import logger from 'koa-logger'
 import bodyparser from 'koa-body'
-// import bodyparser from 'koa-better-body'
 import Pug from 'koa-pug'
 import mongoose from 'mongoose'
 import serve from 'koa-static'
 import session from 'koa-session'
 import SessionStore from 'koa-session-mongoose'
-// import mongoSession from 'koa-session-mongo'
 import bluebird from 'bluebird'
 import passport from 'koa-passport'
-
-/* Dev configuration */
-// import webpackDM from 'koa-webpack-dev-middleware'
-// import webpackHM from 'koa-webpack-hot-middleware'
-// import webpack from 'webpack'
-// import { bundleConfig } from './webpack.config.babel'
-// const compiler = webpack(bundleConfig)
-// /////////
+import cors from 'koa2-cors'
 
 import config from './config'
 import routes from './src/api'
@@ -48,19 +39,17 @@ const server = async () => {
     const store = new SessionStore()
     // const store = mongoSession.create({ url : config.DBURI })
     const sessionParams = {
-      // store
       key : config.KEY,
       // keys : config.SESSIONID,
-      // store
+      store
     }
 
     app.keys = config.KEYS
 
     app
-    /* Dev purposes */
-      // .use(webpackDM(compiler, { noInfo : true, stats : { colors : true }, publicPath : bundleConfig.output.publicPath }))
-      // .use(webpackHM(compiler))
-    //////////////////
+      .use(cors({ 
+        origin : cors => '*'
+      }))
       .use(bodyparser({ multipart : true }))
       .use(serve('./src/public/assets'))
       .use(session(sessionParams, app))
@@ -78,6 +67,7 @@ const server = async () => {
     const PORT = (process.env.PORT || config.PORT)
 
     await app.listen(PORT)
+
     console.log(`Started server at ${ PORT }`)
   } catch (e) {
     console.log(e)
