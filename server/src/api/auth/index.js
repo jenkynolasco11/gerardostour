@@ -1,8 +1,6 @@
 import Router from 'koa-router'
 import passport from 'koa-passport'
 
-// import { User } from '../../models'
-
 const auth = new Router({ prefix : 'auth' })
 
 const isAuthenticated = (ctx, next) => {
@@ -10,6 +8,9 @@ const isAuthenticated = (ctx, next) => {
   return next()
 }
 
+/** *******************************************************************
+ *   WARNING!!!!!!!!!!
+******************************************************************** */
 // auth.get('/', isAuthenticated, ctx => {
 //   const script = '/js/login.js'
 //   const params = { title : 'login', description : 'duh', script }
@@ -17,6 +18,7 @@ const isAuthenticated = (ctx, next) => {
 //   // ..... Create more query errors depending the situation
 //   return ctx.render('login', params)
 // })
+/* ***************************************************************** */
 
 auth.post('/login', isAuthenticated, ctx => (
   passport.authenticate('local', {
@@ -37,7 +39,6 @@ auth.post('/login', isAuthenticated, ctx => (
 )
 
 auth.get('/logout', ctx => {
-
   if(!ctx.state.user) return ctx.body = { data : { ok : true }, message : '' }
 
   console.log(`${ ctx.state.user.username } is logging out...`)

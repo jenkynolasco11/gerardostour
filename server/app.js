@@ -47,9 +47,7 @@ const server = async () => {
     app.keys = config.KEYS
 
     app
-      .use(cors({ 
-        origin : cors => '*'
-      }))
+      .use(cors({ origin : () => '*' })) // Security | Modify access to server via http(s)
       .use(bodyparser({ multipart : true }))
       .use(serve('./src/public/assets'))
       .use(session(sessionParams, app))
@@ -60,6 +58,7 @@ const server = async () => {
       .use((ctx, next) => {
         // Safeguard!!!
         console.log('Where you going, duffo? (app.js)')
+        console.log('If this works, 404 is not working properly...')
         // Everything needs authentication!!!!
         return ctx.redirect('/admin/auth')
       })
