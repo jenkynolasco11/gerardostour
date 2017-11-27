@@ -1,0 +1,171 @@
+.dashboard {
+  position : absolute;
+  width : 100vw;
+  height : 100vh;
+  box-shadow : 0px 0px 5px black;
+  display : flex;
+  flex-flow : column nowrap;
+  transition: left $trans linear;
+  background : rgb(62, 62, 150);
+
+  .main-content {
+    overflow-x : hidden;
+    overflow-y : auto;
+    display : flex;
+    justify-content : center;
+    margin-top : 80px;
+    // margin-bottom : 40px;
+    padding : 80px;
+/*
+    .table-list {
+      right : 0;
+      width : 900px;
+      margin : 20px;
+      border-collapse : collapse;
+      flex-flow : column nowrap;
+
+      tr {
+        &:hover {
+          td {
+            background : $navColor * 2.4;
+            color : rgb(240, 240, 240);
+          }
+        }
+
+        td, th {
+          border-collapse : collapse;
+          border : 1px solid rgb(2, 2, 2);
+          padding : 10px;
+          vertical-align : middle;
+          text-align : center;
+
+          &.flex-1 {
+            flex : 100px;
+          }
+          &.flex-2 {
+            flex : 140px;
+          }
+          &.flex-3 {
+            flex : 200px;
+          }
+        }
+        td {
+          transition : background .2s linear;
+          color : rgb(197, 197, 197);
+          background : $navColor * 1.5;
+        }
+        th {
+          text-transform : capitalize;
+          background : $navColor;
+          // border : 1px solid rgb(214, 214, 214);
+          color : white;
+        }
+      }
+    }
+*/
+    .view-table {
+      margin-bottom : 40px;
+      width : 900px;
+      // background : gray;
+      // border-collapse : collapse;
+      display : flex;
+      flex-flow : column nowrap;
+
+      &__head, &__body, &__row, &__footer {
+        display : flex;
+        flex : 1;
+        box-sizing : border-box;
+      }
+
+      &__body {
+        flex-flow : column nowrap;
+        box-sizing : border-box;
+        position : relative;
+
+        .overlay-fetching {
+          position : absolute;
+          width : 100%;
+          min-height : 20px;
+          background : rgba(41, 58, 58, 0.6);
+          color : white;
+          font-size : 1.4em;
+          @include alignCenter();
+        }
+      }
+      &__row {
+        position : relative;
+        box-sizing : border-box;
+        &:hover {
+          .view-table__data {
+            background : gray * 0.5;
+            color : white;
+          }
+        }
+      }
+
+      &__data, &__header {
+        position : relative;
+        outline : 1px solid black;
+        padding : 5px;
+        box-sizing : border-box;
+        @include alignCenter;
+        flex : 1;
+
+        &.extra-space {
+          flex : 1.5;
+        }
+
+        // &:last-child {
+        //   flex : 1.5;
+        // }
+      }
+
+      &__data {
+        background : gray;        
+        transition : background .1s linear, color .1s linear;
+      }
+
+      &__header, &__footer {
+        background : rgb(77, 77, 77);
+      }
+
+      &__footer {
+        justify-content : space-between;
+
+        &-prev, &-next {
+          margin : 10px;
+          padding : 4px;
+          background : rgb(213, 106, 106);
+          color : white;
+          font-weight : 900;
+          cursor: pointer;
+
+          &.disabled {
+            cursor : default;
+            background : rgb(172, 172, 172);
+          }
+        }
+
+        &-nav {
+          @include alignCenter();
+
+          .view-table__footer-pagination {
+            color : white;
+            transition : color .1s linear;
+            cursor : pointer;
+            margin : 3px;
+            font-size : 1.2em;
+
+            &:hover {
+              color : rgb(255, 142, 142);
+            }
+          }
+          // display : none;
+        }
+        // &-next {
+        //   cursor: pointer;
+        // }
+      }
+    }
+  }
+}

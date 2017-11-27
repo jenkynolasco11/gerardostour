@@ -1,0 +1,68 @@
+%burger {
+  height : $burgerMenuSize * 0.08;
+  width : $burgerMenuSize * 0.8;
+  background : $burgerMenuColor;
+  border-radius : 4px;
+}
+
+.burger-menu {
+  box-shadow : inset 0px 0px 5px black;
+  @include alignCenter();
+  height : $burgerMenuSize;
+  width : $burgerMenuSize;
+  background : $burgerMenuOutside;
+  border-radius : 2px;
+  margin-left : 20px;
+  transition : background .1s linear;
+
+  &:hover {
+    background : $burgerMenuOutside * 1.4;
+  }
+  
+  .toggle-menu {
+    @extend %burger;
+    transition : background .1s linear;
+
+    &:before {
+      content : '';
+      position : absolute;
+      @extend %burger;
+      margin-top : -$burgerMenuSize * 0.25;
+      transition : transform .1s linear, margin .1s linear, width .1s linear, background .1s linear;
+      transform-origin : 0 50%;
+    }
+
+    &:after {
+      content : '';
+      position : absolute;
+      @extend %burger;
+      margin-top : $burgerMenuSize * 0.25;
+      transition : transform .1s linear, margin .1s linear, width .1s linear, background .1s linear;
+      transform-origin : 0 50%;
+    }
+
+    &.open {
+      background : transparent;
+
+      &:before {
+        content : '';
+        position : absolute;
+        background : rgb(208, 131, 131);
+        transform : rotate(45deg);
+        margin-top : -$burgerMenuSize * 0.35;
+        margin-left : $burgerMenuSize * 0.05;
+        width : $burgerMenuSize;
+      }
+
+      &:after {
+        content : '';
+        position : absolute;
+        background : rgb(208, 131, 131);
+        transform : rotate(-45deg);
+        margin-top : $burgerMenuSize * 0.35;
+        margin-left : $burgerMenuSize * 0.05;
+        width : $burgerMenuSize;
+      }
+    }
+  }
+}

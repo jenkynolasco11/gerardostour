@@ -1,0 +1,45 @@
+@import 'partials/_variables.scss';
+@import 'mixins/all.scss';
+
+body {
+  // background : red;
+  margin : 0;
+  min-width : 100vw;
+  min-height : 100vh;
+  @include alignCenter();
+  .login {
+    @include gradient();
+    @include alignCenter();
+    flex-flow: column nowrap;
+    height : $loginHeight;
+    width : $loginWidth;
+    border : 1px solid gray;
+
+    ::-webkit-input-placeholder { @include placeholders(white, gray, 0.1s) }
+    :-moz-placeholder { @include placeholders(white, gray, 0.1s) }
+    :-ms-input-placeholder { @include placeholders(white, gray, 0.1s) }
+
+    [type=text], [type=password]  {
+      background : transparent;
+      transition : background 0.2s linear;
+      height : $loginHeight * 0.1;
+      width : $loginWidth * 0.5;
+      margin-top : 12px;
+      border :none;
+      border-bottom : 1px solid #808080;
+      padding : 4px;
+
+      &:focus {
+        background : white;
+        color : gray;
+      }
+    }
+
+    [type=submit] {
+      background : red;
+      color : white;
+      border : none;
+      margin-top : 20px;
+    }
+  }
+}

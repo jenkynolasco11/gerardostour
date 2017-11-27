@@ -1,0 +1,52 @@
+.sidebar {
+  position : absolute;
+  height : 100vh;
+  background : $navColor;
+  width : 200px;
+  margin-left : 0px;
+  transition : margin-left $trans linear, background $trans linear;
+
+  &.closed {
+    margin-left : -40px;
+    background : rgb(7, 7, 7);
+  }
+
+  &__menu-list {
+    display : flex;
+    flex-direction : column;
+
+    &-title {
+      box-sizing : border-box;
+      height : 80px;
+      @include alignCenter();
+      font-size : 1.4em;
+      color : white;
+      user-select : none;
+    }
+
+    &-item {
+      box-sizing : border-box;
+      @include alignCenter();
+      height : 60px;
+      border-bottom : 1px solid gray;
+      transition : background .1s linear;
+      cursor : pointer;
+
+      &:first-child {
+        border-top : 1px solid gray;
+      }
+
+      &:hover {
+        background : rgb(77, 77, 77);
+        a {
+          color : white;
+        }
+      }
+
+      a {
+        transition :  color .1s linear;
+        color : rgb(208, 131, 131);
+      }
+    }
+  }
+}
