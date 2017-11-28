@@ -60,7 +60,7 @@ user.get('/current', async ctx => {
   }
 })
 
-user.post('/create-or-update', async ctx => {
+user.post('/create', async ctx => {
   // IF PERSON EXISTS, UPDATE
   const {
     uid = '',

@@ -9,7 +9,7 @@ import error404 from './404'
 const api = new Router({ prefix : 'api' })
 const rootRoute = new Router({ prefix : '' })
 
-const apiRoutes = [ auth, user, ride, ]
+const apiRoutes = [ auth, user, ride ]
 
 // Combine all routes to api
 apiRoutes.forEach(route => {
@@ -19,7 +19,7 @@ apiRoutes.forEach(route => {
 rootRoute.use('/', api.routes(), api.allowedMethods())
 
 // Allow to respond with error!
-rootRoute.use(error404)
+rootRoute.use('/', error404)
 
 /** *******************************************************************
  *   WARNING!!!!!!!!!!
