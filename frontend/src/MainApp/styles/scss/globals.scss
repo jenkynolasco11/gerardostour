@@ -3,5 +3,10 @@
 @import 'mixins/all.scss';
 
 body {
+  overflow : hidden;
 
+  #root {
+    @include alignCenter();
+    @include hw();
+  }
 }

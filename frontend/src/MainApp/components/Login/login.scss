@@ -1,0 +1,27 @@
+@import '../../styles/scss/globals.scss';
+
+body {
+  overflow : hidden;
+
+  .login {
+    padding : 30px;
+    width : $loginWidth;
+    height : $loginHeight * 1.5;
+    animation : appear .5s ease-out;
+
+    .actions {
+      margin-top : 30px;
+    }
+  }
+}
+
+@keyframes appear {
+  0% {
+    opacity : 0;
+    margin-top : 500px;
+  }
+  100% {
+    opacity : 1;
+    margin-top : 0;
+  }
+}

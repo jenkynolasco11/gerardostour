@@ -1,5 +1,7 @@
 import React, { Component } from 'react'
 
+// import { Layout } from 'react-toolbox/lib/layout'
+
 import Header from './Header'
 import Drawer from './Drawer'
 
