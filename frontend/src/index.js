@@ -1,10 +1,12 @@
 import React from 'react'
 import { render } from 'react-dom'
 
-import Dashboard from './components/Dashboard'
-
 import registerServiceWorker from './registerServiceWorker'
+import App from './App'
 
-render(<Dashboard />, document.getElementById('root'))
+const root = document.getElementById('root')
+
+render( <App />, root)
+
 // Live Reload
 registerServiceWorker()

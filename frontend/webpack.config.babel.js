@@ -3,7 +3,7 @@ import webpack from 'webpack'
 import Extract from 'extract-text-webpack-plugin'
 import path from 'path'
 
-const styles = './src/styles/'
+const styles = './src/MainApp/styles/'
 
 const extractSass = new Extract({ filename : '[name].css'/*, allChunks : true */ })
 
@@ -11,10 +11,11 @@ const uglify = new webpack.optimize.UglifyJsPlugin({ compress : { warnings : fal
 
 export const cssConfig = {
   watch : true,
-  entry : {
+  entry : { 
     dashboard : `${ styles }/scss/dashboard.scss`,
+    login : `${ styles }/scss/login.scss`,
   }, 
-  output : { 
+  output : {
     path : path.resolve(__dirname, styles, 'css' ),
     filename : '[name].css'
   },

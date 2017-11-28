@@ -1,0 +1,36 @@
+ul {
+  margin: 0;
+  padding: 0; }
+
+li {
+  list-style: none;
+  margin: 0; }
+
+a, a:visited, a:active, a:link, a:hover {
+  color: black;
+  outline: none;
+  text-decoration: none; }
+
+body {
+  margin: 0;
+  width: 100vw;
+  height: 100vh; }
+
+body {
+  background: #2196f3; }
+  body #root {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    width: 100vw; }
+    body #root .login {
+      padding: 30px;
+      width: 400px;
+      height: 450px; }
+      body #root .login input label {
+        color: white; }
+      body #root .login .actions {
+        margin-top: 30px; }
+
+/*# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbXSwibmFtZXMiOltdLCJtYXBwaW5ncyI6IiIsImZpbGUiOiJsb2dpbi5jc3MiLCJzb3VyY2VSb290IjoiIn0=*/
