@@ -1,23 +1,57 @@
 import React, { Component } from 'react'
 import { connect } from 'react-redux'
 
+import { BrowserRouter as Router, Route } from 'react-router-dom'
+
 import Login from './components/Login'
 import Dashboard from './components/Dashboard'
+import RTSnackbar from './components/extras/RTSnackbar'
+// import LoaderOverlay from './components/extras/LoaderOverlay'
+
+import { checkAuthentication } from './store-redux/actions'
 
 class MainApp extends Component{
+  // constructor(props) {
+  //   super(props)
+  // }
+
+  componentWillMount() {
+    this.props.checkAuth()
+  }
+
   render() {
-    const { isUserLoggedIn } = this.props
+    const {
+      isUserLoggedIn,
+      isFetching
+    } = this.props
 
-    if(isUserLoggedIn) return <Dashboard />
-
-    return <Login />
+    return (
+      <Router>
+        <div>
+          {
+            //*
+            isUserLoggedIn 
+            ? <Dashboard />
+            // : <Login />
+            : <Dashboard />
+            //*/
+          }
+          <RTSnackbar />
+          {/* <LoaderOverlay loading={ isFetching }/> */}
+        </div>
+      </Router>
+    )
   }
 }
 
-const mapStateToProps = state => {
-  const { isUserLoggedIn } = state.app
+const mapDispatchToProps = dispatch => ({
+  checkAuth : () => dispatch(checkAuthentication())
+})
 
-  return { isUserLoggedIn }
+const mapStateToProps = state => {
+  const { isUserLoggedIn, isFetching } = state.app
+
+  return { isUserLoggedIn, isFetching }
 }
 
-export default connect(mapStateToProps)(MainApp)
+export default connect(mapStateToProps, mapDispatchToProps)(MainApp)

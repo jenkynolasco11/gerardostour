@@ -3,7 +3,7 @@
 @import 'mixins/all.scss';
 
 body {
-  overflow : hidden;
+  // overflow : hidden;
 
   #root {
     @include alignCenter();

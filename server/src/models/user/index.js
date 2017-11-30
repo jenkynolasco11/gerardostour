@@ -8,7 +8,7 @@ const UserSchema = new Schema({
   position : {
     type : String,
     default : 'NONE',
-    enum :  [ 'ADMIN', 'CHAUFFER', 'NONE'],
+    enum :  [ 'SUPERUSER', 'DRIVER', 'MANAGER', 'DISPATCHER' ],
   },
   createdAt : { type : Date, default : Date.now() },
   lastSession : { type : Date, required : true, default : Date.now() }

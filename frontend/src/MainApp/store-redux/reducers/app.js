@@ -1,5 +1,5 @@
 const defaultApp = {
-  isUserLoggedIn : false,
+  isUserLoggedIn : false, // change this later to false
   isFetching : false,
   isError : false,
   isDrawerOpen : false,
@@ -8,7 +8,13 @@ const defaultApp = {
 
 export const app = (state = defaultApp, action) => {
   switch(action.type) {
-    case 'LOGOUT' :
+    case 'FETCHING_DATA' :
+      return { ...state, isFetching : action.payload }
+    case 'SAVING_DATA' : 
+      return { ...state, isSaving : action.payload }
+    case 'SHOW_ERROR' :
+      return { ...state, isError : action.payload }
+    case 'LOGIN_FAILED' :
       return { ...state, isUserLoggedIn : false }
     case 'LOGIN_SUCCESS' :
       return { ...state, isUserLoggedIn : true }

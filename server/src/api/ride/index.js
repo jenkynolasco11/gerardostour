@@ -9,12 +9,14 @@ ride.get('/all', async ctx => {
 
   try {
     const rides = await Ride.find({}).skip(+skip).limit(+limit).exec()
-    const count = await Ride.count({})
+    // const count = await Ride.count({})
 
-    return ctx.body = { data : { rides, count }, message : null }
+    return ctx.body = { ok : true, data : rides, message : null }
+
+    // Uncomment this later
+    // return ctx.body = { ok : true, data : { rides, count }, message : null }
   } catch (e) {
-    // console.log(e)
-    return ctx.body = { data : null, message : 'Error retrieving rides' }
+    return ctx.body = { ok : false, data : null, message : 'Error retrieving rides' }
   }
 })
 
@@ -23,7 +25,7 @@ const getRide = async id => {
   try {
     const rid = await Ride.findById(id)
 
-    if(rid) return rid
+    if(rid) return await rid
 
     return null
   } catch (e) {
@@ -31,15 +33,19 @@ const getRide = async id => {
   }
 }
 
-ride.get('/:id', ctx => {
+ride.get('/:id', async ctx => {
   const { id } = ctx.params
 
-  const rid = getRide(id)
+  const rid = await getRide(id)
 
   if(rid) return ctx.body = { data : rid, message : null }
 
   return ctx.body = { data : null, message : 'Error retrieving ride' }
 })
+
+// ride.post('/add', async ctx => {
+
+// })
 
 ride.get('/:id/tickets', async ctx => {
   const { id } = ctx.params

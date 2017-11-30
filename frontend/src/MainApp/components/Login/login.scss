@@ -1,7 +1,9 @@
 @import '../../styles/scss/globals.scss';
+@import '~/react-toolbox/lib/colors.css';
 
 body {
   overflow : hidden;
+  background : var(--palette-blue-500);
 
   .login {
     padding : 30px;

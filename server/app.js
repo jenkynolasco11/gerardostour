@@ -12,12 +12,13 @@ import cors from 'koa2-cors'
 
 import config from './config'
 import routes from './src/api'
+import error404 from './src/api/404'
 
 import './passport'
 
 // Assign better Promise to global/mongoose
 global.Promise = bluebird.Promise
-// mongoose.Promise = bluebird.Promise
+mongoose.Promise = bluebird.Promise
 
 const server = async () => {
   try {
@@ -37,17 +38,23 @@ const server = async () => {
 
     // Sessions Config
     const store = new SessionStore()
-    // const store = mongoSession.create({ url : config.DBURI })
+
     const sessionParams = {
       key : config.KEY,
       // keys : config.SESSIONID,
-      store
+      // store,
     }
 
     app.keys = config.KEYS
 
     app
-      .use(cors({ origin : () => '*' })) // Security | Modify access to server via http(s)
+      .use(cors({ 
+        origin : () => '*',
+        // credentials : true,
+        // allowHeaders : [ 
+        //   'Origin', 'X-Requested-With', 'Content-Type', 'Accept'
+        // ]
+      })) // Security | Modify access to server via http(s)
       .use(bodyparser({ multipart : true }))
       .use(serve('./src/public/assets'))
       .use(session(sessionParams, app))
@@ -55,13 +62,7 @@ const server = async () => {
       .use(passport.session())
       .use(logger())
       .use(routes)
-      .use((ctx, next) => {
-        // Safeguard!!!
-        console.log('Where you going, duffo? (app.js)')
-        console.log('If this works, 404 is not working properly...')
-        // Everything needs authentication!!!!
-        return ctx.redirect('/admin/auth')
-      })
+      .use(error404)
 
     const PORT = (process.env.PORT || config.PORT)
 

@@ -3,13 +3,19 @@ import Router from 'koa-router'
 import auth from './auth'
 import user from './user'
 import ride from './ride'
+import webhook from './webhook'
 
-import error404 from './404'
+// import error404 from './404'
 
-const api = new Router({ prefix : 'api' })
+const api = new Router({ prefix : 'api/v1' })
 const rootRoute = new Router({ prefix : '' })
 
-const apiRoutes = [ auth, user, ride, ]
+const apiRoutes = [
+  // webhook,
+  auth,
+  // user,
+  ride,
+]
 
 // Combine all routes to api
 apiRoutes.forEach(route => {
@@ -19,7 +25,7 @@ apiRoutes.forEach(route => {
 rootRoute.use('/', api.routes(), api.allowedMethods())
 
 // Allow to respond with error!
-rootRoute.use(error404)
+// rootRoute.use(error404)
 
 /** *******************************************************************
  *   WARNING!!!!!!!!!!
@@ -34,6 +40,6 @@ rootRoute.use(error404)
 // })
 /** ******************************************************************/
 
-rootRoute.stack.forEach(p => console.log(p.path/*, p.methods*/))
+rootRoute.stack.forEach(p => console.log(p.path, p.methods ))
 
 export default rootRoute.routes()

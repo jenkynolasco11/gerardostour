@@ -1,16 +1,25 @@
-import mongoose, { Schema, SchemaTypes } from 'mongoose'
-import UUID from 'uuid/v4'
+import mongoose, { Schema } from 'mongoose'
+// import UUID from 'uuid/v4'
 // import bcrypt from 'bcrypt-nodejs'
 
 const TicketSchema = new Schema({
-  user : { type : Schema.Types.ObjectId, required : true, index : true },
+  person : { type : Schema.Types.ObjectId, required : true, index : true },
   ride : { type : Schema.Types.ObjectId, required : true, index : true },
-  status : { type : String, index : true, enum : [ 'USED', 'SOLD', 'NEW' ] },
-  luggage : { type : Number, default : 0 },
-  pickAtDoor : { type : Boolean, default : false, index : true },
-  leaveAtDoor : { type : Boolean, default : false, index : true },
-  created_at : { type : Date, default : Date.now() },
+  payment : { type : Schema.Types.ObjectId, required : true, index : true },
+  details : { type : Schema.Types.ObjectId },
+  status : { type : String, index : true, enum : [ 'USED', 'REDEEMABLE', 'NULL', 'NEW' ] },
+  luggageCount : { type : Number, default : 0 },
+  willPick : { type : Boolean, default : false, index : true },
+  willDrop : { type : Boolean, default : false, index : true },
+  createdAt : { type : Date, default : Date.now() },
   modifiedAt : { type : Date, default : Date.now() }
+})
+
+const TicketDetailsSchema = new Schema({
+  pickUpPlace : { type : String, require : true },
+  dropOffPlace : { type : String, required : true },
+  redemmedCount : { Type : Number, default : 0 },
+  createdAt : { type : Date, default : Date.now() },
 })
 
 TicketSchema.pre('validate', function(next){
@@ -19,4 +28,5 @@ TicketSchema.pre('validate', function(next){
   next()
 })
 
-export default mongoose.model('ticket', TicketSchema)
+export const Ticket = mongoose.model('ticket', TicketSchema)
+export const TicketDetail = mongoose.model('ticketDetail', TicketDetailsSchema)

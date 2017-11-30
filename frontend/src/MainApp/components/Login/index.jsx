@@ -1,8 +1,10 @@
 import React, { Component } from 'react'
+import { connect } from 'react-redux'
 import { Input } from 'react-toolbox/lib/input'
 import { Card, CardTitle, CardActions } from 'react-toolbox/lib/card'
-// import Layout  from 'react-toolbox/lib/layout/Layout'
 import Button from 'react-toolbox/lib/button/Button'
+
+import { tryLogin, /*checkAuthentication*/ } from '../../store-redux/actions'
 
 import './login.scss'
 
@@ -11,25 +13,32 @@ class Login extends Component{
     super(props)
 
     this.state = {
-      username : '',
-      password : '',
+      username : 'jenky',
+      password : 'lllll',
     }
 
     this._onInputChange = this._onInputChange.bind(this)
+    this._onSubmit = this._onSubmit.bind(this)
   }
 
   _onInputChange(value, name) {
     this.setState({ [ name ] : value })
   }
 
+  _onSubmit(e) {
+    if(e) e.preventDefault()
+
+    const { username, password } = this.state
+
+    this.props.login(username, password)
+  }
+
   render() {
     return (
       // <Layout>
+      <form onSubmit={ this._onSubmit }>
         <Card className="login">
-          <CardTitle
-            title="Login"
-            subtitle="this should look pink"
-          />
+          <CardTitle title="Login" />
           <Input
             name="username"
             label="Username"
@@ -47,14 +56,30 @@ class Login extends Component{
           />
           <CardActions className="actions">
             <Button
+              type="submit"
               label="Login"
-              onClick={ () => console.log('button clicked!' )}
+              onClick={ this._onSubmit }
             />
           </CardActions>
         </Card>
+      </form>
       // </Layout>
     )
   }
+
+  // componentWillMount() {
+  //   console.log('gotta check this guy out!')
+  //   this.props.checkLogin()
+  // }
 }
 
-export default Login
+const mapDispatchToProps = dispatch => {
+  return {
+    login : (username, password) => dispatch(tryLogin({ username, password})),
+    // checkLogin : () => dispatch(checkAuthentication())
+  }
+}
+
+export default connect(null,mapDispatchToProps)(Login)
+
+// export default Login

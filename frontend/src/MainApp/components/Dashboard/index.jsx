@@ -1,12 +1,14 @@
 import React, { Component } from 'react'
+import { BrowserRouter as Router } from 'react-router-dom'
 
-// import { Layout } from 'react-toolbox/lib/layout'
+import Layout from 'react-toolbox/lib/layout/Layout'
 
 import Header from './Header'
 import Drawer from './Drawer'
+import Body from './Body'
 
 // Import styles
-import '../../styles/css/dashboard.css'
+import './style.scss'
 
 class Dashboard extends Component{
   constructor(props) {
@@ -15,10 +17,11 @@ class Dashboard extends Component{
 
   render() {
     return (
-      <div className="Dashboard">
+      <Layout className="dashboard">
         <Header />
+        <Body />
         <Drawer />
-      </div>
+      </Layout>
     )
   }
 }

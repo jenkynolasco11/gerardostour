@@ -3,9 +3,16 @@ import passport from 'koa-passport'
 
 const auth = new Router({ prefix : 'auth' })
 
+const allowedUsers = [
+  'SUPERUSER',
+  // 'DISPATCHER',
+  // 'MANAGER',
+]
+
 const isAuthenticated = (ctx, next) => {
-  if(ctx.isAuthenticated()) return ctx.redirect('/admin/dashboard')
-  return next()
+  if(ctx.isAuthenticated()) return next()
+
+  return ctx.body = { ok : false }
 }
 
 /** *******************************************************************
@@ -20,21 +27,28 @@ const isAuthenticated = (ctx, next) => {
 // })
 /* ***************************************************************** */
 
-auth.post('/login', isAuthenticated, ctx => (
+auth.post('/login', /*isAuthenticated,*/ ctx => (
   passport.authenticate('local', {
     successRedirect : '/admin/dashboard',
     failureRedirect : '/admin/auth?valid=false',
   }, async (err, user, msg, done) => {
     if(user) {
+      console.log(user)
       // TODO : Alter session last time connected in here
-      if(user.position !== 'ADMIN') return ctx.body = { ok : false, msg : 'You are not authorized to log in. Contact an Admin.' }
+      if(!allowedUsers.includes(user.position)) return ctx.body = { ok : false, msg : 'You are not authorized to log in. Contact an Admin.' }
 
       await ctx.login(user)
 
-      return ctx.body = { ok : true }
+      const data = {
+        username : user.username,
+        lastSession : user.lastSession,
+        personId : user.personId
+      }
+
+      return ctx.body = { ok : true, data, message : '' }
     }
 
-    return ctx.body = { ok : false, msg }
+    return ctx.body = { ok : false, data : null, message : msg }
   })(ctx))
 )
 
@@ -45,6 +59,15 @@ auth.get('/logout', ctx => {
   ctx.logout()
 
   return ctx.body = { data : { ok : true }, message : '' }
+})
+
+auth.get('/check-auth', ctx => {
+  const ok = ctx.isAuthenticated()
+
+  return ctx.body = { 
+    ok,
+    [ ok ? 'data' : 'message' ] : ok ? ctx.state.user : 'No user authenticated'
+  }
 })
 
 export default auth

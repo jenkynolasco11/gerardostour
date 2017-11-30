@@ -1,0 +1,9 @@
+@import '../../styles/scss/globals.scss';
+
+.dashboard {
+  @include hw();
+
+  .logout-button {
+    margin-right : 40px;
+  }
+}
