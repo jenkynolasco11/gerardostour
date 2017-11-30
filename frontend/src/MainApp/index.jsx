@@ -11,10 +11,6 @@ import RTSnackbar from './components/extras/RTSnackbar'
 import { checkAuthentication } from './store-redux/actions'
 
 class MainApp extends Component{
-  // constructor(props) {
-  //   super(props)
-  // }
-
   componentWillMount() {
     this.props.checkAuth()
   }
@@ -22,7 +18,7 @@ class MainApp extends Component{
   render() {
     const {
       isUserLoggedIn,
-      isFetching
+      // isFetching
     } = this.props
 
     return (

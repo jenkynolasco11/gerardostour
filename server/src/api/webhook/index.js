@@ -1,14 +1,11 @@
 import Router from 'koa-router'
 import axios from 'axios'
 
-// import Models from '../../models'
-
-const webhook = new Router({ prefix : 'webhook'})
+const webhook = new Router({ prefix : 'webhook' })
 
 const WEBHOOK_URL = 'https://hooks.zapier.com/hooks/catch/1160582/szth43/'
 
 webhook.post('/', async ctx => {
-
   const { body } = ctx.request
   try {
     const res = await axios.post(WEBHOOK_URL, body)

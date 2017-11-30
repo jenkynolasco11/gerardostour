@@ -20,7 +20,7 @@ import './passport'
 global.Promise = bluebird.Promise
 mongoose.Promise = bluebird.Promise
 
-const server = async () => {
+const server = async done => {
   try {
     await mongoose.connect(config.DBURI, { useMongoClient : true })
 
@@ -37,7 +37,7 @@ const server = async () => {
     })
 
     // Sessions Config
-    const store = new SessionStore()
+    // const store = new SessionStore()
 
     const sessionParams = {
       key : config.KEY,
@@ -69,9 +69,14 @@ const server = async () => {
     await app.listen(PORT)
 
     console.log(`Started server at ${ PORT }`)
+
+    return app
   } catch (e) {
     console.log(e)
     process.exit()
   }
 }
-server()
+
+const app = server()
+
+export default app

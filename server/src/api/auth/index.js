@@ -1,13 +1,8 @@
 import Router from 'koa-router'
 import passport from 'koa-passport'
+import { ALLOWED_USERS } from '../../../config'
 
 const auth = new Router({ prefix : 'auth' })
-
-const allowedUsers = [
-  'SUPERUSER',
-  // 'DISPATCHER',
-  // 'MANAGER',
-]
 
 const isAuthenticated = (ctx, next) => {
   if(ctx.isAuthenticated()) return next()
@@ -35,7 +30,7 @@ auth.post('/login', /*isAuthenticated,*/ ctx => (
     if(user) {
       console.log(user)
       // TODO : Alter session last time connected in here
-      if(!allowedUsers.includes(user.position)) return ctx.body = { ok : false, msg : 'You are not authorized to log in. Contact an Admin.' }
+      if(!ALLOWED_USERS.includes(user.position)) return ctx.body = { ok : false, msg : 'You are not authorized to log in. Contact an Admin.' }
 
       await ctx.login(user)
 

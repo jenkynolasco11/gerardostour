@@ -3,11 +3,15 @@ import mongoose, { Schema } from 'mongoose'
 // import bcrypt from 'bcrypt-nodejs'
 
 const TicketSchema = new Schema({
-  person : { type : Schema.Types.ObjectId, required : true, index : true },
-  ride : { type : Schema.Types.ObjectId, required : true, index : true },
-  payment : { type : Schema.Types.ObjectId, required : true, index : true },
-  details : { type : Schema.Types.ObjectId },
-  status : { type : String, index : true, enum : [ 'USED', 'REDEEMABLE', 'NULL', 'NEW' ] },
+  person : { type : Schema.Types.ObjectId, ref : 'person', required : true, index : true }, // Doesnt need index
+  ride : { type : Schema.Types.ObjectId, ref : 'ride', required : true, index : true }, // Should also be unique, Doesnt need index
+  payment : { type : Schema.Types.ObjectId, ref : 'payment', required : true, index : true }, // Should also be unique, Doesnt need index
+  details : { type : Schema.Types.ObjectId, ref : 'ticketDetail', required : true, index : true }, // Should also be unique, Doesnt need index
+  status : { 
+    type : String, 
+    index : true, 
+    enum : [ 'USED', 'REDEEMABLE', 'NULL', 'NEW' ] 
+  },
   luggageCount : { type : Number, default : 0 },
   willPick : { type : Boolean, default : false, index : true },
   willDrop : { type : Boolean, default : false, index : true },
@@ -16,9 +20,9 @@ const TicketSchema = new Schema({
 })
 
 const TicketDetailsSchema = new Schema({
-  pickUpPlace : { type : String, require : true },
-  dropOffPlace : { type : String, required : true },
-  redemmedCount : { Type : Number, default : 0 },
+  pickUpPlace : String, //{ type : String, require : true },
+  dropOffPlace : String, //{ type : String, required : true },
+  redeemedCount : { Type : Number, default : 0 },
   createdAt : { type : Date, default : Date.now() },
 })
 
@@ -28,5 +32,5 @@ TicketSchema.pre('validate', function(next){
   next()
 })
 
-export const Ticket = mongoose.model('ticket', TicketSchema)
-export const TicketDetail = mongoose.model('ticketDetail', TicketDetailsSchema)
+export const Ticket = mongoose.model('ticket', TicketSchema, 'ticket')
+export const TicketDetail = mongoose.model('ticketDetail', TicketDetailsSchema, 'ticketDetail')

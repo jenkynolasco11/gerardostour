@@ -2,7 +2,7 @@ import mongoose, { Schema, SchemaTypes } from 'mongoose'
 import bcrypt from 'bcrypt-nodejs'
 
 const UserSchema = new Schema({
-  personid : { type : Schema.Types.ObjectId, required : true, unique : true },
+  person : { type : Schema.Types.ObjectId, ref : 'person', required : true, unique : true },
   username : { type : String, index : { unique : true }},
   password : { type : String, required : true, },
   position : {
@@ -34,4 +34,4 @@ UserSchema.methods.updateLastSession = function() {
 //   next()
 // })
 
-export default mongoose.model('user', UserSchema)
+export default mongoose.model('user', UserSchema, 'user')

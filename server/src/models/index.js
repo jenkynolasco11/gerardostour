@@ -21,6 +21,7 @@ export const TicketDetail = mongoose.model('ticketDetail')
 export const Route = mongoose.model('route')
 export const Bus = mongoose.model('bus')
 export const Payment = mongoose.model('payment')
+export const BusDetail = mongoose.model('busDetail')
 
 export default {
   Person,
@@ -30,5 +31,6 @@ export default {
   Route,
   User,
   Bus,
-  Payment
+  Payment,
+  BusDetail
 }

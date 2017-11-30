@@ -3,8 +3,8 @@ import mongoose, { Schema, SchemaTypes } from 'mongoose'
 const PersonSchema = new Schema({
   firstname : { type : String, required : true },
   lastname : { type : String, required : true },
-  phoneNumber : { type : String, match : /^\d{10}$/, required : true },
-  email : { type : String, required : true, unique : true },
+  phoneNumber : { type : String, match : /^\d{10}$/, required : true, index : true, unique : true },
+  email : { type : String, required : true, index : true, unique : true },
   createdAt : { type : Date, default : Date.now() },
 })
 
@@ -24,4 +24,4 @@ PersonSchema.pre('validate', function(next) {
 //   console.log(this)
 // })
 
-export default mongoose.model('person', PersonSchema)
+export default mongoose.model('person', PersonSchema, 'person')

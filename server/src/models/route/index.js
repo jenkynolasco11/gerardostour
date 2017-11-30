@@ -15,4 +15,4 @@ RouteSchema.pre('validate', function(next) {
   next()
 })
 
-export default mongoose.model('route', RouteSchema)
+export default mongoose.model('route', RouteSchema, 'route')

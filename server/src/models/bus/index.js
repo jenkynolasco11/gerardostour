@@ -1,7 +1,7 @@
 import mongoose, { Schema } from 'mongoose'
 
 const BusSchema = new Schema({
-  user : Schema.Types.ObjectId,
+  user : { type : Schema.Types.ObjectId, ref : 'user' },
   alias : String,
   name : String,
   status : {
@@ -13,4 +13,11 @@ const BusSchema = new Schema({
   createdAt : { type : Date, default : Date.now() }
 })
 
-export default mongoose.model('bus', BusSchema)
+const BusDetailSchema = new Schema({
+  bus : { type : Schema.Types.ObjectId, ref : 'bus', index : true, unique : true },
+  seats : { type : Number, default : 0 },
+  luggage : { type : Number, default : 0 }
+})
+
+export const Bus = mongoose.model('bus', BusSchema, 'bus')
+export const BusDetail = mongoose.model('busDetail', BusDetailSchema, 'busDetail')

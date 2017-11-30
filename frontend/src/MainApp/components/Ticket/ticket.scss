@@ -2,14 +2,39 @@
 
 .main-body {
   height : 100%;
-  padding : 40px;
-  .ticket-form {
-    padding : 50px;
+  // padding : 40px 0;
+  @include alignCenter();
 
-    &-add {
-      overflow-y : scroll;
-      padding : 40px;
-      height : 70vh;
+  .ticket-form {
+    // padding : 60px 0;
+    width : 600px;
+    // @media (min-width : 600px) {
+    //   max-width : 600px;
+    // }
+    // min-width : 
+
+    &_add {
+      .ticket-form_title {
+        margin-bottom : 50px;
+      }
+
+      overflow-y : auto;
+      padding : 30px 50px;
+      height : 80vh;
+
+      .route-list {
+        display : flex;
+        .from {
+          color : var(--palette-green-400);
+        }
+        .to {
+          color : var(--palette-yellow-900);
+        }
+      }
+    }
+
+    &_actions {
+      margin : 40px 0px;
     }
   }
 }

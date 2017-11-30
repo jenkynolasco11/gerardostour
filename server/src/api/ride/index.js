@@ -1,77 +1,138 @@
 import Router from 'koa-router'
 
-import { Ride, Ticket } from '../../models'
+import { Ride, Ticket, Route, Bus, User, Person, BusDetail } from '../../models'
 
 const ride = new Router({ prefix : 'ride' })
 
-ride.get('/all', async ctx => {
-  const { limit = 10, skip = 0 } = ctx.query
-
+const getRideData = async rid => {
   try {
-    const rides = await Ride.find({}).skip(+skip).limit(+limit).exec()
-    // const count = await Ride.count({})
+    const routeFrom = await Route.findById(rid.routeFrom)
+    const routeTo = await Route.findById(rid.routeTo)
+    const bus = await Bus.findById(rid.bus)
+    const details = await BusDetail.findOne({ bus : rid.bus })
+    // const user = await User.findById(bus.user)
+    // const person = await Person.findById(user.person)
 
-    return ctx.body = { ok : true, data : rides, message : null }
+    const data = {
+      bus : {
+        alias : bus.alias,
+        name : bus.name,
+        status : bus.status,
+        seats : bus.seats,
+        seatsAvailable : (parseInt(bus.seats) - parseInt(details.seats)),
+        luggage : bus.luggage,
+        luggageAvailable : parseInt(bus.luggage) - parseInt(details.luggage)
+      },
+      routeTo : {
+        street : routeTo.street,
+        city : routeTo.city,
+        state : routeTo.state,
+        zip : routeTo.zipcode
+      },
+      routeFrom : {
+        street : routeFrom.street,
+        city : routeFrom.city,
+        state : routeFrom.state,
+        zip : routeFrom.zipcode
+      },
+      time : rid.time,
+      date : rid.date
+    }
 
-    // Uncomment this later
-    // return ctx.body = { ok : true, data : { rides, count }, message : null }
+    return data
+  } catch (e) {
+    console.log(e)
+  }
+
+  return null
+}
+
+// Retrieve all rides
+ride.get('/all', async ctx => {
+  // const { limit = 10, skip = 0 } = ctx.query
+  try {
+    const rides = await Ride.find({})
+
+    if(rides.length) {
+      const data = await Promise.all(rides.map(getRideData))
+
+      if(data.length) return ctx.body = { ok : true, data, message : '' }
+    }
+
+    return ctx.body = { ok : false, data : null, message : 'No rides available' }
   } catch (e) {
     return ctx.body = { ok : false, data : null, message : 'Error retrieving rides' }
   }
 })
 
-const getRide = async id => {
-  if(!id) return null
+// Saves a ride
+ride.post('/insert', async ctx => {
+  const { body } = ctx.request
+  try {
+    let { time, date } = body
+
+    time = parseInt(time)
+    date = new Date(date)
+
+    if(time < 0 || time > 23) return ctx.body = { ok : false, data : null, message : 'Time is incorrect' }
+    if(date.getTime() < Date.now()) return ctx.body = { ok : false, data : null, message : 'Date can\'t be in the past' }
+
+    const rid = await new Ride({ ...body }).save()
+
+    return ctx.body = { ok : true, data : rid._id, message : '' }
+  } catch (e) {
+    return ctx.body = { ok : false, data : null, message : 'Error saving ride in DB' }
+  }
+})
+
+// Retrieve rides on date and hour.
+// Note: If hour is -1, retrieve all rides on that date
+ride.get('/date/:date/hour/:hour', async ctx => {
+  const { date, hour } = ctx.params
+
+  const time = parseInt(hour)
+  const dateX = parseInt(date)
+
+  if(typeof dateX !== 'number') return ctx.body = { ok : false, data : null, message : 'Incorrect Date format' }
+
+  const date1 = new Date(dateX)
+  const date2 = new Date(dateX).setDate(date1.getDate() + 1)
+
+  const conditions = { date : { $gte : date1, $lte : new Date(date2) }}
+
+  if(time >= 0 && time < 24) conditions.time = time
+
+  try {
+    const rides = await Ride.find(conditions)
+
+    if(rides.length) {
+      const data = await Promise.all(rides.map(getRideData))
+
+      return ctx.body = { ok : true, data, message : '' }
+    }
+  } catch (e) {
+    return ctx.body = { ok : false, data : null, message : 'Error retrieving rides' }
+  }
+
+  return ctx.body = { ok : false, data : null, message : 'There are no rides for this date' }
+})
+
+// Retrieve Ride
+ride.get('/:id', async ctx => {
+  const { id } = ctx.params
   try {
     const rid = await Ride.findById(id)
 
-    if(rid) return await rid
+    if(rid) {
+      const data = await getRideData(rid)
 
-    return null
-  } catch (e) {
-    return null
-  }
-}
-
-ride.get('/:id', async ctx => {
-  const { id } = ctx.params
-
-  const rid = await getRide(id)
-
-  if(rid) return ctx.body = { data : rid, message : null }
-
-  return ctx.body = { data : null, message : 'Error retrieving ride' }
-})
-
-// ride.post('/add', async ctx => {
-
-// })
-
-ride.get('/:id/tickets', async ctx => {
-  const { id } = ctx.params
-
-  const rid = getRide(id)
-
-  if(rid)
-    try {
-      const tickets = await Ticket.find({ ride : rid })
-
-      if(tickets) return ctx.body = { data : tickets, message : null }
-
-      return ctx.body = { data : null, message : '' }
-    } catch (e) {
-      return ctx.body = {
-        data : null,
-        message : `Error retrieving tickets for this ride`
-      }
+      if(data) return ctx.body = { ok : true, data, message : '' }
     }
 
-  return ctx.body = {
-    data : null,
-    message : `Error retrieving data for ID: ${ id }`
+    return ctx.body = { ok : false, data : null, message : 'There is no ride assigned to that id' }
+  } catch(e) {
+    return ctx.body = { ok : false, data : null, message : 'Error retrieving ride' }
   }
 })
-
-// ride.use('/rides', routes.routes(), routes.allowedMethods())
 
 export default ride
