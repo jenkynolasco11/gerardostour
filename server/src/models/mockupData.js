@@ -225,9 +225,11 @@ mongoose.connect(config.DBURI, { useMongoClient : true }, async () => {
     return null
   }
 
-  const createTicket = async (person, ride, payment, details, status, luggage, pick, leave) => {
+  const createTicket = async (to, frm, person, ride, payment, details, status, luggage, pick, leave) => {
     try {
       const ticket = await new Ticket({
+        to,
+        from : frm,
         person,
         ride,
         details,
@@ -344,7 +346,7 @@ mongoose.connect(config.DBURI, { useMongoClient : true }, async () => {
 
       const details = await Promise.all(rids)
 
-      console.log(details)
+      // console.log(details)
 
       // console.log(details)
 
@@ -439,7 +441,14 @@ mongoose.connect(config.DBURI, { useMongoClient : true }, async () => {
         const luggage = genRand(5)
         const status = ticktsStatus[ genRand(ticktsStatus.length) ]
 
+        const x = genRand(2)
+
+        const toState = routes[ Number(!x) ]
+        const frmState = routes[ Number(x) ]
+
         const ticket = await createTicket(
+          toState,
+          frmState,
           person._id,
           genRand(2) ? ride._id : null,
           payment,

@@ -1,38 +1,28 @@
 import Router from 'koa-router'
 
-import { Ticket, Payment, TicketDetail, Person, Ride, Route, Bus } from '../../models'
+import { Ticket, Payment, TicketDetail, Person, Ride, Address /*,Bus*/ } from '../../models'
 
 const ticket = new Router({ prefix : 'ticket' })
 
 const getTicketData = async tckt => {
   try {
-    const ride = await Ride.findById(tckt.ride)
+    const ride = tckt.ride ? await Ride.findById(tckt.ride) : 'none'
     const person = await Person.findById(tckt.person)
     const details = await TicketDetail.findById(tckt.details)
-    const frm = await Route.findById(ride.routeFrom)
-    const to = await Route.findById(ride.routeTo)
+    const pick = await (tckt.pickUpPlace ? Route.findById(tckt.pickUpPlace) : 'none')    
+    const drop = await (tckt.dropOffPlace ? Route.findById(ride.routeTo) : 'none')
 
     const data = {
       willDrop : tckt.willDrop,
       willPick : tckt.willPick,
-      pickUpAddress : details.pickUpPlace ? details.pickUpPlace : '',
-      dropOffAddress : details.dropOffPlace ? details.dropOffPlace : '',
       luggage : tckt.luggageCount,
       status : tckt.status,
-      routeFrom : {
-        state : frm.state,
-        city : frm.city,
-        street : frm.street,
-        zip : frm.zipcode,
-      },
-      routeTo : {
-        state : to.state,
-        city : to.city,
-        street : to.street,
-        zip : to.zipcode,
-      },
-      time : ride.time,
-      date : ride.date,
+      from : tckt.from,
+      to : tckt.to,
+      pickUpAddress : pick !== 'none' ? { ...pick } : pick,
+      dropOffAddress : drop !== 'none' ? { ...drop } : drop,
+      time : details.time,
+      date : details.date,
       person : {
         firstname : person.firstname,
         lastname : person.lastname,
@@ -89,6 +79,8 @@ ticket.get('/:id/payment', async ctx => {
     }
 })
 
+
+////////////////////// TODO! <===== FIX THIS ONE!
 const saveTicket = async data => {
   // console.log(data)
   const {
@@ -176,6 +168,12 @@ ticket.post('/insert/:many', async ctx => {
   } catch (e) {
     return ctx.body = { ok : false, data : null, message : 'Error trying to save your ticket.' }
   }
+})
+
+ticket.get('/all', async ctx => {
+  /*
+    Get all tickets that are not marked as USED or SCANNED (Check up with this in the models)
+  */
 })
 
 // Retrieve all tickets from ride

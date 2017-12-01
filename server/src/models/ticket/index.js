@@ -7,7 +7,7 @@ const status = [ 'USED', 'REDEEMABLE', 'NULL', 'NEW' ]
 
 const TicketSchema = new Schema({
   person : { type : Schema.Types.ObjectId, ref : 'person', required : true, index : true }, // Doesnt need index
-  ride : { type : Schema.Types.ObjectId, ref : 'ride', index : true }, // Should also be unique, Doesnt need index
+  ride : { type : Schema.Types.ObjectId, ref : 'ride', index : true, default : null }, // Should also be unique, Doesnt need index
   payment : { type : Schema.Types.ObjectId, ref : 'payment', required : true, index : true }, // Should also be unique, Doesnt need index
   details : { type : Schema.Types.ObjectId, ref : 'ticketDetail', required : true, index : true }, // Should also be unique, Doesnt need index
   status : { type : String, index : true, enum : status },
@@ -17,13 +17,13 @@ const TicketSchema = new Schema({
   createdAt : { type : Date, default : Date.now() },
   modifiedAt : { type : Date, default : Date.now() },
   //////****//
-  // from : { type : String, enum : routes, index : true },
-  // to : { type : String, enum : routes, index : true },
+  from : { type : String, enum : routes, index : true },
+  to : { type : String, enum : routes, index : true },
 })
 
 const TicketDetailsSchema = new Schema({
-  pickUpPlace : { type : Schema.Types.ObjectId, ref : 'address', required : true, index : true },
-  dropOffPlace : { type : Schema.Types.ObjectId, ref : 'address', required : true, index : true },
+  pickUpPlace : { type : Schema.Types.ObjectId, ref : 'address', index : true },
+  dropOffPlace : { type : Schema.Types.ObjectId, ref : 'address', index : true },
   redeemedCount : { Type : Number, default : 0 },
   fee : { type : Number, default : 0 },
   extraFee : { type : Number, default : 0 },
