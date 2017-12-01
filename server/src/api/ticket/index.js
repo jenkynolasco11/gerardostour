@@ -220,25 +220,25 @@ ticket.get('/:id', async ctx => {
 })
 
 // Retrieve a ticket payment information
-ticket.get('/:id/payment', async ctx => {
-  const { id } = ctx.params
+// ticket.get('/:id/payment', async ctx => {
+//   const { id } = ctx.params
 
-    try {
-      const tckt = await Ticket.findById(id)
+//     try {
+//       const tckt = await Ticket.findById(id)
 
-      if(tckt) {
-        const payment = await Payment.findById(tckt.payment)
-        const { cardLastDigits, cardBrand, totalAmount, type } = payment
-        const data = { cardLastDigits, cardBrand, totalAmount, type }
+//       if(tckt) {
+//         const payment = await Payment.findById(tckt.payment)
+//         const { cardLastDigits, cardBrand, totalAmount, type } = payment
+//         const data = { cardLastDigits, cardBrand, totalAmount, type }
 
-        return ctx.body = { ok : true, data, message : '' }
-      }
+//         return ctx.body = { ok : true, data, message : '' }
+//       }
 
-      return ctx.body = { ok : false, data : null, message : 'Couldn\'t retrieve payment details' }
-    } catch (e) {
-      return ctx.body = { ok : false, data : null, message : 'Error retrieving payment details' }
-    }
-})
+//       return ctx.body = { ok : false, data : null, message : 'Couldn\'t retrieve payment details' }
+//     } catch (e) {
+//       return ctx.body = { ok : false, data : null, message : 'Error retrieving payment details' }
+//     }
+// })
 
 // Saves a(s many) ticket
 ticket.post('/insert', reformatTicket, async ctx => {
@@ -262,32 +262,32 @@ ticket.post('/insert', reformatTicket, async ctx => {
   }
 })
 
-ticket.get('/all', async ctx => {
-  /*
-    Get all tickets that are not marked as USED or SCANNED (Check up with this in the models)
-  */
-})
+// ticket.get('/all', async ctx => {
+//   /*
+//     Get all tickets that are not marked as USED or SCANNED (Check up with this in the models)
+//   */
+// })
 
 // Retrieve all tickets from ride
-ticket.get('/all/:ride', async ctx => {
-  const { ride } = ctx.params
+// ticket.get('/all/:ride', async ctx => {
+//   const { ride } = ctx.params
 
-  // if(/\D/.test(time)) return ctx.body = { ok : false, data : null, message : 'Not a valid time parameter' }
+//   // if(/\D/.test(time)) return ctx.body = { ok : false, data : null, message : 'Not a valid time parameter' }
 
-  try {
-    const tickets = await Ticket.find({ ride })
+//   try {
+//     const tickets = await Ticket.find({ ride })
 
-    if(tickets.length) {
-      const data = await Promise.all(tickets.map(getTicketData))
+//     if(tickets.length) {
+//       const data = await Promise.all(tickets.map(getTicketData))
 
-      return ctx.body = { ok : true, data, message : '' }
-    }
+//       return ctx.body = { ok : true, data, message : '' }
+//     }
 
-    return ctx.body = { ok : false, data : null, message : 'There are no ticket for this ride' }
-  } catch (e) {
-    return ctx.body = { ok : false, data : null, message : 'Error retrieving the tickets for this ride' }
-  }
-})
+//     return ctx.body = { ok : false, data : null, message : 'There are no ticket for this ride' }
+//   } catch (e) {
+//     return ctx.body = { ok : false, data : null, message : 'Error retrieving the tickets for this ride' }
+//   }
+// })
 
 // TODO : This one doesn't wait for response. Either create a log if
 // any error, or create a notifications center in case something happens

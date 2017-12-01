@@ -14,11 +14,11 @@ const rootRoute = new Router({ prefix : '' })
 
 const apiRoutes = [
   // webhook,
-  route,
-  auth,
+  // route,
+  // auth,
   ticket,
   // user,
-  ride,
+  // ride,
 ]
 
 // Combine all routes to api
