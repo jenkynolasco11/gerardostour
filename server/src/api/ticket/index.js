@@ -1,6 +1,7 @@
 import Router from 'koa-router'
 
 import { Ticket, Payment, TicketDetail, Person, Ride, Address /*,Bus*/ } from '../../models'
+import { createPerson, createAddress } from '../../utils'
 
 const ticket = new Router({ prefix : 'ticket' })
 
@@ -37,6 +38,166 @@ const getTicketData = async tckt => {
   }
 
   return null
+}
+
+const reformatTicket = (ctx, next) => {
+  
+  const { body } = ctx.request
+
+  if(body.isLocal) return next()
+  // console.log(body.extra_maletas, parseInt(body.extra_maletas))
+  const newBody = {
+    frm : body.desde,
+    to : body.hacia,
+    departureDate : new Date(body.fecha_salida),
+    departureTime : parseInt(body.hora_salida) - 1,
+    howMany : body.numero_tickets,
+    luggage : parseInt(body.extra_maletas),
+    firstname : body.nombre.split(' ')[ 0 ],
+    lastname : body.apellido.split(' ')[ 0 ],
+    phoneNumber : body.telefono.replace(/\D/g, ''),
+    email : body.email,
+    willPick : body.recoger === 'checked',
+    willDrop : body.dejar === 'checked',
+    pickUpPlace : body.recoger === 'checked'
+    ? {
+      street : body.calle_origen,
+      city : body.ciudad_origen,
+      state : body.estado_origen,
+      zipcode : body.zipcode_origen
+    } 
+    : null,
+    dropOffPlace : body.dejar === 'checked'
+    ? {
+      street : body.calle_destino,
+      city : body.ciudad_destino,
+      state : body.estado_destino,
+      zipcode : body.zipcode_destino
+    }
+    : null,
+    totalAmount : parseInt(body.total_final),
+    cardBrand : body.card_brand.toUpperCase(),
+    cardLastDigits : body.card_last_digits,
+    paymentType : 'CARD',
+    status : 'NEW',
+    fee : parseInt(body.precio_primera_ruta),
+    extraFee : parseInt(body.precio_segunda_ruta),
+  }
+
+  ctx.request.body = newBody
+  // console.log(newBody)
+  return next()
+}
+
+// //////////////////// TODO! <===== FIX THIS ONE!
+const saveTicket = async ({ data, person, pickUp, dropOff }) => {
+  // console.log(data)
+  const {
+    frm,
+    to,
+    luggage,
+    willPick,
+    willDrop,
+    status = 'NEW',
+    fee,
+    extraFee,
+    departureDate,
+    departureTime,
+    cardBrand,
+    cardLastDigits,
+    totalAmount,
+    paymentType
+  } = data
+
+  try {
+    const payment = await new Payment({
+      cardBrand,
+      cardLastDigits,
+      totalAmount,
+      type : paymentType
+    }).save()
+
+    const details = await new TicketDetail({ 
+      pickUpAddress : pickUp,
+      dropOffAddress : dropOff,
+      redeemedCount : 0,
+      fee,
+      extraFee,
+      date : departureDate,
+      time : departureTime,
+    }).save()
+
+    // TODO: Make sure that the data inserted is sanitized, or it'll break!!!
+    const tckt = await new Ticket({
+      person,
+      details : details._id,
+      payment : payment._id,
+      status,
+      luggageCount : luggage,
+      willPick,
+      willDrop,
+      from : frm,
+      to
+    }).save()
+
+    return tckt._id
+  } catch(e) {
+    return null
+  }
+}
+
+const saveTickets = async data => {
+  const { howMany } = data
+
+  const promises = []
+
+  try {
+    const person = await createPerson(data)
+
+    const pickUp = await (
+      data.willPick 
+      ? createAddress({ ...data.pickUpAddress })
+      : null
+    )
+
+    const dropOff = await (
+      data.willDrop 
+      ? createAddress({ ...data.dropOffAddress })
+      : null
+    )
+
+    // If anything got bad on inserting, then erase all the shit back!
+    if(!person || (!pickUp && data.willPick) || (!dropOff && data.willDrop)) {
+      console.log('Erasing shit... Something happened...')
+
+      [
+        // { obj : details, col : TicketDetail },
+        { obj : person, col : Person }, 
+        // { obj : payment, col : Payment },
+        { obj : pickUp, col : Address },
+        { obj : dropOff, col : Address }
+      ].forEach(async itm => {
+        // Remove entries if any
+        if(itm.obj) await itm.col.remove({ _id : itm.obj._id ? itm.obj._id : itm.obj })
+      })
+
+      return null
+    }
+
+    for(let i = 0; i < howMany; i++) 
+      promises.push(saveTicket({ 
+        data, 
+        pickUp,
+        person, 
+        dropOff
+      }))
+    
+    // const data = await Promise.all(promises)
+    return Promise.all(promises)
+  } catch (e) {
+    console.log(e)
+    return null
+  }
 }
 
 // Retrieve a ticket information
@@ -79,93 +240,24 @@ ticket.get('/:id/payment', async ctx => {
     }
 })
 
-
-////////////////////// TODO! <===== FIX THIS ONE!
-const saveTicket = async data => {
-  // console.log(data)
-  const {
-    type,
-    totalAmount,
-    pickUpPlace,
-    dropOffPlace,
-    ride,
-    email,
-    firstname,
-    lastname,
-    phoneNumber,
-    luggage,
-    status = 'NEW'
-  } = data
-
-  const isCard = type === 'CARD'
-  const cardBrand 
-    = isCard
-    ? data.cardBrand
-    : ''
-  const cardLastDigits
-    = isCard 
-    ? data.cardLastDigits
-    : ''
-
-    try {
-      // TODO : SEE HOW TO SOLVE THIS SHIT!!! CANT ENTER A NEW PERSON ON EVERY BOUGHT TICKET
-      let person = await Person.findOne({ phoneNumber })
-      if(!person) person = await new Person({ firstname, lastname, phoneNumber, email }).save()
-
-      const payment = await new Payment({ type, totalAmount, cardBrand, cardLastDigits }).save()
-
-      const details = await new TicketDetail({ pickUpPlace, dropOffPlace }).save()
-
-      // If anything got bad on inserting, then erase all the shit back!
-      if(!details || !person || !payment) {
-        console.log('Erasing shit... Something happened...')
-
-        [
-          { obj : details, col : TicketDetail },
-          { obj : person, col : Person }, 
-          { obj : payment, col : Payment }
-        ].forEach(async itm => {
-          // Remove entries if any
-          if(itm.obj) await itm.col.remove({ _id : itm.obj._id })
-        })
-
-        return null
-      }
-
-      // TODO: Make sure that the data inserted is sanitized, or it'll break!!!
-      const tckt = await new Ticket({
-        person : person._id,
-        details : details._id,
-        payment : payment._id,
-        ride,
-        status,
-        willDrop : dropOffPlace !== '',
-        willPick : pickUpPlace !== '',
-        luggageCount : luggage,
-      }).save()
-
-      return tckt._id
-    } catch(e) {
-      return null
-    }
-}
-
 // Saves a(s many) ticket
-ticket.post('/insert/:many', async ctx => {
+ticket.post('/insert', reformatTicket, async ctx => {
   const { body } = ctx.request
-  const { many } = ctx.params
+
+  // TODO : Add this later. With this, I'll know if it's 
+  const { isLocal } = body
 
   const promises = []
 
   try {
-    for(let i = 0; i < many; i++) promises.push(saveTicket( body ))
-    
-    const data = await Promise.all(promises)
+    const data = await saveTickets(body)
 
+    // console.log(data)
     if(data) return ctx.body = { ok : true, data, message : '' }
 
     return ctx.body = { ok : false, data : null, message : 'Couldn\'t save the ticket. Contact your system administrator.' }
   } catch (e) {
+    console.log(e)
     return ctx.body = { ok : false, data : null, message : 'Error trying to save your ticket.' }
   }
 })
@@ -196,5 +288,25 @@ ticket.get('/all/:ride', async ctx => {
     return ctx.body = { ok : false, data : null, message : 'Error retrieving the tickets for this ride' }
   }
 })
+
+// TODO : This one doesn't wait for response. Either create a log if
+// any error, or create a notifications center in case something happens
+// ticket.post('/webhook/insert', reformatTicket, async ctx => {
+//   const { body } = ctx.request
+//   const { howMany } = body
+//   const promises = []
+
+//   try {
+//     for(let i = 0; i < howMany; i++) promises.push(saveTicket( body ))
+    
+//     const data = await Promise.all(promises)
+
+//     if(data) return ctx.body = { ok : true, data, message : '' }
+
+//     return ctx.body = { ok : false, data : null, message : 'Couldn\'t save the ticket. Contact your system administrator.' }
+//   } catch (e) {
+//     return ctx.body = { ok : false, data : null, message : 'Error trying to save your ticket.' }  
+//   }
+// })
 
 export default ticket

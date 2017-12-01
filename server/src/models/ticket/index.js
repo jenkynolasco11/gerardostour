@@ -22,8 +22,8 @@ const TicketSchema = new Schema({
 })
 
 const TicketDetailsSchema = new Schema({
-  pickUpPlace : { type : Schema.Types.ObjectId, ref : 'address', index : true },
-  dropOffPlace : { type : Schema.Types.ObjectId, ref : 'address', index : true },
+  pickUpAddress : { type : Schema.Types.ObjectId, ref : 'address', index : true },
+  dropOffAddress : { type : Schema.Types.ObjectId, ref : 'address', index : true },
   redeemedCount : { Type : Number, default : 0 },
   fee : { type : Number, default : 0 },
   extraFee : { type : Number, default : 0 },

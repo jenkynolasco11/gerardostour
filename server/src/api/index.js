@@ -44,6 +44,6 @@ rootRoute.use('/', api.routes(), api.allowedMethods())
 // })
 /** ******************************************************************/
 
-rootRoute.stack.forEach(p => console.log(p.path, p.methods ))
+// rootRoute.stack.forEach(p => console.log(p.path, p.methods ))
 
 export default rootRoute.routes()

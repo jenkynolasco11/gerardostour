@@ -3,6 +3,8 @@ node_modules/
 npm-debug.*
 dist/
 bundle.js
-__*.old
+.old
 
 styles/css
+
+appTest.js

@@ -23,7 +23,7 @@ mongoose.Promise = bluebird.Promise
 const server = async done => {
   try {
     await mongoose.connect(config.DBURI, { useMongoClient : true })
-
+    
     const app = new Koa()
 
     // Views Config
@@ -77,6 +77,4 @@ const server = async done => {
   }
 }
 
-const app = server()
-
-export default app
+server()
