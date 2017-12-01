@@ -13,7 +13,7 @@ const PaymentSchema = new Schema({
     enum : [ '', 'VISA', 'MASTERCARD', 'AMERICAN EXPRESS', 'DISCOVERY' ]
   },
   cardLastDigits : Number,
-  createdAt : { type : Date, default : Date.now() }
+  createdAt : { type : Date, default : Date.now }
 })
 
 export default mongoose.model('payment', PaymentSchema, 'payment')

@@ -5,8 +5,8 @@ const AddressSchema = new Schema({
   city : String,
   state : String,
   zipcode : Number,
-  createdAt : { type : Date, default : Date.now() },
-  modifiedAt : { type : Date, default : Date.now() }
+  createdAt : { type : Date, default : Date.now },
+  modifiedAt : { type : Date, default : Date.now }
 })
 
 AddressSchema.pre('validate', function(next) {

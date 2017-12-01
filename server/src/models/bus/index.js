@@ -10,8 +10,8 @@ const BusSchema = new Schema({
   },
   seats : Number,
   luggage : Number,
-  createdAt : { type : Date, default : Date.now() },
-  modifiedAt : { type : Date, default : Date.now() }
+  createdAt : { type : Date, default : Date.now },
+  modifiedAt : { type : Date, default : Date.now }
 })
 
 const BusDetailSchema = new Schema({

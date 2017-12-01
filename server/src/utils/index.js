@@ -35,10 +35,10 @@ export const createAddress = async ({ street, state, zipcode, city }) => {
   }
 }
 
-// export const createPayment = async ({ type, totalAmount, cardBrand, cardLastDigits }) => {
-//   try {
-//     const payment = await new Payment({ type, totalAmount, cardBrand, cardLastDigits }).save()
-//   } catch (e) {
-//     return null
-//   }
-// }
+// Remove non wanted fields
+export const filterDoc = doc => {
+  if(doc === 'none') return doc
+  const { _id, __v, modifiedAt, createdAt, ...rest }  = doc
+
+  return rest
+}

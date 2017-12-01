@@ -14,11 +14,12 @@ const TicketSchema = new Schema({
   luggageCount : { type : Number, default : 0 },
   willPick : { type : Boolean, default : false, index : true },
   willDrop : { type : Boolean, default : false, index : true },
-  createdAt : { type : Date, default : Date.now() },
-  modifiedAt : { type : Date, default : Date.now() },
   //////****//
   from : { type : String, enum : routes, index : true },
   to : { type : String, enum : routes, index : true },
+  //////////
+  createdAt : { type : Date, default : Date.now },
+  modifiedAt : { type : Date, default : Date.now },
 })
 
 const TicketDetailsSchema = new Schema({
@@ -29,17 +30,23 @@ const TicketDetailsSchema = new Schema({
   extraFee : { type : Number, default : 0 },
   time : { type : Number, required : true, index : true },
   date : { type : Date, required : true, index : true },
-  createdAt : { type : Date, default : Date.now() },
-  modifiedAt : { type : Date, default : Date.now() },
+  createdAt : { type : Date, default : Date.now },
+  modifiedAt : { type : Date, default : Date.now },
 })
 
-TicketSchema.pre('validate', function(next){
+// [ TicketSchema, TicketDetailSchema ].forEach(schema => {
+//   schema.pre('save', function(next) {
+    
+//   })
+// })
+
+TicketSchema.pre('save', function(next){
   // console.log(this)
   this.modifiedAt = Date.now()
   next()
 })
 
-TicketDetailsSchema.pre('validate', function(next){
+TicketDetailsSchema.pre('save', function(next){
   // console.log(this)
   this.modifiedAt = Date.now()
   next()

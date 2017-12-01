@@ -1,7 +1,9 @@
 import Router from 'koa-router'
+import mongoose from 'mongoose'
 
 import { Ticket, Payment, TicketDetail, Person, Ride, Address /*,Bus*/ } from '../../models'
-import { createPerson, createAddress } from '../../utils'
+import { createPerson, createAddress, filterDoc } from '../../utils'
+import { isObject } from 'util';
 
 const ticket = new Router({ prefix : 'ticket' })
 
@@ -10,8 +12,11 @@ const getTicketData = async tckt => {
     const ride = tckt.ride ? await Ride.findById(tckt.ride) : 'none'
     const person = await Person.findById(tckt.person)
     const details = await TicketDetail.findById(tckt.details)
-    const pick = await (tckt.pickUpPlace ? Route.findById(tckt.pickUpPlace) : 'none')    
-    const drop = await (tckt.dropOffPlace ? Route.findById(ride.routeTo) : 'none')
+    const pick = await (tckt.willPick ? Address.findById(details.pickUpAddress) : 'none')
+    const drop = await (tckt.willDrop ? Address.findById(details.dropOffAddress) : 'none')
+
+    const pickAdd = pick !== 'none' ? { ...pick.toObject() } : pick
+    const dropAdd = drop !== 'none' ? { ...drop.toObject() } : drop
 
     const data = {
       willDrop : tckt.willDrop,
@@ -20,8 +25,8 @@ const getTicketData = async tckt => {
       status : tckt.status,
       from : tckt.from,
       to : tckt.to,
-      pickUpAddress : pick !== 'none' ? { ...pick } : pick,
-      dropOffAddress : drop !== 'none' ? { ...drop } : drop,
+      pickUpAddress : filterDoc(pickAdd),
+      dropOffAddress : filterDoc(dropAdd),
       time : details.time,
       date : details.date,
       person : {
@@ -40,12 +45,16 @@ const getTicketData = async tckt => {
   return null
 }
 
+// Middleware for webhook data
 const reformatTicket = (ctx, next) => {
   
   const { body } = ctx.request
 
+  // If its local, return. No need to reformat data structure
   if(body.isLocal) return next()
-  // console.log(body.extra_maletas, parseInt(body.extra_maletas))
+
+  // console.log(body)
+
   const newBody = {
     frm : body.desde,
     to : body.hacia,
@@ -59,7 +68,7 @@ const reformatTicket = (ctx, next) => {
     email : body.email,
     willPick : body.recoger === 'checked',
     willDrop : body.dejar === 'checked',
-    pickUpPlace : body.recoger === 'checked'
+    pickUpAddress : body.recoger === 'checked'
     ? {
       street : body.calle_origen,
       city : body.ciudad_origen,
@@ -67,7 +76,7 @@ const reformatTicket = (ctx, next) => {
       zipcode : body.zipcode_origen
     } 
     : null,
-    dropOffPlace : body.dejar === 'checked'
+    dropOffAddress : body.dejar === 'checked'
     ? {
       street : body.calle_destino,
       city : body.ciudad_destino,
@@ -75,21 +84,21 @@ const reformatTicket = (ctx, next) => {
       zipcode : body.zipcode_destino
     }
     : null,
-    totalAmount : parseInt(body.total_final),
+    totalAmount : parseFloat(body.total_final),
     cardBrand : body.card_brand.toUpperCase(),
     cardLastDigits : body.card_last_digits,
-    paymentType : 'CARD',
+    paymentType : body.type ? body.type : 'CARD',
     status : 'NEW',
-    fee : parseInt(body.precio_primera_ruta),
-    extraFee : parseInt(body.precio_segunda_ruta),
+    fee : parseFloat(body.precio_primera_ruta),
+    extraFee : parseFloat(body.precio_segunda_ruta),
   }
 
   ctx.request.body = newBody
-  // console.log(newBody)
+
   return next()
 }
 
-// //////////////////// TODO! <===== FIX THIS ONE!
+// Ticket details
 const saveTicket = async ({ data, person, pickUp, dropOff }) => {
   // console.log(data)
   const {
@@ -146,6 +155,7 @@ const saveTicket = async ({ data, person, pickUp, dropOff }) => {
   }
 }
 
+// Create Tickets
 const saveTickets = async data => {
   const { howMany } = data
 
@@ -229,7 +239,18 @@ ticket.get('/:id/payment', async ctx => {
       if(tckt) {
         const payment = await Payment.findById(tckt.payment)
         const { cardLastDigits, cardBrand, totalAmount, type } = payment
-        const data = { cardLastDigits, cardBrand, totalAmount, type }
+
+        const data = {
+          fee : tckt.fee,
+          extraFee : tckt.fee,
+          totalAmount, 
+          type
+        }
+
+        if(type === 'CARD')
+
+        data.cardBrand = cardBrand
+        data.cardLastDigits = cardLastDigits
 
         return ctx.body = { ok : true, data, message : '' }
       }
@@ -263,9 +284,53 @@ ticket.post('/insert', reformatTicket, async ctx => {
 })
 
 ticket.get('/all', async ctx => {
-  /*
-    Get all tickets that are not marked as USED or SCANNED (Check up with this in the models)
-  */
+  try {
+    return ctx.body = { ok : false, data : null, message : 'There are no ticket' }
+  } catch (e) {
+    return ctx.body = { ok : false, data : null, message : 'Error retrieving the tickets for this ride' }
+  }
+})
+
+// Get tickets by Date range (if d2 is not passed, all tickets by date d1)
+ticket.get('/date/:d1/:d2?', async ctx => {
+  let { d1, d2 } = ctx.params
+
+  // console.log('here')
+
+  let tickets = []
+
+  const date1 = parseInt(d1)
+
+  d2 = d2 ? d2 : new Date(parseInt(d1)).setDate(new Date(date1).getDate() + 1)
+
+  const date2 = parseInt(d2)
+  
+  // console.log(date1, date2)
+
+  try {
+    const details = await TicketDetail.aggregate([
+      { $match : { date : { $gte : new Date(date1), $lte : new Date(date2) }}},
+      { $sort : { time : 1, date : -1 }}
+    ])
+
+    // console.log(details.map( t => t._id))
+    // // return ctx.body = "ñe"
+
+    if(details.length)
+      tickets = await Promise.all(
+        details.map(det => Ticket.findOne({ details : det._id }))
+      )
+
+    if(tickets.length) {
+      const data = await Promise.all(tickets.map(getTicketData))
+
+      return ctx.body = { ok : true, data : data.filter(isObject), message : '' }
+    }
+
+    return ctx.body = { ok : false, data : null, message : 'There are no ticket for this ride' }
+  } catch (e) {
+    return ctx.body = { ok : false, data : null, message : 'Error retrieving the tickets for this ride' }
+  }
 })
 
 // Retrieve all tickets from ride
@@ -289,24 +354,27 @@ ticket.get('/all/:ride', async ctx => {
   }
 })
 
-// TODO : This one doesn't wait for response. Either create a log if
-// any error, or create a notifications center in case something happens
-// ticket.post('/webhook/insert', reformatTicket, async ctx => {
-//   const { body } = ctx.request
-//   const { howMany } = body
-//   const promises = []
+ticket.post('/assign-ride', async ctx => {
+  const { ticketId, rideId } = ctx.request.body
+  const tickts = JSON.parse(ticketId)
 
-//   try {
-//     for(let i = 0; i < howMany; i++) promises.push(saveTicket( body ))
-    
-//     const data = await Promise.all(promises)
+  try {
+    const rid = await Ride.findById(rideId)
 
-//     if(data) return ctx.body = { ok : true, data, message : '' }
+    if(!rid) return ctx.body = { ok : false, data : null, message : 'There is no ride assigned to this id.' }
 
-//     return ctx.body = { ok : false, data : null, message : 'Couldn\'t save the ticket. Contact your system administrator.' }
-//   } catch (e) {
-//     return ctx.body = { ok : false, data : null, message : 'Error trying to save your ticket.' }  
-//   }
-// })
+    const data = await Promise.all(
+      tickts.map( tcktId => (
+        Ticket.findByIdAndUpdate(tcktId, { ride : rid._id })
+      ))
+    )
+
+    if(data.length) return ctx.body = { ok : true, data : null, message : '' }
+
+    return ctx.body = { ok : false, data : null, message : 'There is no ticket with that id.' }
+  } catch (e) {
+    return ctx.body = { ok : false, data : null, message : 'Error retrieving assigning ride to ticket' }
+  }
+})
 
 export default ticket

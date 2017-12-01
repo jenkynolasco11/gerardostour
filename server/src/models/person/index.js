@@ -5,8 +5,8 @@ const PersonSchema = new Schema({
   lastname : { type : String, required : true },
   phoneNumber : { type : String, match : /^\d{10}$/, required : true, index : true, unique : true },
   email : { type : String, required : true, index : true, unique : true },
-  createdAt : { type : Date, default : Date.now() },
-  modifiedAt : { type : Date, default : Date.now() },
+  createdAt : { type : Date, default : Date.now },
+  modifiedAt : { type : Date, default : Date.now },
 })
 
 PersonSchema.pre('validate', function(next) {

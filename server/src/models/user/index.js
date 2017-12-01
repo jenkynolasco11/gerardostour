@@ -10,8 +10,8 @@ const UserSchema = new Schema({
     default : 'NONE',
     enum :  [ 'SUPERUSER', 'DRIVER', 'MANAGER', 'DISPATCHER' ],
   },
-  createdAt : { type : Date, default : Date.now() },
-  lastSession : { type : Date, required : true, default : Date.now() }
+  createdAt : { type : Date, default : Date.now },
+  lastSession : { type : Date, required : true, default : Date.now }
 })
 
 UserSchema.methods.generateHash = function(password){ 
