@@ -6,8 +6,8 @@ const ride = new Router({ prefix : 'ride' })
 
 const getRideData = async rid => {
   try {
-    const routeFrom = await Route.findById(rid.routeFrom)
-    const routeTo = await Route.findById(rid.routeTo)
+    // const routeFrom = await Route.findById(rid.routeFrom)
+    // const routeTo = await Route.findById(rid.routeTo)
     const bus = await Bus.findById(rid.bus)
     const details = await BusDetail.findOne({ bus : rid.bus })
     // const user = await User.findById(bus.user)
@@ -23,18 +23,8 @@ const getRideData = async rid => {
         luggage : bus.luggage,
         luggageAvailable : parseInt(bus.luggage) - parseInt(details.luggage)
       },
-      routeTo : {
-        street : routeTo.street,
-        city : routeTo.city,
-        state : routeTo.state,
-        zip : routeTo.zipcode
-      },
-      routeFrom : {
-        street : routeFrom.street,
-        city : routeFrom.city,
-        state : routeFrom.state,
-        zip : routeFrom.zipcode
-      },
+      routeTo : rid.routeTo,
+      routeFrom : rid.routeFrom,
       time : rid.time,
       date : rid.date
     }

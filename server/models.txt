@@ -105,8 +105,10 @@ fecha_creacion---------
 
 Extras!!! ===========================
 
- A los Driver hay que ponerle un numero, como son Identificados ellos
+ - A los Driver hay que ponerle un numero, como son Identificados ellos
  F15, F140, F10 etc...
  Un Alias <========= Maybe, to User in case is a Driver???
 
- Poner si pasajero es especial (para tener en cuenta)
+- Poner si pasajero es especial (para tener en cuenta)
+- Dispatcher debe asignar el autobus
+- Dispatcher puede modificar ticket
