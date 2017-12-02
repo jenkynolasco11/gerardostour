@@ -1,140 +1,38 @@
 import Router from 'koa-router'
 
-import { Ride, RideDetail, Ticket, Route, Bus, User, Person, BusDetail } from '../../models'
+import { Ride, RideDetail, Bus, } from '../../models'
+import { getRideData, saveRide, updateRide } from './ride.controller'
 
-const ride = new Router({ prefix : 'ride' })
-
-const getRideData = async id => {
-  try {
-    const rid = await Ride.findById(id)
-
-    let bus = null
-    let busDetails = null
-    let seatsAvailable = 0
-    let luggageAvailable = 0
-
-    const rideDetails = await RideDetail.findOne({ ride : rid._id })
-    
-    if(rid.bus) {
-      bus = await Bus.findById(rid.bus)
-      busDetails = await BusDetail.findOne({ bus : rid.bus })
-      
-      const seats = parseInt(busDetails.seats) - parseInt(rideDetails.seatsOccupied)
-      const luggage = parseInt(busDetails.luggage) - parseInt(rideDetails.luggage)
-      seatsAvailable =  seats < 0 ? 0 : seats
-      luggageAvailable = luggage < 0 ? 0 : luggage
-    }
-
-    // console.log(bus)
-
-    const data = {
-      bus : rid.bus ? {
-        alias : bus.alias,
-        name : bus.name,
-        status : bus.status,
-        seats : busDetails.seats,
-        luggage : busDetails.luggage,
-      } : null,
-      routeTo : rid.routeTo,
-      routeFrom : rid.routeFrom,
-      time : rideDetails.time,
-      date : rideDetails.date,
-      seatsAvailable,
-      luggageAvailable,
-    }
-
-    return data
-  } catch (e) {
-    console.log(e)
-  }
-
-  return null
-}
-
-const saveRide = async data => {
-  try {
-    const {
-      bus = null,
-      routeTo,
-      routeFrom,
-      status = 'PENDING',
-
-      // RIDE DETAILS
-      time,
-      date,
-    } = data
-
-    const rid = await new Ride({
-      bus : bus ? bus : null,
-      routeTo,
-      routeFrom,
-      status : status.toUpperCase()
-    }).save()
-
-    const details = await new RideDetail({
-      time,
-      date,
-      ride : rid._id
-    }).save()
-
-    return rid._id
-  } catch (e) {
-    console.log(e)
-  }
-
-  return null
-}
-
-const updateRide = async (id, body) => {
-  try {
-    console.log(body)
-    const {
-      routeTo,
-      routeFrom,
-      status,
-      time,
-      date
-    } = body
-
-    const bus = body.bus ? body.bus : null
-
-    // console.log(bus)
-
-    const rid = await Ride.findOneAndUpdate({ _id : id }, { bus, routeTo, routeFrom, status })
-
-    const details = await RideDetail.findOneAndUpdate({ ride : id }, { time, date })
-
-    return rid._id
-
-  } catch (e) {
-    console.log(e)
-  }
-  return null
-}
+const rideRouter = new Router({ prefix : 'ride' })
 
 // Retrieve all rides
-ride.get('/all', async ctx => {
+rideRouter.get('/all', async ctx => {
   const {
     status = [ 'FINISHED', 'ASSIGNED' ],
     limit = 10,
-    skip = 170
+    skip = 0,
+    unassigned = 'true'
   } = ctx.query
 
   const list = [].concat(status)
+  const conditions = { status : { $nin : list }}
+
+  if(unassigned && unassigned === 'true') conditions.bus = null
 
   try {
     const rides = await Ride
-                          .find({ status : { $nin : list }}, { id : 1 })
+                          .find(conditions)
+                          .sort({ createdAt : -1 })
                           .skip(skip)
                           .limit(limit)
                           .exec()
 
-    // console.log(rides)
-
     if(rides.length) {
       const data = await Promise.all(rides.map(getRideData))
 
-      if(data.length) return ctx.body = { ok : true, data : data.filter(Boolean), message : '' }
+      const count = await Ride.count({ status : { $nin : list }})
+
+      if(data.length) return ctx.body = { ok : true, data : { rides : data, count }, message : '' }
     }
 
     return ctx.body = { ok : false, data : null, message : 'No rides available' }
@@ -144,7 +42,7 @@ ride.get('/all', async ctx => {
 })
 
 // Saves a ride
-ride.post('/insert', async ctx => {
+rideRouter.post('/insert', async ctx => {
   const { body } = ctx.request
 
   try {
@@ -171,43 +69,9 @@ ride.post('/insert', async ctx => {
   }
 })
 
-ride.put('/:id/modify', async ctx => {
-  const { id } = ctx.params
-  const { body } = ctx.request
-
-  try {
-    const data = await updateRide(id, body)
-
-    if(data) return ctx.body = { ok : true, data, message : '' }
-
-    return ctx.body = { ok : false, data : null, message : 'There is no ride assigned to that id' }
-  } catch(e) {
-    return ctx.body = { ok : false, data : null, message : 'Error retrieving ride' }
-  }
-})
-
-// Update ride details 
-ride.put('/:id/update-details', async ctx => {
-  const { id } = ctx.params
-  const { seatsOccupied, luggage, time, date } = ctx.request
-
-  const dateX = new Date(date)
-  const timeX = parseInt(time)
-
-  try {
-    const details = await RideDetail.findOneAndUpdate({ ride : id }, { seatsOccupied, luggage, date : dateX, time : timeX })
-
-    if(details) return ctx.body = { ok : true, data : null, message : '' }
-  } catch(e) {
-    return ctx.body = { ok : false, data : null, message : 'Error updating ride' }
-  }
-
-  return ctx.body = { ok : false, data : null, message : 'There is no ride assigned to that id' }
-})
-
 // Retrieve rides on date and hour.
 // Note: If hour is -1, retrieve all rides on that date
-ride.get('/date/:date/hour/:hour', async ctx => {
+rideRouter.get('/date/:date/hour/:hour', async ctx => {
   const { date, hour } = ctx.params
 
   const time = parseInt(hour)
@@ -240,7 +104,7 @@ ride.get('/date/:date/hour/:hour', async ctx => {
 })
 
 // Assign bus to ride
-ride.put('/assign-bus', async ctx => {
+rideRouter.put('/assign-bus', async ctx => {
   const { bus, id } = ctx.request.body
 
   try {
@@ -260,17 +124,14 @@ ride.put('/assign-bus', async ctx => {
   return ctx.body = { ok : false, data : null, message : 'There are no rides for this date' }
 })
 
-// Retrieve Ride
-ride.get('/:id', async ctx => {
+rideRouter.put('/:id/modify', async ctx => {
   const { id } = ctx.params
-  try {
-    // const rid = await Ride.findById(id)
+  const { body } = ctx.request
 
-    // if(rid) {
-    const data = await getRideData(id)
+  try {
+    const data = await updateRide(id, body)
 
     if(data) return ctx.body = { ok : true, data, message : '' }
-    // }
 
     return ctx.body = { ok : false, data : null, message : 'There is no ride assigned to that id' }
   } catch(e) {
@@ -278,4 +139,41 @@ ride.get('/:id', async ctx => {
   }
 })
 
-export default ride
+// Update ride details
+rideRouter.put('/:id/update-details', async ctx => {
+  const { id } = ctx.params
+  const { seatsOccupied, luggage, time, date } = ctx.request
+
+  const dateX = new Date(date)
+  const timeX = parseInt(time)
+
+  try {
+    const details = await RideDetail.findOneAndUpdate({ ride : id }, { seatsOccupied, luggage, date : dateX, time : timeX })
+
+    if(details) return ctx.body = { ok : true, data : null, message : '' }
+  } catch(e) {
+    return ctx.body = { ok : false, data : null, message : 'Error updating ride' }
+  }
+
+  return ctx.body = { ok : false, data : null, message : 'There is no ride assigned to that id' }
+})
+
+// Retrieve Ride
+rideRouter.get('/:id', async ctx => {
+  const { id } = ctx.params
+  try {
+    const rid = await Ride.findById(id)
+
+    if(rid) {
+      const data = await getRideData(rid)
+
+      if(data) return ctx.body = { ok : true, data, message : '' }
+    }
+
+    return ctx.body = { ok : false, data : null, message : 'There is no ride assigned to that id' }
+  } catch(e) {
+    return ctx.body = { ok : false, data : null, message : 'Error retrieving ride' }
+  }
+})
+
+export default rideRouter

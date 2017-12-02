@@ -30,6 +30,7 @@ mongoose.connect(config.DBURI, { useMongoClient : true }, async () => {
   require('./address')
   require('./bus')
   require('./financial')
+  require('./meta')
 
   const addresses = require('./mockupData-streets').default
   const users = require('./mockupData-users').default
@@ -46,17 +47,21 @@ mongoose.connect(config.DBURI, { useMongoClient : true }, async () => {
   const BusDetail = mongoose.model('busDetail')
   const Payment = mongoose.model('payment')
   const RideDetail = mongoose.model('rideDetail')
+  const Meta = mongoose.model('meta')
   
   const genRand = (limit, x = 0) => Math.floor(Math.random() * limit) + x
   const genRandDate = (start, end, startHour, endHour) => {
     const date = new Date(+start + Math.random() * (end - start))
-    const hour = startHour + Math.random() * (endHour - startHour) | 0
-    date.setHours(hour)
+    // const hour = startHour + Math.random() * (endHour - startHour) | 0
+    // date.setHours(hour)
+    date.setHours(0,0,0,0)
     return date
   }
   
   const limit = (lim = 100) => genRand(lim, 1)
-  const ticketLimit = genRand(300,200)
+  const getAnyDate = () => genRandDate(new Date(), new Date('2020-10-10'), 0, 23)
+
+  const ticketLimit = genRand(900,600)
   // const firstNames = [ 'jenky', 'julian', 'richard', 'diane', 'masmfas', 'bastion', 'august', 'ceasar', 'carlos' ]
   // const lastNames = [ 'nolasco', 'matias', 'rodriguez', 'figueroa', 'masmfas', 'bastion', 'august', 'ceasar', 'carlos' ]
   const ticktsStatus = [ 'USED', 'REDEEMABLE', 'NULL', 'NEW' ]
@@ -66,6 +71,7 @@ mongoose.connect(config.DBURI, { useMongoClient : true }, async () => {
   const cardAffiliates = [ 'VISA', 'MASTERCARD', 'AMERICAN EXPRESS', 'DISCOVERY' ]
   const payType = [ 'CASH', 'CARD' ]
   const routes = [ 'NY', 'PA' ]
+  const rideStatus = [ 'FINISHED', 'PENDING', 'ASSIGNED', 'ON-THE-WAY' ]
 
   const usersLimit = 50
   const addLen = addresses.length
@@ -95,7 +101,7 @@ mongoose.connect(config.DBURI, { useMongoClient : true }, async () => {
   
       return person._id
     } catch (e) {
-      console.log('shit happened at Person')
+      // console.log('shit happened at Person')
       // console.log(e)
       // throw new Error(`Person =====> ${ JSON.stringify(e) }`)
     }
@@ -114,7 +120,7 @@ mongoose.connect(config.DBURI, { useMongoClient : true }, async () => {
   
       return await usl.save()
     } catch (e) {
-      console.log('shit happened at User')
+      // console.log('shit happened at User')
       // console.log(e)
       // process.exit()
       // return new Error(`User =====> ${ JSON.stringify(e) }`)
@@ -128,13 +134,13 @@ mongoose.connect(config.DBURI, { useMongoClient : true }, async () => {
         user,
         name,
         status,
-        seats,
-        luggage,
         alias : name
       }).save()
 
       const busDetail = await new BusDetail({
-        bus : bus._id
+        bus : bus._id,
+        seats,
+        luggage,
       }).save()
   
       return bus._id
@@ -164,14 +170,21 @@ mongoose.connect(config.DBURI, { useMongoClient : true }, async () => {
     return null
   }
 
-  const createRide = async (bus, to, frm) => {
+  const createRide = async (bus, to, frm, status, time, date, seatsOccupied, luggage) => {
     try {
       const ride = await new Ride({
-        bus,
+        bus : genRand(2) ? bus : null,
         routeTo : to,
         routeFrom : frm,
-        // time,
-        // date
+        status : status ? status : 'PENDING'
+      }).save()
+
+      const details = await new RideDetail({
+        ride : ride._id,
+        time,
+        date,
+        seatsOccupied,
+        luggage
       }).save()
 
       return ride._id
@@ -200,12 +213,12 @@ mongoose.connect(config.DBURI, { useMongoClient : true }, async () => {
 
     return null
   }
-
+/*
   const createTicketDetail = async (pick, drop, date, time, fee, extraFee ) => {
     try {
       const tcktDtl = await new TicketDetail({
-        pickUpPlace : pick,
-        dropOffPlace : drop,
+        pickUpAddress : pick,
+        dropOffAddress : drop,
         redeemedCount : 0,
         date,
         time,
@@ -224,21 +237,55 @@ mongoose.connect(config.DBURI, { useMongoClient : true }, async () => {
 
     return null
   }
+*/
+  const createTicket = async (ticketData) => {
+    const {
+      id,
+      to,
+      frm,
+      person,
+      ride,
+      payment,
+      // details,
+      status,
+      luggage,
+      // leave /**/,
+      pick,
+      drop,
+      date,
+      time,
+      fee,
+      extraFee
+    } = ticketData
 
-  const createTicket = async (to, frm, person, ride, payment, details, status, luggage, pick, leave) => {
+    // console.log(ride)
+
     try {
-      const ticket = await new Ticket({
-        to,
-        from : frm,
-        person,
-        ride,
-        details,
-        payment,
-        status,
-        luggageCount : luggage,
-        willPick : pick,
-        willDrop : leave
+      const details = await new TicketDetail({
+        pickUpAddress : pick,
+        dropOffAddress : drop,
+        redeemedCount : 0,
+        date,
+        time,
+        fee,
+        extraFee
       }).save()
+
+      const ticket = await new Ticket({
+        id,
+        person,
+        ride : ride ? ride : null,
+        payment,
+        details : details._id,
+        status,
+        luggage,
+        willPick : Boolean(pick),
+        willDrop : Boolean(drop),
+        from : frm,
+        to,
+      }).save()
+
+      return ticket._id
     } catch (e) {
       console.log(e)
       // process.exit()
@@ -287,18 +334,34 @@ mongoose.connect(config.DBURI, { useMongoClient : true }, async () => {
   }
 
   const createUsers = async () => {
-    // const promises = []
+    const promises = []
+    let driv = 7
 
     try {
       for(let i = 0; i < usersLimit; i++) {
         const rnd = genRand(positions.length)
+        if(driv) --driv
         const pos = positions[ rnd ]
 
-        const [ person ] = await Person.aggregate([{ $sample : { size : 1 }}])
-        const user = await createUser(person._id, person.firstname, 'lllll', pos)
+        promises.push(Person
+          .aggregate([{ $sample : { size : 1 }}])
+          .then(([ person ]) => createUser(
+              person._id,
+              person.firstname,
+              'lllll',
+              driv ? 'DRIVER' : pos
+            )
+          )
+        )
       }
 
+      const aggregate = await Promise.all(promises)
+
+      await Promise.all(aggregate)
+
       console.log('Users created!!')
+      // process.exit()
+
     } catch (e) {
       throw new Error(`Create User =====> ${ JSON.stringify(e) }`)
     }
@@ -311,7 +374,7 @@ mongoose.connect(config.DBURI, { useMongoClient : true }, async () => {
     try {
       for(let i = 0; i < ext; i++) {
         const { street, city, state, zipcode } = addresses[ genRand(addLen) ]
-    
+
         promises.push(createAddress(state, city, street, zipcode))
       }
 
@@ -329,33 +392,37 @@ mongoose.connect(config.DBURI, { useMongoClient : true }, async () => {
 
     try {
       for(let i = 0; i < ext; i++) {
-        // const prmss = []
-        const [ bus ] = await Bus.aggregate([{ $sample : { size : 1 }}])
         const to = routes[ genRand(routes.length) ]
         const frm = routes[ genRand(routes.length) ]
+        const status = rideStatus[ genRand(rideStatus.length) ]
+        const time = genRand(24)
+        const seats = genRand(40)
+        const luggage = genRand(50)
+        const date = getAnyDate()
 
-        promises.push(createRide(
-          bus._id,
-          to,
-          frm
-        ))
+        promises.push(Bus
+          .aggregate([{ $sample : { size : 1 }}])
+          .then(([ bus ]) => createRide(
+              bus._id,
+              to,
+              frm,
+              status,
+              time,
+              date,
+              seats,
+              luggage
+            ))
+          )
       }
 
-      const rides = await Promise.all(promises)
-      const rids = rides.map(rid => new RideDetail({ ride : rid }).save())
+      const aggregate = await Promise.all(promises)
 
-      const details = await Promise.all(rids)
-
-      // console.log(details)
-
-      // console.log(details)
+      await Promise.all(aggregate)
 
       console.log('Rides created!!!')
     } catch (e) {
       console.log(e)
       process.exit()
-
-      // throw new Error(`Create Rides =====> ${ JSON.stringify(e) }`)
     }
   }
 
@@ -385,82 +452,119 @@ mongoose.connect(config.DBURI, { useMongoClient : true }, async () => {
   }
 
   const createTickets = async () => {
+    const promises = []
     try {
       for(let i = 0; i < ticketLimit; i++) {
-        // /*
-        const [ person ] = await Person.aggregate([{ $sample : { size : 1 }}])
-        const [ ride ] = await Ride.aggregate([{ $sample : { size : 1 }}])
+        promises.push(
+          Person
+            .aggregate([{ $sample : { size : 1 }}])
+            .then(([ person ]) =>
+              Promise.all([
+                person,
+                Ride.aggregate([{ $sample : { size : 1 }}])
+              ])
+            )
+            // .then(([ person, rideProm ]) =>
+            //   Promise.all([
+            //     person,
+            //     rideProm[ 0 ],
+            //     Address.aggregate([{ $sample : { size : 1 }}])
+            //   ])
+            // )
+            .then(([ person, rid/*, addProm*/ ]) => {
+              // const [ address ] = addProm
+              const [ ride ] = rid
+              const type = payType[ genRand(payType.length) ]
+              
+              const isCard = type === 'CARD'
+              const cardBrand
+                = isCard
+                ? getRandCard()
+                : ''
+              const cardLastDigits
+                = isCard
+                ? `${ genRand(10000, 0) }`
+                : ''
+      
+              // const totalAmount = genRand(70,40)
+              const fee = genRand(100,20)
+              const extraFee = genRand(40,10)
+              const totalAmount = fee + extraFee
+      
+              const payment = createPayment(
+                type,
+                totalAmount,
+                cardBrand,
+                cardLastDigits
+              )
 
-        const willPick = Boolean(genRand(2))
-        const willLeave = Boolean(genRand(2))
+              // console.log(payment)
 
-        const type = payType[ genRand(payType.length) ]
+              return Promise.all([ person, ride/*, address*/, [ fee, extraFee ], payment ])
+            })
+            .then(async ([ person, ride/*, address*/, payDetails, payment ]) => {
+              const [ fee, extraFee ] = payDetails
 
-        const isCard = type === 'CARD'
-        const cardBrand 
-          = isCard
-          ? getRandCard()
-          : ''
-        const cardLastDigits
-          = isCard 
-          ? `${ genRand(10000, 0) }`
-          : ''
+              const date = getAnyDate()
+              const time = genRand(24, 0)
 
-        // const totalAmount = genRand(70,40)
-        const fee = genRand(100,20)
-        const extraFee = genRand(40,10)
-        const totalAmount = fee + extraFee
+              const luggage = genRand(5)
+              const status = ticktsStatus[ genRand(ticktsStatus.length) ]
 
-        const payment = await createPayment(
-          type,
-          totalAmount,
-          cardBrand,
-          cardLastDigits
-        )
+              const assignedRide = genRand(2)
+              const willPick = genRand(2)
+              const willDrop = genRand(2)
 
-        const date = genRandDate(new Date(2017, 11, 1), new Date(2018, 12, 1), 0, 23)
-        const hour = genRand(24,0)
+              // If more routes, change this logic...
+              const toState = routes[ Number(!assignedRide) ]
+              const frmState = routes[ Number(assignedRide) ]
 
-        const [ frm, to ] = await Address.aggregate([{ $sample : { size : 2 }}])
+              const pick = await (
+                          willPick
+                          ? Address.aggregate([{ $sample : { size : 1}}])
+                          : null
+                        )
+              const drop = await (
+                          willDrop
+                          ? Address.aggregate([{ $sample : { size : 1}}])
+                          : null
+                        )
 
-        // console.log(frm, to)
-        // console.log(adrss)
-        // process.exit()
 
-        const details = await createTicketDetail(
-          frm._id,
-          to._id,
-          date,
-          hour,
-          fee,
-          extraFee
-        )
-    // )
-        if(!payment || !details) throw new Error('No payment/details!!! WTF IS HAPPENING!!!')
+              const ticket = await createTicket({
+                id : i + 1,
+                to : assignedRide ? ride.routeTo : toState,
+                frm : assignedRide ? ride.routeFrom : frmState,
+                ride : assignedRide ? ride._id : null,
+                person : person._id,
+                payment,
+                status,
+                luggage,
+                pick : willPick ? pick[ 0 ]._id : null,
+                drop : willDrop ? drop[ 0 ]._id : null,
+                date,
+                time,
+                fee,
+                extraFee
+              })
 
-        const luggage = genRand(5)
-        const status = ticktsStatus[ genRand(ticktsStatus.length) ]
-
-        const x = genRand(2)
-
-        const toState = routes[ Number(!x) ]
-        const frmState = routes[ Number(x) ]
-
-        const ticket = await createTicket(
-          toState,
-          frmState,
-          person._id,
-          genRand(2) ? ride._id : null,
-          payment,
-          details,
-          status,
-          luggage,
-          willPick,
-          willLeave
+              return ticket
+            })
         )
       }
 
+      const p = await Promise.all(promises)
+      const r = await Promise.all(p)
+      const a = await Promise.all(r)
+      const py = await Promise.all(a)
+
+      // console.log(py)
+      const meta = await new Meta({ lastTicketId : py.length }).save()
+      
       console.log('Tickets created!!')
+
+      // process.exit()
+
     } catch (e) {
       console.log(e)
       console.log('shit happened')
@@ -477,12 +581,14 @@ mongoose.connect(config.DBURI, { useMongoClient : true }, async () => {
       const a = await Person.remove({})//, () => {})
       const b = await User.remove({})//, () => {})
       const c = await Ride.remove({})//, () => {})
-      const d = await Ticket.remove({})//, () => {})
-      const e = await TicketDetail.remove({})
-      const f = await Payment.remove({})
-      const g = await Address.remove({})
-      const h = await Bus.remove({})
-      const i = await BusDetail.remove({})
+      const d = await RideDetail.remove({})
+      const e = await Ticket.remove({})//, () => {})
+      const f = await TicketDetail.remove({})
+      const g = await Payment.remove({})
+      const h = await Address.remove({})
+      const i = await Bus.remove({})
+      const j = await BusDetail.remove({})
+      const k = await Meta.remove({})
 
       // await Person.collection.dropIndexes()
       // await User.collection.dropIndexes()

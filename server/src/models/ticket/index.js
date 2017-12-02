@@ -3,15 +3,16 @@ import mongoose, { Schema } from 'mongoose'
 // import bcrypt from 'bcrypt-nodejs'
 
 const routes = [ 'NY', 'PA' ]
-const status = [ 'USED', 'REDEEMABLE', 'NULL', 'NEW' ]
+const status = [ 'USED', 'REDEEMABLE', 'NULL', 'NEW', 'DELETED' ]
 
 const TicketSchema = new Schema({
+  id : { type : Number, required : true, unique : true, index : true },
   person : { type : Schema.Types.ObjectId, ref : 'person', required : true, index : true }, // Doesnt need index
   ride : { type : Schema.Types.ObjectId, ref : 'ride', index : true, default : null }, // Should also be unique, Doesnt need index
   payment : { type : Schema.Types.ObjectId, ref : 'payment', required : true, index : true }, // Should also be unique, Doesnt need index
   details : { type : Schema.Types.ObjectId, ref : 'ticketDetail', required : true, index : true }, // Should also be unique, Doesnt need index
   status : { type : String, index : true, enum : status },
-  luggageCount : { type : Number, default : 0 },
+  luggage : { type : Number, default : 0 },
   willPick : { type : Boolean, default : false, index : true },
   willDrop : { type : Boolean, default : false, index : true },
   //////****//

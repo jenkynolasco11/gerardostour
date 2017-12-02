@@ -10,9 +10,9 @@ const PersonSchema = new Schema({
 })
 
 PersonSchema.pre('validate', function(next) {
-  let { firstname, lastname, phoneNumber } = this
-  const first = firstname.split(' ')[0]
-  const last = lastname.split(' ')[0]
+  const { firstname, lastname, phoneNumber } = this
+  const [ first ] = firstname.split(' ')
+  const [ last ] = lastname.split(' ')
   
   // Validate Phone Number
   // console.log(typeof this.phoneNumber)

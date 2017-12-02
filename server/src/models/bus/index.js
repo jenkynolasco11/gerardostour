@@ -6,7 +6,7 @@ const BusSchema = new Schema({
   name : String,
   status : {
     type : String,
-    enum : [ 'STANDBY', 'OK', 'DAMAGED', '' ]
+    enum : [ 'STANDBY', 'OK', 'DAMAGED', 'RETIRED', '' ]
   },
   // seats : Number,
   // luggage : Number,
