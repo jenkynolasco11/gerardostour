@@ -3,11 +3,13 @@ import mongoose, { Schema } from 'mongoose'
 // import bcrypt from 'bcrypt-nodejs'
 
 const routes = [ 'NY', 'PA' ]
+const status = [ 'FINISHED', 'PENDING', 'ASSIGNED', 'ON-THE-WAY' ]
 
 const RideSchema = new Schema({
   bus : { type : Schema.Types.ObjectId, ref : 'bus', index : true },
   routeTo : { type : String, enum : routes, required : true },
   routeFrom : { type : String, enum : routes, required : true },
+  status : { type : String, enum : status, index : true, default : 'PENDING' },
   createdAt : { type : Date, default : Date.now },
   modifiedAt : { type : Date, default : Date.now },
 })
@@ -16,6 +18,8 @@ const RideDetailSchema = new Schema({
   ride : { type : Schema.Types.ObjectId, ref : 'ride', index : true },
   time : { type : Number, default : -1 },
   date : { type : Date },
+  seatsOccupied : { type : Number, default : 0 },
+  luggage : { type : Number, default : 0 },
   createdAt : { type : Date, default : Date.now },
   modifiedAt : { type : Date, default : Date.now }
 })

@@ -8,8 +8,8 @@ const BusSchema = new Schema({
     type : String,
     enum : [ 'STANDBY', 'OK', 'DAMAGED', '' ]
   },
-  seats : Number,
-  luggage : Number,
+  // seats : Number,
+  // luggage : Number,
   createdAt : { type : Date, default : Date.now },
   modifiedAt : { type : Date, default : Date.now }
 })
@@ -17,10 +17,16 @@ const BusSchema = new Schema({
 const BusDetailSchema = new Schema({
   bus : { type : Schema.Types.ObjectId, ref : 'bus', index : true, unique : true },
   seats : { type : Number, default : 0 },
-  luggage : { type : Number, default : 0 }
+  luggage : { type : Number, default : 0 },
+  modifiedAt : { type : Date, default : Date.now }
 })
 
-BusSchema.pre('validate', function(next) {
+BusSchema.pre('save', function(next) {
+  this.modifiedAt = Date.now()
+  next()
+})
+
+BusDetailSchema.pre('save', function(next) {
   this.modifiedAt = Date.now()
   next()
 })

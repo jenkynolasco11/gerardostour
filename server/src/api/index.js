@@ -5,17 +5,13 @@ import user from './user'
 import ride from './ride'
 import route from './route'
 import ticket from './ticket'
-import webhook from './webhook'
-
-// import error404 from './404'
 
 const api = new Router({ prefix : 'api/v1' })
 const rootRoute = new Router({ prefix : '' })
 
 const apiRoutes = [
-  // webhook,
-  route,
-  auth,
+  // route,
+  // auth,
   ticket,
   // user,
   ride,
