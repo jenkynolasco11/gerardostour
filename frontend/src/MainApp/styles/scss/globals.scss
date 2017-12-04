@@ -3,10 +3,9 @@
 @import 'mixins/all.scss';
 
 body {
-  // overflow : hidden;
-
   #root {
-    @include alignCenter();
+    background : var(--palette-blue-500);
+    display : flex;
     @include hw();
   }
 }

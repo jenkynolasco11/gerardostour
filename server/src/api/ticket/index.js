@@ -65,7 +65,8 @@ ticketRouter.get('/all', async ctx => {
     status = [ 'NULL', 'USED' ],
     limit = 10,
     skip = 0,
-    unassigned = true
+    unassigned = true,
+    sort = 'date -1'
   } = ctx.query
 
   const list = [].concat(status)
@@ -73,21 +74,27 @@ ticketRouter.get('/all', async ctx => {
 
   if(unassigned) conditions.ride = null
 
+  const [ srt, asc ] = sort.split(' ')
+  const sortCondition = { [ srt ] : Number(asc) }
+
+  if(srt === 'date') sortCondition.time = 1
+
   try {
     const tickets = await Ticket
                           .find(conditions)
-                          .sort({ id : -1 })
-                          .skip(skip)
-                          .limit(limit)
+                          .skip(Number(skip))
+                          .limit(Number(limit))
+                          .sort(sortCondition)
                           .exec()
 
     if(tickets.length) {
       const data = await Promise.all(tickets.map(getTicketData))
 
-      const count = await Ticket.count({ status : { $nin : list }})
+      const count = await Ticket.count(conditions)
 
-      return ctx.body = { ok : true, data : { tickets : data, count }, message : '' }
+      if(data.length) return ctx.body = { ok : true, data : { tickets : data, count }, message : '' }
     }
+
     return ctx.body = { ok : false, data : null, message : 'There are no tickets.' }
   } catch (e) {
     console.log(e)

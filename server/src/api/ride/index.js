@@ -11,32 +11,41 @@ rideRouter.get('/all', async ctx => {
     status = [ 'FINISHED', 'ASSIGNED' ],
     limit = 10,
     skip = 0,
-    unassigned = 'true'
+    unassigned = 'true',
+    sort = 'date -1'
   } = ctx.query
 
   const list = [].concat(status)
   const conditions = { status : { $nin : list }}
-
+  
   if(unassigned && unassigned === 'true') conditions.bus = null
+
+  const [ srt, asc ] = sort.split(' ')
+  const sortCondition = { [ srt ] : Number(asc) }
+
+  if(srt === 'date') sortCondition.time = 1
+
+  // console.log(sortCondition)
 
   try {
     const rides = await Ride
                           .find(conditions)
-                          .sort({ createdAt : -1 })
-                          .skip(skip)
-                          .limit(limit)
+                          .skip(Number(skip))
+                          .limit(Number(limit))
+                          .sort(sortCondition)
                           .exec()
 
     if(rides.length) {
       const data = await Promise.all(rides.map(getRideData))
 
-      const count = await Ride.count({ status : { $nin : list }})
+      const count = await Ride.count(conditions)
 
       if(data.length) return ctx.body = { ok : true, data : { rides : data, count }, message : '' }
     }
 
     return ctx.body = { ok : false, data : null, message : 'No rides available' }
   } catch (e) {
+    console.log(e)
     return ctx.body = { ok : false, data : null, message : 'Error retrieving rides' }
   }
 })
@@ -87,10 +96,10 @@ rideRouter.get('/date/:date/hour/:hour', async ctx => {
   if(time >= 0 && time < 24) conditions.time = time
 
   try {
-    const details = await RideDetail.find(conditions)
+    const rides = await Ride.find(conditions)
     
-    if(details.length) {
-      const data = await Promise.all(details.map(detail => getRideData(detail.ride)))
+    if(rides.length) {
+      const data = await Promise.all(rides.map(getRideData))
 
       return ctx.body = { ok : true, data : data.filter(Boolean), message : '' }
     }

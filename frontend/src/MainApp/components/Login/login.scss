@@ -2,17 +2,23 @@
 @import '~/react-toolbox/lib/colors.css';
 
 body {
-  overflow : hidden;
-  background : var(--palette-blue-500);
+  // overflow : hidden;
+  // background : var(--palette-blue-500);
 
   .login {
     padding : 30px;
     width : $loginWidth;
-    height : $loginHeight * 1.5;
+    height : $loginHeight * 1.3;
     animation : appear .5s ease-out;
 
     .actions {
+      flex : 1;
+      @include alignCenter();
       margin-top : 30px;
+
+      .login-button {
+        background : var(--palette-indigo-50);
+      }
     }
   }
 }

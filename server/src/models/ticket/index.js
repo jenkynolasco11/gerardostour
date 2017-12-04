@@ -21,6 +21,8 @@ const TicketSchema = new Schema({
   //////////
   createdAt : { type : Date, default : Date.now },
   modifiedAt : { type : Date, default : Date.now },
+  time : { type : Number, required : true, index : true },
+  date : { type : Date, required : true, index : true },
 })
 
 const TicketDetailsSchema = new Schema({
@@ -29,8 +31,6 @@ const TicketDetailsSchema = new Schema({
   redeemedCount : { Type : Number, default : 0 },
   fee : { type : Number, default : 0 },
   extraFee : { type : Number, default : 0 },
-  time : { type : Number, required : true, index : true },
-  date : { type : Date, required : true, index : true },
   createdAt : { type : Date, default : Date.now },
   modifiedAt : { type : Date, default : Date.now },
 })

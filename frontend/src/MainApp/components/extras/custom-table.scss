@@ -1,0 +1,59 @@
+@import '../../styles/scss/globals.scss';
+
+.table-content {
+  padding-bottom : 40px;
+
+  .table-pagination {
+    border-radius : 0 0 2px 2px;
+    background : white;
+    height : 46px;
+
+    // position : absolute;
+    @include alignCenter();
+    
+
+    ul {
+      display : flex;
+      
+      li {
+        &.table-pagination-page, &.previous, &.next {
+          cursor : pointer;
+          margin : 0 5px;
+          @include alignCenter();
+        }
+        
+        &.table-pagination-page {
+          height : 30px;
+          width : 30px;
+
+          a {
+            color : red;
+          }
+
+          &.selected {
+            background : rgb(209, 209, 209);
+          }
+        }
+
+        &.previous {
+          a {
+
+          }
+        }
+
+        &.next {
+          a {
+
+          }
+        }
+
+        &.break {
+          align-self : flex-end;
+          color : red;
+          margin-bottom : 5px;
+        }
+
+      }
+    }
+  }
+}

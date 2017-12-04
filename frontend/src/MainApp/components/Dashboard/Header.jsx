@@ -9,7 +9,7 @@ import AppBar from 'react-toolbox/lib/app_bar/AppBar'
 // import Link from 'react-toolbox/lib/link/Link'
 // import Ripple from 'react-toolbox/lib/ripple/Ripple'
 
-import { toggleDrawer, logUserOut } from '../../store-redux/actions'
+import { toggleDrawer/*, logUserOut*/ } from '../../store-redux/actions'
 
 // const LogoutButton = props => (
 //   <Button
@@ -37,9 +37,12 @@ class NavBar extends Component{
     
   return (
       <AppBar
+        // style={{ "z-index" : 1 }}
         title="Dashboard"
         onLeftIconClick={ onMenuClick }
         leftIcon={ <MdMenu /> }
+        // fixed={ true }
+        scrollHide={ true }
         // rightIcon={ <RTLogout /> }
       >
       {/*

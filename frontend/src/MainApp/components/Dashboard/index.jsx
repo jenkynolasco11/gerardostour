@@ -1,5 +1,4 @@
 import React, { Component } from 'react'
-import { BrowserRouter as Router } from 'react-router-dom'
 
 import Layout from 'react-toolbox/lib/layout/Layout'
 
@@ -11,10 +10,6 @@ import Body from './Body'
 import './style.scss'
 
 class Dashboard extends Component{
-  constructor(props) {
-    super(props)
-  }
-
   render() {
     return (
       <Layout className="dashboard">

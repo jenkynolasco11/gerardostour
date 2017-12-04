@@ -1,9 +1,7 @@
 @import '../../styles/scss/globals.scss';
 
 .dashboard {
-  @include hw();
+  overflow-y : auto;
 
-  // .logout-button {
-  //   margin-right : 40px;
-  // }
+  @include hw();
 }

@@ -1,0 +1,133 @@
+{
+  "ok": true,
+  "data": {
+    "rides": [{
+      "id": "5a232a2c4b84f83104f0f1b9",
+      "bus": null,
+      "status": "ON-THE-WAY",
+      "routeTo": "PA",
+      "routeFrom": "PA",
+      "time": 22,
+      "date": "2019-10-28T04:00:00.000Z",
+      "seatsAvailable": 0,
+      "luggageAvailable": 0
+    }, {
+      "id": "5a232a2c4b84f83104f0f1a8",
+      "bus": {
+        "alias": "Blanquita",
+        "name": "Blanquita",
+        "seats": 28,
+        "luggage": 46
+      },
+      "status": "PENDING",
+      "routeTo": "PA",
+      "routeFrom": "PA",
+      "time": 5,
+      "date": "2018-05-10T04:00:00.000Z",
+      "seatsAvailable": 0,
+      "luggageAvailable": 29
+    }, {
+      "id": "5a232a2c4b84f83104f0f1a5",
+      "bus": {
+        "alias": "Maria la del Barrio",
+        "name": "Maria la del Barrio",
+        "seats": 43,
+        "luggage": 34
+      },
+      "status": "PENDING",
+      "routeTo": "NY",
+      "routeFrom": "PA",
+      "time": 7,
+      "date": "2019-07-26T04:00:00.000Z",
+      "seatsAvailable": 33,
+      "luggageAvailable": 16
+    }, {
+      "id": "5a232a2c4b84f83104f0f1a4",
+      "bus": {
+        "alias": "Rocio",
+        "name": "Rocio",
+        "seats": 31,
+        "luggage": 44
+      },
+      "status": "PENDING",
+      "routeTo": "NY",
+      "routeFrom": "NY",
+      "time": 19,
+      "date": "2020-04-25T04:00:00.000Z",
+      "seatsAvailable": 16,
+      "luggageAvailable": 35
+    }, {
+      "id": "5a232a2c4b84f83104f0f19d",
+      "bus": null,
+      "status": "PENDING",
+      "routeTo": "NY",
+      "routeFrom": "NY",
+      "time": 11,
+      "date": "2020-09-07T04:00:00.000Z",
+      "seatsAvailable": 0,
+      "luggageAvailable": 0
+    }, {
+      "id": "5a232a2c4b84f83104f0f19c",
+      "bus": null,
+      "status": "ON-THE-WAY",
+      "routeTo": "PA",
+      "routeFrom": "NY",
+      "time": 14,
+      "date": "2018-08-26T04:00:00.000Z",
+      "seatsAvailable": 0,
+      "luggageAvailable": 0
+    }, {
+      "id": "5a232a2c4b84f83104f0f19f",
+      "bus": null,
+      "status": "ON-THE-WAY",
+      "routeTo": "NY",
+      "routeFrom": "NY",
+      "time": 1,
+      "date": "2018-08-07T04:00:00.000Z",
+      "seatsAvailable": 0,
+      "luggageAvailable": 0
+    }, {
+      "id": "5a232a2c4b84f83104f0f1a3",
+      "bus": {
+        "alias": "Rocio",
+        "name": "Rocio",
+        "seats": 31,
+        "luggage": 44
+      },
+      "status": "ON-THE-WAY",
+      "routeTo": "NY",
+      "routeFrom": "PA",
+      "time": 2,
+      "date": "2020-05-07T04:00:00.000Z",
+      "seatsAvailable": 1,
+      "luggageAvailable": 41
+    }, {
+      "id": "5a232a2c4b84f83104f0f19b",
+      "bus": {
+        "alias": "Calle 14",
+        "name": "Calle 14",
+        "seats": 44,
+        "luggage": 49
+      },
+      "status": "PENDING",
+      "routeTo": "PA",
+      "routeFrom": "NY",
+      "time": 13,
+      "date": "2020-01-31T05:00:00.000Z",
+      "seatsAvailable": 34,
+      "luggageAvailable": 47
+    }, {
+      "id": "5a232a2c4b84f83104f0f18b",
+      "bus": null,
+      "status": "ON-THE-WAY",
+      "routeTo": "PA",
+      "routeFrom": "PA",
+      "time": 22,
+      "date": "2018-04-06T04:00:00.000Z",
+      "seatsAvailable": 0,
+      "luggageAvailable": 0
+    }],
+    "count": 57
+  },
+  "message": ""
+}

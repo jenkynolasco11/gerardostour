@@ -1,6 +1,6 @@
 import axios from 'axios'
 
-import { loginSuccess, loginFailed, showError, fetchingStatus } from './app'
+import { loginSuccess, loginFailed, showError } from './app'
 
 // axios.defaults.headers.common['Content-Type'] = 'application/x-www-form-urlencoded, application/json' 
 // axios.defaults.headers.common.crossDomain = true 

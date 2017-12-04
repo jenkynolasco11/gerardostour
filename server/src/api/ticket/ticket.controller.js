@@ -1,5 +1,5 @@
 import { Ticket, Payment, TicketDetail, Person, Meta, Address /*,Bus*/ } from '../../models'
-import { createPerson, createAddress, filterDoc } from '../../utils'
+import { createPerson, createAddress, filterDoc, formatDate, formatHour, formatPhone } from '../../utils'
 
 // ///////////////// Helper functions
 export const getTicketData = async tckt => {
@@ -31,13 +31,13 @@ export const getTicketData = async tckt => {
       to : tckt.to,
       pickUpAddress : filterDoc(pickAdd),
       dropOffAddress : filterDoc(dropAdd),
-      time : details.time,
-      date : details.date,
+      time : formatHour(tckt.time),
+      date : formatDate(tckt.date),
       person : {
         firstname : person.firstname,
         lastname : person.lastname,
         email : person.email,
-        phoneNumber : person.phoneNumber
+        phoneNumber : formatPhone(person.phoneNumber)
       }
     }
 
@@ -111,12 +111,12 @@ export const saveTicket = async ({ id, data, person, pickUp, dropOff }) => {
     willPick,
     willDrop,
     status = 'NEW',
+    departureDate,
+    departureTime,
 
     // TICKET DETAILS
     fee,
     extraFee,
-    departureDate,
-    departureTime,
 
     // PAYMENT DETAILS
     cardBrand,
@@ -135,7 +135,9 @@ export const saveTicket = async ({ id, data, person, pickUp, dropOff }) => {
       cardBrand,
       cardLastDigits,
       totalAmount,
-      type : paymentType
+      type : paymentType,
+      date : departureDate,
+      time : departureTime,
     }).save()
 
     details = await new TicketDetail({ 
@@ -144,8 +146,6 @@ export const saveTicket = async ({ id, data, person, pickUp, dropOff }) => {
       redeemedCount : 0,
       fee,
       extraFee,
-      date : departureDate,
-      time : departureTime,
     }).save()
 
     // TODO: Make sure that the data inserted is sanitized, or it'll break!!!
@@ -188,13 +188,13 @@ export const saveTickets = async data => {
     const person = await createPerson(data)
 
     const pickUp = await (
-      data.willPick 
+      data.willPick
       ? createAddress({ ...data.pickUpAddress })
       : null
     )
 
     const dropOff = await (
-      data.willDrop 
+      data.willDrop
       ? createAddress({ ...data.dropOffAddress })
       : null
     )

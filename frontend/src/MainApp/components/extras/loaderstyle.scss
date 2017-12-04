@@ -1,9 +1,0 @@
-@import '../../styles/scss/globals.scss';
-
-.loader-overlay {
-  height : 100vh;
-  width : 100vw;
-  background : rgba(0, 0, 0, 0.275);
-
-  @include alignCenter;
-}

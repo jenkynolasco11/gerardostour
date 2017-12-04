@@ -56,6 +56,7 @@ class Login extends Component{
           />
           <CardActions className="actions">
             <Button
+              className="login-button"
               type="submit"
               label="Login"
               onClick={ this._onSubmit }

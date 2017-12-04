@@ -1,15 +1,16 @@
 import { Ride, RideDetail, Bus, BusDetail } from '../../models'
+import { formatDate, formatHour } from '../../utils'
 
-export const getRideData = async (ride, i) => {
+export const getRideData = async ride => {
   try {
-    const { routeTo, routeFrom, bus, status } = ride
+    const { routeTo, routeFrom, bus, status, time, date } = ride
 
     let buss = null
     let busDetails = null
     let seatsAvailable = 0
     let luggageAvailable = 0
 
-    const { time, date, seatsOccupied, luggage } = await RideDetail.findOne({ ride : ride._id })
+    const { seatsOccupied, luggage } = await RideDetail.findOne({ ride : ride._id })
 
     if(bus) {
       buss = await Bus.findById(bus)
@@ -21,6 +22,13 @@ export const getRideData = async (ride, i) => {
       seatsAvailable = seat < 0 ? 0 : seat
       luggageAvailable = lug < 0 ? 0 : lug
     }
+
+    // console.log(date)
+    const nDate = formatDate(date)
+    const nTime = formatHour(time)
+
+    // console.log(nDate)
+    // console.log(nTime)
 
     const data = {
       id : ride._id,
@@ -34,8 +42,8 @@ export const getRideData = async (ride, i) => {
       status,
       routeTo,
       routeFrom,
-      time,
-      date,
+      time : nTime,
+      date : nDate,
       seatsAvailable,
       luggageAvailable,
     }
@@ -43,7 +51,8 @@ export const getRideData = async (ride, i) => {
     // TODO : CHECK THIS OUT LATER
     return data//.filter(Boolean)
   } catch (e) {
-    // console.log(e)
+    console.log(e)
+    process.exit()
   }
 
   return null
@@ -56,8 +65,6 @@ export const saveRide = async data => {
       routeTo,
       routeFrom,
       status,
-
-      // RIDE DETAILS
       time,
       date,
     } = data
@@ -66,14 +73,12 @@ export const saveRide = async data => {
       bus : bus ? bus : null,
       routeTo,
       routeFrom,
+      time,
+      date,
       status : status ? status.toUpperCase() : 'PENDING'
     }).save()
 
-    const details = await new RideDetail({
-      time,
-      date,
-      ride : rid._id
-    }).save()
+    const details = await new RideDetail({ ride : rid._id }).save()
 
     return rid._id
   } catch (e) {

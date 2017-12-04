@@ -4,7 +4,7 @@ import { render } from 'react-dom'
 import registerServiceWorker from './registerServiceWorker'
 import App from './App'
 
-import axios from 'axios'
+// import axios from 'axios'
 
 const root = document.getElementById('root')
 

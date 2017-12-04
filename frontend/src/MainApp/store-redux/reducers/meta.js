@@ -1,6 +1,6 @@
 const defaultState = {
   user : { firstname : '', lastname : '' },
-  errorMsg : '' 
+  errorMsg : ''
 }
 
 export const meta = (state = defaultState, action) => {

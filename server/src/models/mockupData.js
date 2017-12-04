@@ -50,7 +50,7 @@ mongoose.connect(config.DBURI, { useMongoClient : true }, async () => {
   const Meta = mongoose.model('meta')
   
   const genRand = (limit, x = 0) => Math.floor(Math.random() * limit) + x
-  const genRandDate = (start, end, startHour, endHour) => {
+  const genRandDate = (start, end) => {
     const date = new Date(+start + Math.random() * (end - start))
     // const hour = startHour + Math.random() * (endHour - startHour) | 0
     // date.setHours(hour)
@@ -59,7 +59,11 @@ mongoose.connect(config.DBURI, { useMongoClient : true }, async () => {
   }
   
   const limit = (lim = 100) => genRand(lim, 1)
-  const getAnyDate = () => genRandDate(new Date(), new Date('2020-10-10'), 0, 23)
+  const getAnyDate = () => {
+    const a = genRandDate(new Date(), new Date('2020-10-10'))
+    console.log(a.toDateString())
+    return new Date(a.toDateString())
+  }
 
   const ticketLimit = genRand(900,600)
   // const firstNames = [ 'jenky', 'julian', 'richard', 'diane', 'masmfas', 'bastion', 'august', 'ceasar', 'carlos' ]
@@ -176,16 +180,18 @@ mongoose.connect(config.DBURI, { useMongoClient : true }, async () => {
         bus : genRand(2) ? bus : null,
         routeTo : to,
         routeFrom : frm,
+        time,
+        date,
         status : status ? status : 'PENDING'
       }).save()
 
       const details = await new RideDetail({
         ride : ride._id,
-        time,
-        date,
         seatsOccupied,
         luggage
       }).save()
+
+      // console.log(ride.time)
 
       return ride._id
     } catch (e) {
@@ -265,8 +271,6 @@ mongoose.connect(config.DBURI, { useMongoClient : true }, async () => {
         pickUpAddress : pick,
         dropOffAddress : drop,
         redeemedCount : 0,
-        date,
-        time,
         fee,
         extraFee
       }).save()
@@ -274,6 +278,8 @@ mongoose.connect(config.DBURI, { useMongoClient : true }, async () => {
       const ticket = await new Ticket({
         id,
         person,
+        date,
+        time,
         ride : ride ? ride : null,
         payment,
         details : details._id,
@@ -387,7 +393,7 @@ mongoose.connect(config.DBURI, { useMongoClient : true }, async () => {
   }
 
   const createRides = async () => {
-    const ext = genRand(200,100)
+    const ext = genRand(200,150)
     const promises = []
 
     try {
@@ -399,6 +405,8 @@ mongoose.connect(config.DBURI, { useMongoClient : true }, async () => {
         const seats = genRand(40)
         const luggage = genRand(50)
         const date = getAnyDate()
+
+        // console.log(date)
 
         promises.push(Bus
           .aggregate([{ $sample : { size : 1 }}])

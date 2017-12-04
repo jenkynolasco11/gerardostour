@@ -1,22 +1,27 @@
 import React, { Component } from 'react'
-import { Route } from 'react-router-dom'
+import { Route, Switch } from 'react-router-dom'
 
 import Ticket from '../Ticket'
 import Ride from '../Ride'
 
+import './body.scss'
+
 const Extra = props => (
-  <div>This is a test</div>
+  <div>This route didn't render properly... Check the hell out of it!</div>
 )
 
 class Body extends Component {
   render() {
     return (
       <div className="main-body">
-        <div>
-          <Route exact path="/" component={ Extra }/> 
-          <Route exact path="/ticket" component={ Ticket }/>
-          <Route exact path="/ride" component={ Ride }/>
-        </div>
+        {/* <div> */}
+          {/* <Redirect from="/"/> */}
+          <Switch>
+            <Route exact path="/ticket/consult" component={ Ticket.TicketConsult } />
+            <Route exact path="/ride/consult" component={ Ride.RideConsult } />
+            <Route component={ Extra } />
+          </Switch>
+        {/* </div> */}
       </div>
     )
   }
