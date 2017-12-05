@@ -19,6 +19,7 @@ class Body extends Component {
           <Switch>
             <Route exact path="/ticket/consult" component={ Ticket.TicketConsult } />
             <Route exact path="/ride/consult" component={ Ride.RideConsult } />
+            <Route exact path="/ride/create-modify" component={ Ride.Ride } />
             <Route component={ Extra } />
           </Switch>
         {/* </div> */}

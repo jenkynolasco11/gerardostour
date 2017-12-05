@@ -2,6 +2,7 @@
 // import { Switch, Route } from 'react-router-dom'
 
 import RideConsult from './RideConsult'
+import Ride from './Ride'
 
 // class Ride extends Component {
 //   componentWillMount() {
@@ -23,4 +24,5 @@ import RideConsult from './RideConsult'
 
 export default {
   RideConsult,
+  Ride
 }

@@ -6,8 +6,8 @@ const busRouter = new Router({ prefix : 'bus' })
 
 const getBusData = async bus => {
   try {
+    const { _id, alias, name, status, user } = bus
     const { seats, luggage } = await BusDetail.findOne({ bus })
-    const { _id, alias, name, status, user } = await Bus.findById(bus)
     const { person, position } = await User.findById(user)
     const { firstname, lastname, phoneNumber } = await Person.findById(person)
 
@@ -69,13 +69,27 @@ const saveBus = async data => {
 
 // Retrieve all busses
 busRouter.get('/all', async ctx => {
-  const { limit = 10, skip = 0 } = ctx.query
+  const {
+    // limit = 10,
+    // skip = 0,
+    status,
+  } = ctx.query
+  // console.log('wtf!?')
+  // 'STANDBY', 'OK', 'DAMAGED', 'RETIRED', ''
+
+  const statusExt = `STANDBY,OK${ status ? `,${ status }` : '' }`
+
+  const list = [].concat(statusExt ? statusExt.split(',') : '')
+  const conditions = { status : { $in : list }}
+
+  console.log(conditions)
 
   try {
     const busses = await Bus
-                    .find({}, { _id : 1 })
-                    .skip(skip)
-                    .limit(limit)
+                    .find(conditions)
+                    .sort({ _id : -1 })
+                    // .skip(skip)
+                    // .limit(limit)
                     .exec()
 
     const data = await Promise.all(busses.map(getBusData))
@@ -83,7 +97,9 @@ busRouter.get('/all', async ctx => {
     const count = await Bus.count({})
 
     if(data.length) return ctx.body = { ok : true, data : { busses : data, count }, message : '' }
+
   } catch (e) {
+    console.log(e)
     return ctx.body = { ok : false, data : null, message : 'Error retrieving the busses' }
   }
 
@@ -92,6 +108,7 @@ busRouter.get('/all', async ctx => {
 
 // Retrieve a bus with :id
 busRouter.get('/:id', async ctx => {
+  // console.log('to retrieve ID')
   const { id } = ctx.params
 
   try {

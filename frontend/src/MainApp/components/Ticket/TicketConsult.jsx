@@ -61,42 +61,64 @@ class TicketConsult extends Component {
         skip : 0,
         count : 0,
         unassigned : true,
-        sort : 'date -1',
+        sort : 'date',
+        sortOrder :  -1,
         tickets : [],
       }
 
-      this.onPaginate = this.onPaginate.bind(this)
-    }
-  
-    async makeRequest(limit, skip, count, unassigned, sort) {
-      return await axios.get(`${url}/all?skip=${ skip }&limit=${ limit }&unassigned=${ unassigned }&sort=${ sort }`)
-    }
-  
-    async onPaginate(skip) {
-      const { limit, count, unassigned, sort } = this.state
-  
-      const newSkip = skip.selected * limit
-  
-      try {
-        const { data } = await this.makeRequest(limit, newSkip, count, unassigned, sort)
-        console.log(data)
-        if(data.ok) return this.setState({ tickets : [].concat(data.data.tickets), count : data.data.count, skip : skip.selected })
-      } catch (e) {
-        return setTimeout(() => this.onPaginate(skip), 1000)
+    this.onPaginate = this.onPaginate.bind(this)
+    this.onSort = this.onSort.bind(this)
+  }
+
+  async makeRequest(limit, skip, count, unassigned, sort) {
+    return await axios.get(`${url}/all?skip=${ skip }&limit=${ limit }&unassigned=${ unassigned }&sort=${ sort }`)
+  }
+
+  async onPaginate(skip) {
+    const { limit, count, unassigned, sort, sortOrder } = this.state
+
+    const newSkip = skip.selected * limit
+
+    try {
+      const { data } = await this.makeRequest(limit, newSkip, count, unassigned, `${ sort } ${ sortOrder }`)
+      
+      if(data.ok) {
+        const { tickets, count } = data.data
+
+        return this.setState({ tickets : [].concat(tickets), count, skip : skip.selected })
       }
+    } catch (e) {
+      return setTimeout(() => this.onPaginate(skip), 1000)
     }
-  
-    async componentWillMount() {
-      await this.onPaginate({ selected : 0 })
-    }
-  
+  }
+
+  // TODO : DRY with RideConsult - Also, fix the sort engine
+  // For example, sorting by fields in other tables (person, details, etc)
+  async onSort(val) {
+    let { sort, sortOrder, skip } = this.state
+
+    if(val === sort) sortOrder = sortOrder * -1
+    else sort = val
+
+    this.setState({ sort, sortOrder }, () => this.onPaginate({ selected : skip }))
+  }
+
+  async componentWillMount() {
+    await this.onPaginate({ selected : 0 })
+  }
+
   render() {
     const { tickets, skip, limit, count } = this.state
     const data = tickets.map(tableFormat.format)
 
     return (
       <div className="ticket-consult">
-        <TableContent header={ tableFormat.header } {...{ onPaginate : this.onPaginate, data, skip, limit, count }}/>
+        <TableContent
+          header={ tableFormat.header }
+          onPaginate={ this.onPaginate }
+          onSort={ this.onSort }
+          {...{ data, skip, limit, count }}
+        />
       </div>
     )
   }

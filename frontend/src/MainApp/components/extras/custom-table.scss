@@ -2,6 +2,11 @@
 
 .table-content {
   padding-bottom : 40px;
+  min-width : 840px;
+  
+  // @media(min-width : 900px) {
+  //   width : 100vw;
+  // }
 
   .table-pagination {
     border-radius : 0 0 2px 2px;

@@ -61,7 +61,7 @@ mongoose.connect(config.DBURI, { useMongoClient : true }, async () => {
   const limit = (lim = 100) => genRand(lim, 1)
   const getAnyDate = () => {
     const a = genRandDate(new Date(), new Date('2020-10-10'))
-    console.log(a.toDateString())
+    // console.log(a.toDateString())
     return new Date(a.toDateString())
   }
 
@@ -70,7 +70,7 @@ mongoose.connect(config.DBURI, { useMongoClient : true }, async () => {
   // const lastNames = [ 'nolasco', 'matias', 'rodriguez', 'figueroa', 'masmfas', 'bastion', 'august', 'ceasar', 'carlos' ]
   const ticktsStatus = [ 'USED', 'REDEEMABLE', 'NULL', 'NEW' ]
   const positions = [ 'DRIVER', 'MANAGER', 'DISPATCHER' ]
-  const busStatus = [ 'STANDBY', 'OK', 'DAMAGED' ]
+  const busStatus = [ 'STANDBY', 'OK', 'DAMAGED', 'RETIRED' ]
   const busNames = [ 'Blanquita', 'Rocio', 'Maria la del Barrio', 'Calle 14', 'Vasito Verde', 'La Negra' ]
   const cardAffiliates = [ 'VISA', 'MASTERCARD', 'AMERICAN EXPRESS', 'DISCOVERY' ]
   const payType = [ 'CASH', 'CARD' ]
@@ -176,13 +176,14 @@ mongoose.connect(config.DBURI, { useMongoClient : true }, async () => {
 
   const createRide = async (bus, to, frm, status, time, date, seatsOccupied, luggage) => {
     try {
+      const willBus = genRand(2)
       const ride = await new Ride({
-        bus : genRand(2) ? bus : null,
+        bus : willBus ? bus : null,
         routeTo : to,
         routeFrom : frm,
         time,
         date,
-        status : status ? status : 'PENDING'
+        status : willBus ? status ? status : 'PENDING' : 'PENDING'
       }).save()
 
       const details = await new RideDetail({
@@ -443,7 +444,7 @@ mongoose.connect(config.DBURI, { useMongoClient : true }, async () => {
       const bussesCount = busNames.length
 
       const drvrs = drivers.slice(0, bussesCount).map(async (driver, i) => {
-        const status = busStatus[ genRand[ busStatus.length ] ]
+        const status = busStatus[ genRand([ busStatus.length ]) ]
         const name = busNames[ i ]
         const seats = genRand(30,20)
         const luggage = genRand(50,30)

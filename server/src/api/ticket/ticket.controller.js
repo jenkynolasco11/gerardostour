@@ -1,5 +1,5 @@
 import { Ticket, Payment, TicketDetail, Person, Meta, Address /*,Bus*/ } from '../../models'
-import { createPerson, createAddress, filterDoc, formatDate, formatHour, formatPhone } from '../../utils'
+import { createPerson, createAddress, filterDoc /*, formatDate, formatHour, formatPhone*/ } from '../../utils'
 
 // ///////////////// Helper functions
 export const getTicketData = async tckt => {
@@ -31,13 +31,13 @@ export const getTicketData = async tckt => {
       to : tckt.to,
       pickUpAddress : filterDoc(pickAdd),
       dropOffAddress : filterDoc(dropAdd),
-      time : formatHour(tckt.time),
-      date : formatDate(tckt.date),
+      time : tckt.time,
+      date : tckt.date,
       person : {
         firstname : person.firstname,
         lastname : person.lastname,
         email : person.email,
-        phoneNumber : formatPhone(person.phoneNumber)
+        phoneNumber : person.phoneNumber
       }
     }
 

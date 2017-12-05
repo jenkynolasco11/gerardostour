@@ -41,6 +41,5 @@ RideDetailSchema.pre('validate', function(next) {
 //   })
 // })
 
-
 export const Ride = mongoose.model('ride', RideSchema, 'ride')
 export const RideDetail = mongoose.model('rideDetail', RideDetailSchema, 'rideDetail')

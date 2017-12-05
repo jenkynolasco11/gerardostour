@@ -8,24 +8,20 @@ const rideRouter = new Router({ prefix : 'ride' })
 // Retrieve all rides
 rideRouter.get('/all', async ctx => {
   const {
-    status = [ 'FINISHED', 'ASSIGNED' ],
+    status = 'FINISHED,ASSIGNED',
     limit = 10,
     skip = 0,
-    unassigned = 'true',
+    // unassigned = 'true',
     sort = 'date -1'
   } = ctx.query
 
-  const list = [].concat(status)
-  const conditions = { status : { $nin : list }}
-  
-  if(unassigned && unassigned === 'true') conditions.bus = null
+  const list = [].concat(status ? status.split(',') : '')
+  const conditions = { status : { $in : list }}
 
   const [ srt, asc ] = sort.split(' ')
   const sortCondition = { [ srt ] : Number(asc) }
 
   if(srt === 'date') sortCondition.time = 1
-
-  // console.log(sortCondition)
 
   try {
     const rides = await Ride
@@ -114,18 +110,21 @@ rideRouter.get('/date/:date/hour/:hour', async ctx => {
 
 // Assign bus to ride
 rideRouter.put('/assign-bus', async ctx => {
-  const { bus, id } = ctx.request.body
+  const { bus, ids = [] } = ctx.request.body
 
   try {
     const bs = await Bus.findById(bus)
+    const promises = []
 
     if(bs) {
-      const rid = await Ride.findOneAndUpdate({ _id : id }, { bus })
+      for(let i = 0; i < ids.length; i++) promises.push(Ride.findOneAndUpdate({ _id : ids[ i ] }, { bus, status : 'ASSIGNED' }))
 
-      if(rid) return ctx.body = { ok : true, data : null, message : '' }
+      const rids = await Promise.all(promises)
+
+      if(rids) return ctx.body = { ok : true, data : null, message : '' }
     }
   } catch (e) {
-    console.log(e)
+    // console.log(e)
 
     return ctx.body = { ok : false, data : null, message : 'Error retrieving rides' }
   }
@@ -136,14 +135,18 @@ rideRouter.put('/assign-bus', async ctx => {
 rideRouter.put('/:id/modify', async ctx => {
   const { id } = ctx.params
   const { body } = ctx.request
+  console.log(body)
+  console.log(id)
 
   try {
+    // console.log(body)
     const data = await updateRide(id, body)
-
+    console.log(data)
     if(data) return ctx.body = { ok : true, data, message : '' }
 
     return ctx.body = { ok : false, data : null, message : 'There is no ride assigned to that id' }
   } catch(e) {
+    // console.log(e)
     return ctx.body = { ok : false, data : null, message : 'Error retrieving ride' }
   }
 })
