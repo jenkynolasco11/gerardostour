@@ -50,8 +50,8 @@ const tableFormat = {
     { 'to' : 'To' },
     { 'time' : 'Hour' },
     { 'date' : 'Date' },
-    { 'seats' : 'Seats Available' },
-    { 'luggage' : 'Luggage Available' }
+    { 'seats' : 'Seats' },
+    { 'luggage' : 'Luggage' }
   ]
 }
 
@@ -63,9 +63,9 @@ class Ride extends Component {
       limit : 10,
       skip : 0,
       count : 0,
-      assigned : true,
+      pending : true,
       finished : false,
-      pending : false,
+      assigned : false,
       onTheWay : false,
       sort : 'date',
       sortOrder : -1,
@@ -214,6 +214,7 @@ class Ride extends Component {
               caption="Set To Bus"
               onClick={ () => this.setState({ showModal : true }) }
               disabled={ selected.length === 0 }
+              selectable={ true }
             />
             <ListDivider />
             {
@@ -229,6 +230,7 @@ class Ride extends Component {
                 <ListItem
                   avatar={ <MdBuild /> }
                   caption="Modify Ride"
+                  selectable={ true }
                   // disabled={ selected.length > 1 }
                 />  
               </Link>
@@ -237,6 +239,7 @@ class Ride extends Component {
                 <ListItem
                   avatar={ <MdAdd /> }
                   caption="Add a new Ride"
+                  selectable={ true }
                 />
               </Link>
             }
@@ -245,12 +248,19 @@ class Ride extends Component {
             <CardTitle title="Settings" />
             <ListDivider />
             <ListCheckbox
+              legend="Those rides waiting to be dispatched"
+              inset={ true }
+              caption="Pending rides"
+              checked={ pending }
+              onChange={ val => this.onChange(val, 'pending') }
+              disabled={ true }
+            />
+            <ListCheckbox
               legend="Haven't been assigned to a bus"
               inset={ true }
-              caption="Unassigned rides"
+              caption="Assigned rides"
               checked={ assigned }
               onChange={ val => this.onChange(val, 'assigned') }
-              disabled={ true }
             />
             <ListCheckbox
               legend="Those that are on their way"
@@ -265,13 +275,6 @@ class Ride extends Component {
               caption="Finished rides"
               checked={ finished }
               onChange={ val => this.onChange(val, 'finished') }
-            />
-            <ListCheckbox
-              legend="Those rides waiting to be dispatched"
-              inset={ true }
-              caption="Pending rides"
-              checked={ pending }
-              onChange={ val => this.onChange(val, 'pending') }
             />
             <ListDivider/>
           </List>

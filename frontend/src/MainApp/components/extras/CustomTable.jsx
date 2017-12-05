@@ -7,7 +7,8 @@ import { formatDate, formatHour, formatPhone } from '../../utils'
 import './custom-table.scss'
 
 const formatField = (val, key) => {
-  // console.log(val, key)
+  console.log('val => ', val)
+  console.log('key => ', key)
   switch(key) {
     case 'date' : 
       return formatDate(val)
@@ -92,6 +93,7 @@ class CustomTable extends Component {
               }
             </TableHead>
             {
+              // 0 &&
               data.map((row, indx) => 
                 <TableRow key={ indx } selected={ this.state.selected.indexOf(indx) !== -1 }>
                 {
@@ -102,6 +104,11 @@ class CustomTable extends Component {
             }
           </Table>
         </div>
+        { 
+          data.length
+          ? null
+          : <div className="table-no-content"> There is no content available </div>
+        }
         { this.renderNavigationBar(pages) }
       </div>
     )

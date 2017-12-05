@@ -34,9 +34,9 @@ mongoose.connect(config.DBURI, { useMongoClient : true }, async () => {
 
   const addresses = require('./mockupData-streets').default
   const users = require('./mockupData-users').default
-  
+
   mongoose.Promise = global.Promise
-  
+
   const Person = mongoose.model('person')
   const User = mongoose.model('user')
   const Ride = mongoose.model('ride')
@@ -55,14 +55,15 @@ mongoose.connect(config.DBURI, { useMongoClient : true }, async () => {
     // const hour = startHour + Math.random() * (endHour - startHour) | 0
     // date.setHours(hour)
     date.setHours(0,0,0,0)
-    return date
+    // console.log(date)
+    return date.toISOString()
   }
   
   const limit = (lim = 100) => genRand(lim, 1)
   const getAnyDate = () => {
     const a = genRandDate(new Date(), new Date('2020-10-10'))
     // console.log(a.toDateString())
-    return new Date(a.toDateString())
+    return new Date(a)
   }
 
   const ticketLimit = genRand(900,600)

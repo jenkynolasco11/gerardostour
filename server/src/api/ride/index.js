@@ -34,7 +34,10 @@ rideRouter.get('/all', async ctx => {
     if(rides.length) {
       const data = await Promise.all(rides.map(getRideData))
 
+      data.map(e => console.log(e.date))
+
       const count = await Ride.count(conditions)
+      console.log(count)
 
       if(data.length) return ctx.body = { ok : true, data : { rides : data, count }, message : '' }
     }
@@ -135,13 +138,13 @@ rideRouter.put('/assign-bus', async ctx => {
 rideRouter.put('/:id/modify', async ctx => {
   const { id } = ctx.params
   const { body } = ctx.request
-  console.log(body)
-  console.log(id)
+  // console.log(body)
+  // console.log(id)
 
   try {
     // console.log(body)
     const data = await updateRide(id, body)
-    console.log(data)
+    // console.log(data)
     if(data) return ctx.body = { ok : true, data, message : '' }
 
     return ctx.body = { ok : false, data : null, message : 'There is no ride assigned to that id' }

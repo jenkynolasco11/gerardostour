@@ -31,6 +31,11 @@ const defaultState = {
   busses : []
 }
 
+const headers = {
+  'Access-Control-Allow-Origin': '*',
+  'Content-Type': 'application/json',
+}
+
 //TOO MUCH DRY IN HERE!!!! 
 const formatData = bus => {
   const { id, ...rest } = bus
@@ -97,7 +102,7 @@ class RideForm extends Component {
 
       let data = null
       
-      if(title === 'Create' ) data = await axios.post(`${ url }/ride/`, body)
+      if(title === 'Create' ) data = await axios.post(`${ url }/ride/insert`, body)
       else data = await axios.put(`${ url }/ride/${ id }/modify`, body)
       // console.log(data)
       if(data.data.ok) return history.goBack()
@@ -121,11 +126,13 @@ class RideForm extends Component {
         if(data.ok) {
           // console.log(data.data)
           const { id, routeFrom, routeTo, time, date, bus } = data.data
-          
+                
+          console.log(id)
+    
           // console.log(data)
           // console.log(date)
           
-          self.setState({ id, routeFrom, routeTo, time, date, bus : bus.id })  
+          self.setState({ id, routeFrom, routeTo, time, date, bus : bus ? bus.id : null })  
         }
       })
       .catch(e=> {

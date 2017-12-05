@@ -136,8 +136,6 @@ export const saveTicket = async ({ id, data, person, pickUp, dropOff }) => {
       cardLastDigits,
       totalAmount,
       type : paymentType,
-      date : departureDate,
-      time : departureTime,
     }).save()
 
     details = await new TicketDetail({ 
@@ -159,7 +157,9 @@ export const saveTicket = async ({ id, data, person, pickUp, dropOff }) => {
       willPick,
       willDrop,
       from : frm,
-      to
+      to,
+      date : (new Date(departureDate)).serUTCHours(0,0,0,0).toISOString(),
+      time : departureTime,
     }).save()
 
     return tckt._id
