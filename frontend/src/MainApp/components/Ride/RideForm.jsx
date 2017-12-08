@@ -4,17 +4,17 @@ import axios from 'axios'
 
 import { Card, CardTitle, CardActions } from 'react-toolbox/lib/card'
 // import Checkbox from 'react-toolbox/lib/checkbox/Checkbox'
-import { List, ListDivider } from 'react-toolbox/lib/list'
+import { /*List,*/ ListDivider } from 'react-toolbox/lib/list'
 import Dropdown from 'react-toolbox/lib/dropdown/Dropdown'
-import { MdChevronLeft, MdChevronRight, MdEventAvailable } from 'react-icons/lib/md'
+import { /*MdChevronLeft, MdChevronRight, */ MdEventAvailable } from 'react-icons/lib/md'
 // import Layout from 'react-toolbox/lib/layout/Layout'
 import Button from 'react-toolbox/lib/button/Button'
-// import { Input } from 'react-toolbox/lib/input'
+
 import DatePicker from 'react-toolbox/lib/date_picker/DatePicker'
 
-import { formatDate, formatHour } from '../../utils'
+// import { formatDate, formatHour } from '../../utils'
 
-import defaultData from './default-data-ride.json'
+import configData from '../../config/config-values.json'
 import './ride-form.scss'
 
 const url = 'http://localhost:8000/api/v1'
@@ -31,10 +31,10 @@ const defaultState = {
   busses : []
 }
 
-const headers = {
-  'Access-Control-Allow-Origin': '*',
-  'Content-Type': 'application/json',
-}
+// const headers = {
+//   'Access-Control-Allow-Origin': '*',
+//   'Content-Type': 'application/json',
+// }
 
 //TOO MUCH DRY IN HERE!!!! 
 const formatData = bus => {
@@ -62,16 +62,16 @@ const FormatBusItem = bus => (
   </div>
 )
 
-const getHourValue = tim => {
-  const { times } = defaultData
+// const getHourValue = tim => {
+//   const { times } = configData
 
-  for(let i = 0; i < times.length; i++) {
-    console.log(`${ tim } ${ times[i].label } ===> ${ tim === times[i].label }`)
-    if(tim === times[i].label) return times[i].value
-  }
+//   for(let i = 0; i < times.length; i++) {
+//     console.log(`${ tim } ${ times[i].label } ===> ${ tim === times[i].label }`)
+//     if(tim === times[i].label) return times[i].value
+//   }
 
-  return times[ 0 ].value
-}
+//   return times[ 0 ].value
+// }
 
 const getMinDate = () => {
   const date = new Date()
@@ -168,46 +168,48 @@ class RideForm extends Component {
       date,
     } = this.state
 
+    // const source = [].concat(busses, { value : null, label : '' })
+
     return (
       <form className="" onSubmit={ this.onSubmit }>
         <Card className="ride-form">
           <CardTitle className="" title={`${ title } Ride`}/>
-          <ListDivider />
+          <ListDivider className="margin-bottom" />
           <Dropdown
             label="Time"
-            source={ defaultData.times }
+            source={ configData.times }
             value={ time }
             onChange={ e => this.setState({ time : e }) }
           />
           {/*<div className="ride-routes">*/}
           <Dropdown
             label="Going from"
-            source={ defaultData.routes }
+            source={ configData.routes }
             value={ routeFrom }
             onChange={ e => this.setState({ routeFrom : e }) }
           />
           <Dropdown
             label="Going to"
-            source={ defaultData.routes }
+            source={ configData.routes }
             value={ routeTo }
             onChange={ e => this.setState({ routeTo : e }) }
           />
           {/*</div>*/}
-          <DatePicker 
+          <DatePicker
+            autoOk
             minDate={ getMinDate() }
             icon={ <MdEventAvailable /> }
             value={ new Date(date) }
             onChange={ e => this.setState({ date : new Date(e.setHours(0,0,0,0)) }) }
           />
           <Dropdown
-            source={ busses }
+            source={ busses /* source */ }
             label="Bus"
             template={ FormatBusItem }
             value={ bus }
-            onChange={ bus => {
-              console.log(bus)
-              this.setState({ bus })
-            }}
+            onChange={ bus => this.setState({ bus }) }
+            allowBlank={ true }
+            auto={ true }
           />
           {/*
             <Input 

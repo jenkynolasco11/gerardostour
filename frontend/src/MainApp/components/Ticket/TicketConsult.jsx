@@ -1,9 +1,14 @@
 import React, { Component } from 'react'
 import axios from 'axios'
+import { Link } from 'react-router-dom'
+import { List, ListDivider, ListCheckbox, ListItem } from 'react-toolbox/lib/list'
+import { MdReceipt, MdBuild } from 'react-icons/lib/md'
+import { Card, CardTitle } from 'react-toolbox/lib/card'
 
 import TableContent from '../extras/CustomTable'
 
-import json from './response-ticket-example.json'
+
+// import json from './response-ticket-example.json'
 import './ticket-consult.scss'
 
 const url = 'http://localhost:8000/api/v1/ticket'
@@ -45,9 +50,9 @@ const tableFormat = {
     { 'phoneNumber' : 'Phone Number' },
     { 'from' : 'From' },
     { 'to' : 'To' },
-    { 'luggage' : 'Luggage Available' },
-    { 'willPick' : 'Will Pick Up?' },
-    { 'willDrop' : 'Will Drop Off?' },
+    { 'luggage' : 'Luggage' },
+    { 'willPick' : 'Pick Up?' },
+    { 'willDrop' : 'Drop Off?' },
     { 'time' : 'Hour' },
     { 'date' : 'Date' },
   ]
@@ -64,8 +69,10 @@ class TicketConsult extends Component {
         sort : 'date',
         sortOrder :  -1,
         tickets : [],
+        selected : [],
       }
 
+    this.onGetSelected = this.onGetSelected.bind(this)
     this.onPaginate = this.onPaginate.bind(this)
     this.onSort = this.onSort.bind(this)
   }
@@ -75,7 +82,13 @@ class TicketConsult extends Component {
   }
 
   async onPaginate(skip) {
-    const { limit, count, unassigned, sort, sortOrder } = this.state
+    const {
+      limit,
+      count,
+      unassigned,
+      sort,
+      sortOrder
+    } = this.state
 
     const newSkip = skip.selected * limit
 
@@ -103,22 +116,76 @@ class TicketConsult extends Component {
     this.setState({ sort, sortOrder }, () => this.onPaginate({ selected : skip }))
   }
 
+  onGetSelected(selected) {
+    this.setState({ selected : [].concat(selected) })
+  }
+
+  getSelectedTicket() {
+    const { selected, tickets } = this.state
+
+    if(!selected.length) return null
+
+    return tickets[ selected[ 0 ]].id
+  }
+
   async componentWillMount() {
     await this.onPaginate({ selected : 0 })
   }
 
   render() {
-    const { tickets, skip, limit, count } = this.state
+    const {
+      tickets,
+      skip,
+      limit,
+      count,
+      selected
+    } = this.state
     const data = tickets.map(tableFormat.format)
 
     return (
       <div className="ticket-consult">
         <TableContent
-          header={ tableFormat.header }
+          getSelectedRows={ this.onGetSelected }
           onPaginate={ this.onPaginate }
+          header={ tableFormat.header }
           onSort={ this.onSort }
           {...{ data, skip, limit, count }}
         />
+        <Card className="ticket-settings">
+          <List>
+            <CardTitle title="Actions"/>
+            <ListDivider />
+            {
+              selected.length ?
+              selected.length > 1 ?
+              // <Link>
+              <ListItem
+                avatar={ <MdBuild /> }
+                caption="Modify Ticket"
+                disabled={ selected.length > 1 }
+              />
+              // </Link>
+              :
+              <Link to={{ pathname : '/ticket/create-modify', state : { ticket : this.getSelectedTicket(), title : 'Modify' }}}>
+                <ListItem
+                  avatar={ <MdBuild /> }
+                  caption="Modify Ticket"
+                  selectable
+                />
+              </Link>
+              :
+              <Link to={{ pathname: '/ticket/create-modify' }}>
+                <ListItem
+                  avatar={ <MdReceipt /> }
+                  caption="Create a new Ticket"
+                  selectable
+                />
+              </Link>
+            }
+            <CardTitle title="Settings"/>
+            <ListDivider />
+          </List>
+        </Card>
       </div>
     )
   }

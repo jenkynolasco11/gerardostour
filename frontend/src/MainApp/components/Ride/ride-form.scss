@@ -1,6 +1,24 @@
 .ride-form {
   padding : 40px 30px 50px;
 
+  [data-react-toolbox=dropdown], [data-react-toolbox=date-picker] {
+    // background : red;
+
+    [data-react-toolbox=input] {
+      transition : background .1s linear;
+    }
+    &:hover {
+      [data-react-toolbox=input] {
+        background : #eee;
+      }
+    }
+  }
+
+  
+  [data-react-toolbox=dropdown]:nth-child(3) {
+    margin-top : 40px;
+  }
+
   .ride-routes {
     // display : flex;
   }

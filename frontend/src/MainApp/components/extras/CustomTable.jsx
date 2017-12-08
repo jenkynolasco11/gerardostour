@@ -7,8 +7,8 @@ import { formatDate, formatHour, formatPhone } from '../../utils'
 import './custom-table.scss'
 
 const formatField = (val, key) => {
-  console.log('val => ', val)
-  console.log('key => ', key)
+  // console.log('val => ', val)
+  // console.log('key => ', key)
   switch(key) {
     case 'date' : 
       return formatDate(val)
@@ -103,13 +103,13 @@ class CustomTable extends Component {
               )
             }
           </Table>
+          { 
+            data.length
+            ? null
+            : <div className="table-no-content"> There is no content available </div>
+          }
+          { this.renderNavigationBar(pages) }
         </div>
-        { 
-          data.length
-          ? null
-          : <div className="table-no-content"> There is no content available </div>
-        }
-        { this.renderNavigationBar(pages) }
       </div>
     )
   }

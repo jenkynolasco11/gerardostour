@@ -3,7 +3,7 @@ import mongoose, { Schema } from 'mongoose'
 // import bcrypt from 'bcrypt-nodejs'
 
 const routes = [ 'NY', 'PA' ]
-const status = [ 'USED', 'REDEEMABLE', 'NULL', 'NEW', 'DELETED' ]
+const status = [ 'USED', 'REDEEMED', 'NULL', 'NEW', 'DELETED' ]
 
 const TicketSchema = new Schema({
   id : { type : Number, required : true, unique : true, index : true },

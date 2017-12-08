@@ -45,9 +45,14 @@ ticketRouter.post('/insert', reformatTicket, async ctx => {
 
   // TODO : Add this later. With this, I'll know if it's 
   // const { isLocal } = body
+  // console.log('RIGHT HERE!!')
+  // console.log(body)
+
+  // return ctx.body = { ok : true, data : body }
 
   try {
     const data = await saveTickets(body)
+    console.log(data)
 
     // console.log(data)
     if(data) return ctx.body = { ok : true, data, message : '' }

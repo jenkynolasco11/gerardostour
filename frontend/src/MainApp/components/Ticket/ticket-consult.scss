@@ -3,5 +3,16 @@
   display : flex;
   justify-content : center;
 
-  width : 100vw;
+  @media (max-width : 1200px) {
+    // .table-content {
+    //   // font-size : 0.8em !important;
+    //   // transform : scale(0.5);
+    // }
+  }
+
+  // width : 100vw;
+
+  .ticket-settings {
+    margin-left : 4px;
+  }
 }

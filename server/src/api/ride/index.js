@@ -53,6 +53,8 @@ rideRouter.get('/all', async ctx => {
 rideRouter.post('/insert', async ctx => {
   const { body } = ctx.request
 
+  console.log(body)
+
   try {
     let { time, date } = body
 

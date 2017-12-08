@@ -1,10 +1,10 @@
-import mongoose, { Schema, SchemaTypes } from 'mongoose'
+import mongoose, { Schema } from 'mongoose'
 
 const PersonSchema = new Schema({
   firstname : { type : String, required : true },
   lastname : { type : String, required : true },
   phoneNumber : { type : String, match : /^\d{10}$/, required : true, index : true, unique : true },
-  email : { type : String, required : true, index : true, unique : true },
+  email : { type : String, index : true, unique : true },
   createdAt : { type : Date, default : Date.now },
   modifiedAt : { type : Date, default : Date.now },
 })

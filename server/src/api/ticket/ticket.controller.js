@@ -20,6 +20,8 @@ export const getTicketData = async tckt => {
     // console.log(dropAdd)
     // console.log('----------------------------')
 
+    // const settingDate = tckt.date
+
     const data = {
       id : tckt.id,
       _id : tckt._id,
@@ -32,6 +34,7 @@ export const getTicketData = async tckt => {
       pickUpAddress : filterDoc(pickAdd),
       dropOffAddress : filterDoc(dropAdd),
       time : tckt.time,
+      // date : new Date(tckt.date).setHours(0,0,0,0).toISOString(),
       date : tckt.date,
       person : {
         firstname : person.firstname,
@@ -54,9 +57,8 @@ export const reformatTicket = (ctx, next) => {
   const { body } = ctx.request
 
   // If its local, return. No need to reformat data structure
+  console.log(body)
   if(body.isLocal) return next()
-
-  // console.log(body)
 
   const newBody = {
     frm : body.desde,
@@ -128,7 +130,6 @@ export const saveTicket = async ({ id, data, person, pickUp, dropOff }) => {
   let payment = null
   let details = null
   let tckt = null
-// console.log(data)
 
   try {
     payment = await new Payment({
@@ -158,7 +159,8 @@ export const saveTicket = async ({ id, data, person, pickUp, dropOff }) => {
       willDrop,
       from : frm,
       to,
-      date : (new Date(departureDate)).serUTCHours(0,0,0,0).toISOString(),
+      // date : (new Date(departureDate)).setHours(0,0,0,0).toISOString(),
+      date : departureDate,
       time : departureTime,
     }).save()
 
@@ -221,8 +223,8 @@ export const saveTickets = async data => {
       promises.push(saveTicket({
         id : meta.lastTicketId + i + 1,
         data,
-        pickUp,
         person,
+        pickUp,
         dropOff
       }))
     

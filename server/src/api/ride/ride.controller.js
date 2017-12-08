@@ -71,12 +71,15 @@ export const saveRide = async data => {
       date,
     } = data
 
+    console.log(typeof date)
+
     const rid = await new Ride({
       bus : bus ? bus : null,
       routeTo,
       routeFrom,
       time,
-      date : (new Date(date)).serUTCHours(0,0,0,0).toISOString(),
+      // date : new Date(date).setHours(0,0,0,0).toISOString(),
+      date,
       status : status ? status.toUpperCase() : 'PENDING'
     }).save()
 
@@ -105,14 +108,17 @@ export const updateRide = async (id, body) => {
 
     const bus = body.bus ? body.bus : null
 
-    // console.log(bus)
-    // console.log(body, id)
+    const data = {
+      bus,
+      routeTo,
+      routeFrom,
+      status,
+      // date : (new Date(date)).setHours(0,0,0,0).toISOString(), 
+      date,
+      time,
+    }
 
-    const rid = await Ride.findByIdAndUpdate(id, { bus, routeTo, routeFrom, status, date : (new Date(date)).serUTCHours(0,0,0,0).toISOString(), time }/*, { new : true }*/)
-
-    // console.log(rid)
-
-    // const details = await RideDetail.findOneAndUpdate({ ride : id }, { time, date })
+    const rid = await Ride.findByIdAndUpdate(id, data /*, { new : true }*/)
 
     return rid._id
   } catch (e) {

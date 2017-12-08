@@ -1,0 +1,81 @@
+.ticket-form {
+  padding : 10px 10px 20px;
+
+  &-address {
+    .address-dropdown {
+      .list {
+
+        display : flex;
+        align-items : center;
+      }
+
+      p {
+        // background : red;
+        text-align : right;
+        width : 90px;
+        margin : 0 20px;
+      }
+
+    }
+
+    .address-pick-drop {
+      display : block;
+    }
+  }
+
+  &-payment {
+    width : 200px;
+  }
+
+  &-review {
+    display : block;
+
+    .review-trip {
+      display : block;
+      .list {
+        // display : inline-block;
+        display : flex;
+
+        li > span {
+          // span:first-child {
+          //   background : red;
+          // }
+
+          span + span > span  {
+            background : white;
+            width : 100px;
+          }
+        }
+
+        // li {
+        //   // display : flex;
+        //   // & > span:first-of-type {
+        //     // background : red;
+        //     color : white;
+        //   // }
+        //   span {
+        //     // flex : 1;
+        //   }
+        // }
+      }
+    }
+
+    .review-fee {
+      display : block;
+      font-size : 1em;
+
+      div {
+        display : inline-block;
+        // &:not(.small-caption) {
+        //   padding : 0 10px;
+        // }
+
+        .small-caption {
+          // background : red;
+          text-align : right;
+          width : 156px;
+        }
+      }
+    }
+  }
+}

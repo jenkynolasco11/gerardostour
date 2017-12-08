@@ -1,7 +1,7 @@
 // import React, { Component } from 'react'
 // import { BrowserRouter as Router, Route } from 'react-router-dom'
 
-import TicketCreate from './TicketCreate'
+import TicketForm from './TicketForm'
 import TicketConsult from './TicketConsult'
 
 // class Ticket extends Component {
@@ -20,6 +20,6 @@ import TicketConsult from './TicketConsult'
 // }
 
 export default {
-  TicketCreate,
+  TicketForm,
   TicketConsult
 }

@@ -1,4 +1,4 @@
-import mongoose, { Schema, SchemaTypes } from 'mongoose'
+import mongoose, { Schema } from 'mongoose'
 import bcrypt from 'bcrypt-nodejs'
 
 const UserSchema = new Schema({

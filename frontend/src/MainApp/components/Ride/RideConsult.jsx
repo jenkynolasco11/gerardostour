@@ -4,7 +4,7 @@ import { Link } from 'react-router-dom'
 import axios from 'axios'
 
 import { List, ListDivider, ListCheckbox, ListItem, ListSubHeader } from 'react-toolbox/lib/list'
-import { Card, CardActions, /*CardMedia,*/ CardTitle } from 'react-toolbox/lib/card'
+import { Card, /*CardActions, /*CardMedia,*/ CardTitle } from 'react-toolbox/lib/card'
 // import Dropdown from 'react-toolbox/lib/dropdown/Dropdown'
 // import Button from 'react-toolbox/lib/button/Button'
 import { MdDirectionsBus, MdBuild, MdAdd } from 'react-icons/lib/md'
@@ -75,7 +75,7 @@ class Ride extends Component {
     }
 
     this.onPaginate = this.onPaginate.bind(this)
-    this.onSelected = this.onSelected.bind(this)
+    this.onGetSelected = this.onGetSelected.bind(this)
     this.assignBus = this.assignBus.bind(this)
     this.onChange = this.onChange.bind(this)
     this.onSort = this.onSort.bind(this)
@@ -171,7 +171,7 @@ class Ride extends Component {
     this.setState({ [ field ] : val }, () => this.onPaginate({ selected : 0 }))
   }
 
-  onSelected(selected) {
+  onGetSelected(selected) {
     this.setState({ selected : [].concat(selected) })
   }
 
@@ -180,7 +180,7 @@ class Ride extends Component {
   }
 
   render() {
-    const { history } = this.props
+    // const { history } = this.props
     const {
       rides,
       count,
@@ -199,12 +199,12 @@ class Ride extends Component {
 
     return (
       <div className="ride-consult">
-        <TableContent 
-          header={ tableFormat.header }
+        <TableContent
+          getSelectedRows={ this.onGetSelected }
           onPaginate={ this.onPaginate }
+          header={ tableFormat.header }
           onSort={ this.onSort }
           {...{ data, skip, limit, count }}
-          getSelectedRows={ this.onSelected }
         />
         <Card className="ride-settings">
           <List>
@@ -230,7 +230,7 @@ class Ride extends Component {
                 <ListItem
                   avatar={ <MdBuild /> }
                   caption="Modify Ride"
-                  selectable={ true }
+                  selectable
                   // disabled={ selected.length > 1 }
                 />  
               </Link>
@@ -239,7 +239,7 @@ class Ride extends Component {
                 <ListItem
                   avatar={ <MdAdd /> }
                   caption="Add a new Ride"
-                  selectable={ true }
+                  selectable
                 />
               </Link>
             }
