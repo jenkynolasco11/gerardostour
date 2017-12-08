@@ -7,7 +7,6 @@ const ReceiptSchema = new Schema({
     index : true, 
     enum : [ 'CASH', 'CARD' ]
   },
-  // tickets : [{ type : String, required : true, index : true }],
   fee : Number,
   extraFee : Number,
   totalAmount : Number,
@@ -16,6 +15,8 @@ const ReceiptSchema = new Schema({
     // index : true,
     enum : [ '', 'VISA', 'MASTERCARD', 'AMERICAN EXPRESS', 'DISCOVERY' ]
   },
+  luggage : Number,
+  ticketCant : Number,
   cardLastDigits : Number,
   createdAt : { type : Date, default : Date.now }
 })

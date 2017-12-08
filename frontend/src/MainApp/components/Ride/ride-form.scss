@@ -1,6 +1,17 @@
 .ride-form {
   padding : 40px 30px 50px;
 
+  .ride-form-header {
+    display : flex;
+    justify-content : space-between;
+    align-items : center;
+
+    p {
+      font-size : 1.2em;
+      margin-right : 20%;
+    }
+  }
+
   [data-react-toolbox=dropdown], [data-react-toolbox=date-picker] {
     // background : red;
 
@@ -15,13 +26,19 @@
   }
 
   
-  [data-react-toolbox=dropdown]:nth-child(3) {
-    margin-top : 40px;
+  [data-react-toolbox=dropdown]{
+    &.bus-list {
+      margin-top : 50px;
+    }
+
+    &:nth-child(3) {
+      margin-top : 40px;
+    }
   }
 
-  .ride-routes {
-    // display : flex;
-  }
+  // .ride-routes {
+  //   // display : flex;
+  // }
 
   .bus-item {
     display : flex;

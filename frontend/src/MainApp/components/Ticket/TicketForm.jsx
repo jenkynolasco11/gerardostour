@@ -1,9 +1,10 @@
 import React, { Component } from 'react'
+import Dialog from 'react-toolbox/lib/dialog/Dialog'
 import axios from 'axios'
 
 import TicketTabs from './TicketTabs'
 import configData from '../../config/config-values.json'
-import { verifyCard } from '../../utils'
+import { formatTicketData, reformatTicketData } from './utils'
 
 import './ticket-form.scss'
 
@@ -12,6 +13,8 @@ const url = 'http://localhost:8000/api/v1/ticket'
 const defaultState = {
   id : '',
   isModify : false,
+  isLocal : true,
+  showDialog : false,
   title : 'Create',
 
   // Person Form Fields
@@ -56,6 +59,7 @@ const defaultState = {
   extraFee : 0.0,
   fee : 0.0,
   totalAmount : 0,
+  
   /////////////////
 
   // Ticket Information
@@ -64,7 +68,7 @@ const defaultState = {
   luggage : 0,
   ///////////
   status : 'NEW',
-  isLocal : true,
+  redeemedCount : 0,
 }
 /*
 const myInfo  = {
@@ -122,66 +126,6 @@ const myInfo  = {
   ///////////
 }
 */
-const formatTicketData = ticket => {
-  const { person, pickUpAddress, dropOffAddress } = ticket
-
-  return {
-    id : ticket.id,
-    person : {
-      firstname : person.firstname,
-      lastname : person.lastname,
-      email : person.email,
-      phoneNumber : person.phoneNumber,
-    },
-    date : new Date(ticket.date),
-    time : ticket.time,
-    willPick : ticket.willPick,
-    willDrop : ticket.willDrop,
-    pickUpAddress : {
-      street : pickUpAddress.street,
-      city : pickUpAddress.city,
-      state : pickUpAddress.state,
-      zipcode : pickUpAddress.zipcode
-    }, 
-    dropOffAddress : {
-      street : dropOffAddress.street,
-      city : dropOffAddress.city,
-      state : dropOffAddress.state,
-      zipcode : dropOffAddress.zipcode
-    },
-    from : ticket.from,
-    to : ticket.to,
-    oldDate : new Date(ticket.date),
-    oldTime : ticket.time
-  }
-}
-
-const reformatTicketData = tickt => {
-  return {
-    isLocal : true,
-    frm : tickt.from,
-    to : tickt.to,
-    departureDate : tickt.date,
-    departureTime : tickt.time,
-    howMany : tickt.ticketMany,
-    luggage : tickt.luggage,
-    firstname : tickt.person.firstname,
-    lastname : tickt.person.lastname,
-    phoneNumber : tickt.person.phoneNumber,
-    email : tickt.person.email,
-    willPick : tickt.willPick,
-    willDrop : tickt.willDrop,
-    pickUpAddress : tickt.willPick ? tickt.pickUpAddress : null,
-    dropOffAddress : tickt.willDrop ? tickt.dropOffAddress : null,
-    totalAmount : tickt.totalAmount,
-    cardBrand : tickt.payment.isCard ? verifyCard(tickt.payment.cardNumber) : '',
-    cardLastDigits : tickt.payment.isCard ? tickt.payment.cardNumber.slice(-4) : '',
-    paymentType : tickt.payment.isCard ? 'CARD' : 'CASH', 
-    status : tickt.status,
-    fee : parseFloat(tickt.fee),
-    extraFee : parseFloat(tickt.extraFee),
-  }
-}
 
 class TicketForm extends Component {
   constructor(props) {
@@ -204,17 +148,22 @@ class TicketForm extends Component {
     const { history } = this.props
     const { title, oldDate, oldTime, isModify, ...rest } = this.state
 
+    // console.log(this.state)
+    let data = null
     const body = reformatTicketData(rest)
     
     try {
       if(isModify) {
-        if(oldDate && oldTime && (new Date(body.date).getDate() !== new Date(oldDate).getDate() || body.time !== oldTime )) body.status = 'REDEEMABLE'
+        if(oldDate && oldTime && (body.departureDate.getDate() !== oldDate.getDate() || body.departureTime !== oldTime )) body.status = 'REDEEMED'
 
-        // const { data } = await axios.put(`${ url }/modify/`)
-      }
-      const { data } = await axios.post(`${ url }/insert`, body)
+        // console.log(body)
+        data = await axios.put(`${ url }/modify/`, body)
+        console.log(data)
+
+      } else data = await axios.post(`${ url }/save`, body)
       
-      if(data) {
+      if(data.data.ok) {
+        console.log(data)
         return history.push('/ticket')
       }
     } catch (e) {
@@ -322,6 +271,7 @@ class TicketForm extends Component {
     if(state) {
       params.title = state.title
       params.isModify = state.isModify
+      // if(params.isModify) params.status = 'REDEEMED'
 
       const id = state.ticket
 
@@ -340,17 +290,24 @@ class TicketForm extends Component {
       }
       // Do axios in here
     }
-
-    this.setState({ ...params, ...ticketData })
+    console.log(params)
+    console.log(ticketData)
+    this.setState({ ...ticketData, ...params, })
   }
 
   render() {
+    // console.log(this.state)
+    const { showDialog } = this.state
+
     return (
       <form onSubmit={ this._onSubmit }>
         <TicketTabs
           { ...this.state }
           onChange={ this._onChange }
           onCancel={ this._onCancel }
+        />
+        <Dialog
+          active={ showDialog }
         />
       </form>
     )

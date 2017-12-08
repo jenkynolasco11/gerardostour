@@ -9,7 +9,7 @@ receiptRouter.get('/:id', async ctx => {
   const { id } = ctx.params
 
   try {
-    const receipt = await Receipt.findById(id)
+    const receipt = await Receipt.findOne({ id })
 
     if(receipt) return ctx.body = { ok : true, data : { receipt }, message : '' }
 

@@ -6,19 +6,21 @@ export const getTicketData = async tckt => {
   try {
     const person = await Person.findById(tckt.person)
     const details = await TicketDetail.findById(tckt.details)
-    const { _id, createdAt, __v, ...receipt } = await Receipt.findById(tckt.receipt)
+    const recpt = await Receipt.findById(tckt.receipt)
     const pick = await (tckt.willPick ? Address.findById(details.pickUpAddress) : 'none')
     const drop = await (tckt.willDrop ? Address.findById(details.dropOffAddress) : 'none')
 
     const pickAdd = pick !== 'none' && pick ? { ...pick.toObject() } : pick
     const dropAdd = drop !== 'none' && drop ? { ...drop.toObject() } : drop
 
+    const { _id, createdAt, __v, luggage, ...receipt } = recpt._doc
+
     const data = {
       id : tckt.id,
       _id : tckt._id,
       willDrop : tckt.willDrop,
       willPick : tckt.willPick,
-      luggage : tckt.luggage,
+      luggage,
       status : tckt.status,
       from : tckt.from,
       to : tckt.to,
@@ -33,6 +35,7 @@ export const getTicketData = async tckt => {
         email : person.email,
         phoneNumber : person.phoneNumber
       },
+      redeemedCount : details.redeemedCount,
       receipt : { ...receipt }
     }
 
@@ -71,7 +74,7 @@ export const reformatTicket = (ctx, next) => {
   const { body } = ctx.request
 
   // If its local, return. No need to reformat data structure
-  console.log(body)
+  // console.log(body)
   if(body.isLocal) return next()
 
   // This is for the page data
@@ -132,7 +135,7 @@ export const saveTicket = async ticketInfo => {
   const {
     frm,
     to,
-    luggage,
+    // luggage,
     willPick,
     willDrop,
     status = 'NEW',
@@ -157,7 +160,7 @@ export const saveTicket = async ticketInfo => {
       details : details._id,
       receipt,
       status,
-      luggage,
+      // luggage,
       willPick,
       willDrop,
       from : frm,
@@ -181,16 +184,19 @@ export const saveTicket = async ticketInfo => {
   }
 }
 
-const saveReceipt = async data => {
-  const { cardBrand, cardLastDigits, totalAmount, paymentType, fee, extraFee } = data
+const saveReceipt = async (id, howMany, data) => {
+  const { cardBrand, cardLastDigits, totalAmount, paymentType, fee, extraFee, luggage } = data
   try {
     const receipt = await new Receipt({
+      id,
       cardBrand,
       cardLastDigits,
       totalAmount,
       paymentType,
       fee,
       extraFee,
+      luggage,
+      ticketCount : howMany
     }).save()
 
     return receipt._id
@@ -224,7 +230,8 @@ export const saveTickets = async data => {
       : null
     )
 
-    const receipt = await saveReceipt(data)
+    const receiptId = meta.lastReceiptId
+    const receipt = await saveReceipt(receiptId, howMany, data)
 
     // If anything got bad on inserting, then erase all the shit back!
     if(!receipt || !person || (!pickUp && data.willPick) || (!dropOff && data.willDrop)) {
@@ -253,18 +260,65 @@ export const saveTickets = async data => {
         pickUp,
         dropOff
       }))
-    
-    // const data = await Promise.all(promises)
+
     const tickets = await Promise.all(promises)
 
+    meta.lastReceiptId += 1
     meta.lastTicketId += tickets.length
     await meta.save()
 
     // return tickets
-    return receipt
+    return receiptId
   } catch (e) {
     console.log(e)
     return null
   }
+}
+
+export const updateTicket = async (id, data) => {
+  /**
+   * isLocal: true,
+  frm: 'NY',
+  to: 'PA',
+  departureDate: '2020-09-25T04:00:00.000Z',
+  departureTime: 4,
+  howMany: 1,
+  luggage: 0,
+  firstname: 'Damian',
+  lastname: 'Benjamin',
+  phoneNumber: '9654725166',
+  email: 'imperdiet.nec@lectussitamet.net',
+  willPick: true,
+  willDrop: false,
+  pickUpAddress:
+   { street: 'P.O. Box 258, 4084 Maecenas Road',
+     city: 'Pike Creek',
+     state: 'Delaware',
+     zipcode: 13660 },
+  dropOffAddress: null,
+  totalAmount: 30,
+  cardBrand: '',
+  cardLastDigits: '',
+  paymentType: 'CASH',
+  status: 'NEW',
+  fee: 30,
+  extraFee: 0 } 866
+   */
+  // const {
+  //   frm,
+  //   to,
+  //   departureTime,
+  //   departureDate,
+  //   willPick,
+  //   willDrop,
+
+  // } = data
+
+  // try {
+    
+  // } catch (e) {
+  //   console.log(e)
+  // }
+  return null
 }
 //////////////////////////////////////

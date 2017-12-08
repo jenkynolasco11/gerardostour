@@ -32,6 +32,7 @@ Meta.findOne({}).then(doc => {
 
     // Default meta data
     return new Meta({
+      lastReceiptId : 1,
       lastTicketId : 1,
       lastRideId : 1,
       lastBusId : 1,

@@ -212,7 +212,7 @@ mongoose.connect(config.DBURI, { useMongoClient : true }, async () => {
   }
 
   const createReceipt = async data => {
-    const { id, type, amnt, fee, extraFee, cardBrand, cardLastDigits } = data
+    const { id, type, amnt, fee, extraFee, cardBrand, cardLastDigits, luggage, ticketCount } = data
     try {
       const receipt = await new Payment({
         id,
@@ -222,6 +222,8 @@ mongoose.connect(config.DBURI, { useMongoClient : true }, async () => {
         totalAmount : amnt,
         cardBrand,
         cardLastDigits,
+        luggage,
+        ticketCount,
       }).save()
   
       return receipt._id
@@ -234,31 +236,7 @@ mongoose.connect(config.DBURI, { useMongoClient : true }, async () => {
 
     return null
   }
-/*
-  const createTicketDetail = async (pick, drop, date, time, fee, extraFee ) => {
-    try {
-      const tcktDtl = await new TicketDetail({
-        pickUpAddress : pick,
-        dropOffAddress : drop,
-        redeemedCount : 0,
-        date,
-        time,
-        fee,
-        extraFee
-      }).save()
-  
-      return tcktDtl._id
-    } catch (e) {
-      console.log(e)
-      process.exit()
-      // console.log('shit happened at TicketDetail')
-      // console.log(e)
-      // throw new Error(`Ticket Detail =====> ${ JSON.stringify(e) }`)
-    }
 
-    return null
-  }
-*/
   const createTicket = async (ticketData) => {
     const {
       id,
@@ -269,7 +247,7 @@ mongoose.connect(config.DBURI, { useMongoClient : true }, async () => {
       receipt,
       // details,
       status,
-      luggage,
+      // luggage,
       // leave /**/,
       pick,
       drop,
@@ -299,7 +277,7 @@ mongoose.connect(config.DBURI, { useMongoClient : true }, async () => {
         receipt,
         details : details._id,
         status,
-        luggage,
+        // luggage,
         willPick : Boolean(pick),
         willDrop : Boolean(drop),
         from : frm,
@@ -513,6 +491,7 @@ mongoose.connect(config.DBURI, { useMongoClient : true }, async () => {
               const fee = genRand(100,20)
               const extraFee = genRand(40,10)
               const totalAmount = fee + extraFee
+              const luggage = genRand(5)
 
               const receipt = createReceipt({
                 id : i + 1,
@@ -521,7 +500,9 @@ mongoose.connect(config.DBURI, { useMongoClient : true }, async () => {
                 fee,
                 extraFee,
                 cardBrand,
-                cardLastDigits
+                cardLastDigits,
+                luggage,
+                ticketCount : 1,
               })
 
               // console.log(receipt)
@@ -534,7 +515,6 @@ mongoose.connect(config.DBURI, { useMongoClient : true }, async () => {
               const date = getAnyDate()
               const time = genRand(24, 0)
 
-              const luggage = genRand(5)
               const status = ticktsStatus[ genRand(ticktsStatus.length) ]
 
               const assignedRide = genRand(2)
@@ -565,7 +545,7 @@ mongoose.connect(config.DBURI, { useMongoClient : true }, async () => {
                 person : person._id,
                 receipt,
                 status,
-                luggage,
+                // luggage,
                 pick : willPick ? pick[ 0 ]._id : null,
                 drop : willDrop ? drop[ 0 ]._id : null,
                 date,
@@ -643,6 +623,7 @@ mongoose.connect(config.DBURI, { useMongoClient : true }, async () => {
       await createTickets()
 
       await new Meta({
+        lastReceiptId : ticketLimit + 1,
         lastTicketId : ticketLimit + 1,
         lastRideId : rideLimit + 1,
         lastBusId : busNames.length + 1,

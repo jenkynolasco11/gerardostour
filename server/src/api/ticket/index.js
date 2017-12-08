@@ -1,7 +1,7 @@
 import Router from 'koa-router'
 
 import { Ticket, Receipt, TicketDetail, Ride, Meta } from '../../models'
-import { getTicketData, getTicketReceipt, reformatTicket, saveTickets } from './ticket.controller'
+import { getTicketData, getTicketReceipt, reformatTicket, saveTickets, updateTicket } from './ticket.controller'
 
 const ticketRouter = new Router({ prefix : 'ticket' })
 
@@ -42,6 +42,7 @@ ticketRouter.post('/save', reformatTicket, async ctx => {
     // console.log(data)
 
     // return the receipt instead
+    console.log(data)
     if(data) return ctx.body = { ok : true, data : { receipt : data }, message : '' }
 
     return ctx.body = { ok : false, data : null, message : 'Couldn\'t save the ticket. Contact your system administrator.' }
@@ -49,6 +50,21 @@ ticketRouter.post('/save', reformatTicket, async ctx => {
     console.log(e)
     return ctx.body = { ok : false, data : null, message : 'Error trying to save your ticket.' }
   }
+})
+
+ticketRouter.put('/modify', async ctx => {
+  const { body } = ctx.request
+  const { id } = body
+
+  try {
+    const data = await updateTicket(id, body)
+
+    if(data) return ctx.body = { ok : true, data : { ticket : data }, message : '' }
+  } catch (e) {
+    console.log(e)
+    return ctx.body = { ok : false, data : null, message : `Error updating ticket #${ id }.` }
+  }
+  return ctx.body = { ok : false, data : null, message : `Couldn't update the ticket #${ id }.` }
 })
 
 // Return all tickets that are not USED nor NULL
@@ -116,6 +132,7 @@ ticketRouter.get('/all/:rideId', async ctx => {
   }
 })
 
+// /////////////////////////////////////
 /** Not assigned yet */
 // Get tickets by Date range (if d2 is not passed, all tickets by date d1)
 ticketRouter.get('/date/:d1/:d2?', async ctx => {
@@ -212,6 +229,7 @@ ticketRouter.put('/modify/status', async ctx => {
     return ctx.body = { ok : false, data : null, message : 'Error changing ticket status' }
   }
 })
+// //////////////////////////////////////
 
 // Retrieve a ticket information
 ticketRouter.get('/:id', async ctx => {

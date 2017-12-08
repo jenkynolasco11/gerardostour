@@ -15,7 +15,7 @@ class TicketTabs extends Component{
     super(props)
 
     this.state = {
-      index : 3,
+      index : 0,
       // tab2Disable : true,
       // tab3Disable : true,
       // tab4Disable : true,

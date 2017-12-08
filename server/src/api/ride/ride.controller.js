@@ -112,7 +112,7 @@ export const updateRide = async (id, body) => {
       time,
       date,
       luggage = 0,
-      seatsOccupied = 0
+      seatsOccupied = 0,
     } = body
 
     // console.log(body.bus)

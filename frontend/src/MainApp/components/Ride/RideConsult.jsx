@@ -7,7 +7,7 @@ import { List, ListDivider, ListCheckbox, ListItem, ListSubHeader } from 'react-
 import { Card, /*CardActions, /*CardMedia,*/ CardTitle } from 'react-toolbox/lib/card'
 // import Dropdown from 'react-toolbox/lib/dropdown/Dropdown'
 // import Button from 'react-toolbox/lib/button/Button'
-import { MdDirectionsBus, MdBuild, MdAdd } from 'react-icons/lib/md'
+import { MdDirectionsBus, MdBuild, MdAdd, MdPublish } from 'react-icons/lib/md'
 
 import TableContent from '../extras/CustomTable'
 import RideBusModal from './RideBusModal'
@@ -27,8 +27,8 @@ const tableFormat = {
       routeFrom,
       time,
       date,
-      seatsAvailable,
-      luggageAvailable,
+      seatsUsed,
+      luggageUsed,
     } = props
   
     return {
@@ -39,11 +39,12 @@ const tableFormat = {
       from : routeFrom,
       time : time,
       date : date,
-      seats : seatsAvailable,
-      luggage : luggageAvailable
+      seats : seatsUsed,
+      luggage : luggageUsed
     }
   },
   header : [
+    { 'id' : 'Ride ID' },
     { 'bus' : 'Bus' },
     { 'status' : 'Status' },
     { 'from' : 'From' },
@@ -64,21 +65,22 @@ const RideSettings = props => {
     onTheWay,
     finished,
     shouldShowModal,
-    onChange
+    onChange,
+    future
   } = props
 
   return (
     <Card className="ride-settings">
       <List>
         <CardTitle title="Actions" />
+        <ListDivider />
         <ListItem 
           avatar={ <MdDirectionsBus /> }
           caption="Set To Bus"
           onClick={ () => shouldShowModal(true) }
           disabled={ selected.length === 0 }
-          selectable={ true }
+          selectable
         />
-        <ListDivider />
         {
           selected.length ?
           selected.length > 1 ?
@@ -88,7 +90,7 @@ const RideSettings = props => {
             disabled={ selected.length > 1 }
           />
           :
-          <Link to={{ pathname : '/ride/create-modify', state : { ride : getSelectedRide, title : 'Modify' }}}>
+          <Link to={{ pathname : '/ride/create-modify', state : { ride : getSelectedRide(), title : 'Modify' }}}>
             <ListItem
               avatar={ <MdBuild /> }
               caption="Modify Ride"
@@ -106,6 +108,15 @@ const RideSettings = props => {
           </Link>
         }
       </List>
+      <CardTitle title="Dispatch" />
+      <ListDivider />
+      <ListItem 
+        avatar={ <MdPublish /> }
+        caption="Dispatch to Bus"
+        onClick={ e => console.log('Clicked on dispatch!') }
+        disabled={ true }
+        selectable
+      />
       <List>
         <CardTitle title="Settings" />
         <ListDivider />
@@ -138,7 +149,25 @@ const RideSettings = props => {
           checked={ finished }
           onChange={ val => onChange(val, 'finished') }
         />
-        <ListDivider/>
+        {
+          //////////////////////////////////////////
+          ///// ADMIN SETTINGS
+          //////////////////////////////////////////
+          false &&
+            <List>
+              <CardTitle title="Admin Settings" />
+              <ListDivider/>
+              <ListCheckbox
+                legend="Those rides that have finished for the day"
+                inset={ true }
+                caption="Past rides"
+                checked={ future }
+                onChange={ val => onChange(val, 'future') }
+                // Come here later....
+                disabled={ true }
+              />
+          </List>
+        }
       </List>
     </Card>
   )
@@ -156,6 +185,7 @@ class Ride extends Component {
       finished : false,
       assigned : false,
       onTheWay : false,
+      future : true,
       sort : 'date',
       sortOrder : -1,
       rides : [],
@@ -164,6 +194,7 @@ class Ride extends Component {
     }
 
     this.shouldShowModal = this.shouldShowModal.bind(this)
+    this.getSelectedRide = this.getSelectedRide.bind(this)
     this.onGetSelected = this.onGetSelected.bind(this)
     this.onPaginate = this.onPaginate.bind(this)
     this.assignBus = this.assignBus.bind(this)
@@ -171,8 +202,8 @@ class Ride extends Component {
     this.onSort = this.onSort.bind(this)
   }
 
-  async makeRequest(limit, skip, count, /*assigned, */status, sort) {
-    return await axios.get(`${ url }/all?skip=${ skip }&limit=${ limit }&sort=${ sort }&status=${ status }`)//&unassigned=${ true }`)
+  async makeRequest(limit, skip, count, /*assigned, */status, sort, future) {
+    return await axios.get(`${ url }/all?skip=${ skip }&limit=${ limit }&sort=${ sort }&status=${ status }&future=${ future }`)//&unassigned=${ true }`)
   }
 
   async onPaginate(skip) {
@@ -185,6 +216,7 @@ class Ride extends Component {
       onTheWay,
       finished,
       pending,
+      future
      } = this.state
 
     const newSkip = skip.selected * limit
@@ -198,7 +230,7 @@ class Ride extends Component {
       .join(',')
 
     try {
-      const { data } = await this.makeRequest(limit, newSkip, count,/* unassigned,*/ status, `${ sort } ${ sortOrder }`)
+      const { data } = await this.makeRequest(limit, newSkip, count,/* unassigned,*/ status, `${ sort } ${ sortOrder }`, future)
 
       if(data.ok) {
         let { rides, count } = data.data
@@ -247,11 +279,11 @@ class Ride extends Component {
 
     try {
       const { data } = await axios.put(`${ url }/assign-bus`, { bus,  ids })
-
+      // console.log(data)
       if(data.ok) this.onPaginate({ selected : skip })
 
     } catch(e) {
-
+      console.log(e)
     }
 
     this.setState({ showModal : false })

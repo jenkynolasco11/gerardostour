@@ -54,21 +54,3 @@ export const onlyNumber = val => {
 
 //   return false
 // }
-
-
-export const verifyCard = number => {
-
-  // Visa => 16, starts with 4
-  if(/^4/.test(number) && number.length === 16) return 'VISA'
-
-  // American Express => 15, starts with 3, second either 4 or 7
-  else if(/^3[47]/.test(number) && number.length >= 15) return 'AMERICAN EXPRESS'
-
-  // MasterCard => 16, starts with 5, second from 1 to 5, ranges 510000 to 559999, starts with 2 and second is 2 to 7, ranges 222100 to 272099
-  else if(/^(5[1-5]|2[2-7])/.test(number) && number.length >= 16 ){
-    const card = Number(number.slice(0,6))
-    if((card > 222099 && card < 272100) || (card > 509999 && card < 560000)) return 'MASTERCARD'
-  }
-
-  return ''
-}

@@ -4,7 +4,7 @@ import axios from 'axios'
 
 import { Card, CardTitle, CardActions } from 'react-toolbox/lib/card'
 // import Checkbox from 'react-toolbox/lib/checkbox/Checkbox'
-import { /*List,*/ ListDivider } from 'react-toolbox/lib/list'
+import { List, ListDivider } from 'react-toolbox/lib/list'
 import Dropdown from 'react-toolbox/lib/dropdown/Dropdown'
 import { /*MdChevronLeft, MdChevronRight, */ MdEventAvailable } from 'react-icons/lib/md'
 // import Layout from 'react-toolbox/lib/layout/Layout'
@@ -14,6 +14,7 @@ import DatePicker from 'react-toolbox/lib/date_picker/DatePicker'
 
 // import { formatDate, formatHour } from '../../utils'
 
+import { FormatBusItem, formatData, getMinDate } from './utils'
 import configData from '../../config/config-values.json'
 import './ride-form.scss'
 
@@ -25,7 +26,7 @@ const defaultState = {
   bus : '',
   routeTo : 'NY',
   routeFrom : 'PA',
-  // status : 'PENDING',
+  status : 'PENDING',
   time : 3,
   date : new Date(new Date().setHours(0,0,0,0)),
   busses : []
@@ -37,30 +38,9 @@ const defaultState = {
 // }
 
 //TOO MUCH DRY IN HERE!!!! 
-const formatData = bus => {
-  const { id, ...rest } = bus
 
-  return {
-    ...rest,
-    value : id
-  }
-}
 
-const FormatBusItem = bus => (
-  <div className="bus-item">
-    <div className="">
-      <strong>{ bus.name }</strong>
-      <p>
-        <em><strong>Seats :</strong>{`${ bus.seats }`}</em>
-        <em><strong>Luggage :</strong>{`${ bus.luggage }`}</em>
-      </p>
-    </div>
-    <div className="">
-      <p>Driver : { `${ bus.driver.firstname } ${ bus.driver.lastname }` }</p>
-      <em>{ bus.alias }</em>
-    </div>
-  </div>
-)
+
 
 // const getHourValue = tim => {
 //   const { times } = configData
@@ -73,13 +53,7 @@ const FormatBusItem = bus => (
 //   return times[ 0 ].value
 // }
 
-const getMinDate = () => {
-  const date = new Date()
 
-  date.setDate(date.getDate() - 1)
-
-  return date
-}
 
 class RideForm extends Component {
   constructor(props) {
@@ -95,19 +69,19 @@ class RideForm extends Component {
   async onSubmit(e) {
     e.preventDefault()
     const { history } = this.props
-    const { id, bus, routeTo, routeFrom, time, date, title } = this.state
+    const { id, bus, routeTo, routeFrom, time, date, title, status } = this.state
 
     try {
-      const body = { bus, routeTo, routeFrom, time, date }
+      const body = { bus, routeTo, routeFrom, time, date, status }
 
       let data = null
       
-      if(title === 'Create' ) data = await axios.post(`${ url }/ride/insert`, body)
+      if(title === 'Create' ) data = await axios.post(`${ url }/ride/save`, body)
       else data = await axios.put(`${ url }/ride/${ id }/modify`, body)
       // console.log(data)
       if(data.data.ok) return history.goBack()
     } catch(e) {
-
+      console.log(e)
     }
   }
 
@@ -125,14 +99,14 @@ class RideForm extends Component {
 
         if(data.ok) {
           // console.log(data.data)
-          const { id, routeFrom, routeTo, time, date, bus } = data.data
+          const { id, routeFrom, routeTo, time, date, bus, status } = data.data
                 
           console.log(id)
     
           // console.log(data)
           // console.log(date)
           
-          self.setState({ id, routeFrom, routeTo, time, date, bus : bus ? bus.id : null })  
+          self.setState({ id, routeFrom, routeTo, time, date, status, bus : bus ? bus.id : null })
         }
       })
       .catch(e=> {
@@ -159,6 +133,7 @@ class RideForm extends Component {
   render() {
     const { history } = this.props
     const {
+      id,
       title,
       busses,
       routeTo,
@@ -173,15 +148,18 @@ class RideForm extends Component {
     return (
       <form className="" onSubmit={ this.onSubmit }>
         <Card className="ride-form">
-          <CardTitle className="" title={`${ title } Ride`}/>
+          <List className="ride-form-header">
+            <CardTitle className="" title={`${ title } Ride`}/>
+            { id ? <p>Ride ID: { id }</p> : null }
+          </List>
           <ListDivider className="margin-bottom" />
           <Dropdown
             label="Time"
+            allowBlank={ false }
             source={ configData.times }
             value={ time }
             onChange={ e => this.setState({ time : e }) }
           />
-          {/*<div className="ride-routes">*/}
           <Dropdown
             label="Going from"
             source={ configData.routes }
@@ -194,7 +172,6 @@ class RideForm extends Component {
             value={ routeTo }
             onChange={ e => this.setState({ routeTo : e }) }
           />
-          {/*</div>*/}
           <DatePicker
             autoOk
             minDate={ getMinDate() }

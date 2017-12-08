@@ -82,7 +82,7 @@ busRouter.get('/all', async ctx => {
   const list = [].concat(statusExt ? statusExt.split(',') : '')
   const conditions = { status : { $in : list }}
 
-  console.log(conditions)
+  // console.log(conditions)
 
   try {
     const busses = await Bus

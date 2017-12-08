@@ -41,14 +41,6 @@ class CustomTable extends Component {
     }, () => getSelectedRows(selected))
   }
 
-  // getSelectedRows() {
-    
-  // }
-  // onPageSelect(e) {
-  //   console.log(e)
-  //   // console.log()
-  // }
-
   renderNavigationBar(pages) {
     const { skip = 0, onPaginate } = this.props
 

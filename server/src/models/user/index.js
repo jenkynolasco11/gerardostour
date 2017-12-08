@@ -5,6 +5,7 @@ const UserSchema = new Schema({
   person : { type : Schema.Types.ObjectId, ref : 'person', required : true, unique : true },
   username : { type : String, index : { unique : true }},
   password : { type : String, required : true, },
+  // permissions : [{ type : String, enum : [ 'create', 'replace', 'update', 'delete' ] }],
   position : {
     type : String,
     default : 'NONE',

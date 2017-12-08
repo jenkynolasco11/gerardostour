@@ -12,7 +12,7 @@ const TicketSchema = new Schema({
   receipt : { type : Schema.Types.ObjectId, ref : 'receipt', required : true, index : true }, // Should also be unique, Doesnt need index
   details : { type : Schema.Types.ObjectId, ref : 'ticketDetail', required : true, index : true }, // Should also be unique, Doesnt need index
   status : { type : String, index : true, enum : status },
-  luggage : { type : Number, default : 0 },
+  // luggage : { type : Number, default : 0 },
   willPick : { type : Boolean, default : false, index : true },
   willDrop : { type : Boolean, default : false, index : true },
   //////****//
@@ -28,7 +28,7 @@ const TicketSchema = new Schema({
 const TicketDetailsSchema = new Schema({
   pickUpAddress : { type : Schema.Types.ObjectId, ref : 'address', index : true },
   dropOffAddress : { type : Schema.Types.ObjectId, ref : 'address', index : true },
-  redeemedCount : { Type : Number, default : 0 },
+  redeemedCount : Number,
   // fee : { type : Number, default : 0 },
   // extraFee : { type : Number, default : 0 },
   createdAt : { type : Date, default : Date.now },

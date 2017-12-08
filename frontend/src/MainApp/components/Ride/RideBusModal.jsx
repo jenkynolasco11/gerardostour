@@ -1,55 +1,14 @@
 import React, { Component } from 'react'
-import Dialog from 'react-toolbox/lib/dialog/Dialog'
+import { CardTitle } from 'react-toolbox/lib/card'
+import { ListCheckbox, ListItem, ListDivider } from 'react-toolbox/lib/list'
 import Dropdown from 'react-toolbox/lib/dropdown/Dropdown'
+import Dialog from 'react-toolbox/lib/dialog/Dialog'
 import axios from 'axios'
-// import { Card, CardActions, /*CardMedia,*/ CardTitle } from 'react-toolbox/lib/card'
-import { List, ListDivider, ListCheckbox, ListItem, ListSubHeader } from 'react-toolbox/lib/list'
 
+import { FormatBusItem, formatData } from './utils'
 import './ride-modal.scss'
 
 const url = 'http://localhost:8000/api/v1/bus'
-
-const FormatBusItem = bus => (
-  <div className="bus-item">
-    <div className="">
-      <strong>{ bus.name }</strong>
-      <p>
-        <em><strong>Seats :</strong>{`${ bus.seats }`}</em>
-        <em><strong>Luggage :</strong>{`${ bus.luggage }`}</em>
-      </p>
-    </div>
-    <div className="">
-      <p>Driver : { `${ bus.driver.firstname } ${ bus.driver.lastname }` }</p>
-      <em>{ bus.alias }</em>
-    </div>
-  </div>
-)
-
-const formatData = bus => {
-  const { id, ...rest } = bus
-
-  return {
-    ...rest,
-    value : id
-  }
-}
-
-/**
- *
- * {
-    "id": "5a24be8eab02183380cfbe12",
-    "name": "Blanquita",
-    "alias": "Blanquita",
-    "driver": {
-    "firstname": "Quinlan",
-    "lastname": "Franks",
-    "phoneNumber": "3573563988",
-    "position": "DRIVER"
-    },
-    "seats": 40,
-    "luggage": 52
-  }
- */
 
 class RideBusModal extends Component {
   constructor(props) {
@@ -89,7 +48,6 @@ class RideBusModal extends Component {
 
       }
     } catch(e) {
-      // console.log(e)
       return setTimeout(() => this.makeRequest(), 1000)
     }
   }
@@ -113,13 +71,14 @@ class RideBusModal extends Component {
         actions={ actions }
         onEscKeyDown={ onDialogClose }
         active={ active }
-        // title="What to do?"
       >
         <div>
-          <ListItem selectable={ false } legend="Assign bus" />
+          <CardTitle title="Assign Bus" />
+          <ListDivider />
           <Dropdown
+            className="bus-list"
             value={ selected }
-            selectable={ false }
+            // selectable={ false }
             source={ busses }
             template={ FormatBusItem }
             onChange={ this.setSelected }

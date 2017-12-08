@@ -11,7 +11,8 @@ rideRouter.get('/all', async ctx => {
     status = 'FINISHED,ASSIGNED',
     limit = 10,
     skip = 0,
-    sort = 'date -1'
+    sort = 'date -1',
+    future = 'true',
   } = ctx.query
 
   const list = [].concat(status ? status.split(',') : '')
@@ -21,6 +22,11 @@ rideRouter.get('/all', async ctx => {
   const sortCondition = { [ srt ] : Number(asc) }
 
   if(srt === 'date') sortCondition.time = 1
+  if(future === 'true') {
+    const tmpDate = new Date()
+
+    conditions.date = { $gte : new Date(new Date().setDate( tmpDate.getDate() - 1)) }
+  }
 
   try {
     const rides = await Ride
@@ -114,14 +120,14 @@ rideRouter.put('/assign-bus', async ctx => {
     const promises = []
 
     if(bs) {
-      for(let i = 0; i < ids.length; i++) promises.push(Ride.findOneAndUpdate({ _id : ids[ i ] }, { bus, status : 'ASSIGNED' }))
+      for(let i = 0; i < ids.length; i++) promises.push(Ride.findOneAndUpdate({ id : ids[ i ] }, { bus, status : 'ASSIGNED' }))
 
       const rids = await Promise.all(promises)
 
       if(rids) return ctx.body = { ok : true, data : null, message : '' }
     }
   } catch (e) {
-    // console.log(e)
+    console.log(e)
 
     return ctx.body = { ok : false, data : null, message : 'Error retrieving rides' }
   }

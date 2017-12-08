@@ -1,6 +1,7 @@
 import mongoose, { Schema } from 'mongoose'
 
 const MetaSchema = new Schema({
+  lastReceiptId : Number,
   lastTicketId : Number,
   lastBusId : Number,
   lastRideId : Number,
