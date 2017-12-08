@@ -53,7 +53,7 @@ const TimeInfo = props => {
 }
 
 const TripInfo = props => {
-  const { ticketMany, luggage, to, from } = props
+  const { ticketMany, luggage, to, from, isModify } = props
 
   return (
     <List className="address-dropdown">
@@ -67,6 +67,7 @@ const TripInfo = props => {
           label="Tickets"
           hint="How Many?"
           value={ ticketMany }
+          disabled={ isModify }
           onChange={ val => props.onChange(val, 'ticketMany') }
         />
         <p>Luggage:</p>
@@ -76,6 +77,7 @@ const TripInfo = props => {
           label="Luggage"
           hint="How Many?"
           value={ luggage }
+          disabled={ isModify }
           onChange={ val => props.onChange(val, 'luggage') }
         />
       </List>
@@ -86,6 +88,7 @@ const TripInfo = props => {
           label="From"
           required
           allowBlank={ false }
+          disabled={ isModify }
           // template={ typeTemplate }
           source={ configData.routes }
           value={ from }
@@ -97,6 +100,7 @@ const TripInfo = props => {
           label="To"
           required
           allowBlank={ false }
+          disabled={ isModify }
           // template={ typeTemplate }
           source={ configData.routes }
           value={ to }

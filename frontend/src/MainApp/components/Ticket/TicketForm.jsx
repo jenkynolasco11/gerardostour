@@ -9,38 +9,9 @@ import './ticket-form.scss'
 
 const url = 'http://localhost:8000/api/v1/ticket'
 
-/**
- * desde----------
-hacia----------
-fecha_salida----------
-hora_salida----------
-numero_tickets----------
-extras_maletas------
-nombre------
-apellido------
-telefono------
-email------
-calle_origen----------
-cuidad_origen----------
-estado_origen----------
-zipcode_origen----------
-precio_primera_ruta----------
-precio_segunda_ruta----------
-calle_destino----------
-ciudad_destino----------
-estado_destino----------
-zipcode_destino----------
-total_final---------
-card_last_digits---------
-card_brand---------
-recoger---------
-dejar---------
-fecha_creacion---------
-
- */
-
 const defaultState = {
   id : '',
+  isModify : false,
   title : 'Create',
 
   // Person Form Fields
@@ -95,7 +66,7 @@ const defaultState = {
   status : 'NEW',
   isLocal : true,
 }
-
+/*
 const myInfo  = {
   id : '',
   title : 'Create',
@@ -150,6 +121,40 @@ const myInfo  = {
   luggage : 3,
   ///////////
 }
+*/
+const formatTicketData = ticket => {
+  const { person, pickUpAddress, dropOffAddress } = ticket
+
+  return {
+    id : ticket.id,
+    person : {
+      firstname : person.firstname,
+      lastname : person.lastname,
+      email : person.email,
+      phoneNumber : person.phoneNumber,
+    },
+    date : new Date(ticket.date),
+    time : ticket.time,
+    willPick : ticket.willPick,
+    willDrop : ticket.willDrop,
+    pickUpAddress : {
+      street : pickUpAddress.street,
+      city : pickUpAddress.city,
+      state : pickUpAddress.state,
+      zipcode : pickUpAddress.zipcode
+    }, 
+    dropOffAddress : {
+      street : dropOffAddress.street,
+      city : dropOffAddress.city,
+      state : dropOffAddress.state,
+      zipcode : dropOffAddress.zipcode
+    },
+    from : ticket.from,
+    to : ticket.to,
+    oldDate : new Date(ticket.date),
+    oldTime : ticket.time
+  }
+}
 
 const reformatTicketData = tickt => {
   return {
@@ -184,7 +189,7 @@ class TicketForm extends Component {
 
     this.state = {
       ...defaultState,
-      ...myInfo
+      // ...myInfo
     }
 
     this._onChange = this._onChange.bind(this)
@@ -197,12 +202,18 @@ class TicketForm extends Component {
     e.preventDefault()
 
     const { history } = this.props
-    const { title, ...rest } = this.state
+    const { title, oldDate, oldTime, isModify, ...rest } = this.state
+
     const body = reformatTicketData(rest)
     
     try {
+      if(isModify) {
+        if(oldDate && oldTime && (new Date(body.date).getDate() !== new Date(oldDate).getDate() || body.time !== oldTime )) body.status = 'REDEEMABLE'
+
+        // const { data } = await axios.put(`${ url }/modify/`)
+      }
       const { data } = await axios.post(`${ url }/insert`, body)
-      console.log(data)
+      
       if(data) {
         return history.push('/ticket')
       }
@@ -301,20 +312,36 @@ class TicketForm extends Component {
     })
   }
 
-  componentWillMount() {
+  async componentWillMount() {
     const { state } = this.props.location
     let { to, luggage, ticketMany } = this.state
 
     const params = this._calculateFees(to, luggage, ticketMany)
+    let ticketData = null
 
     if(state) {
       params.title = state.title
-      // this.setState({ title : state.title })
+      params.isModify = state.isModify
 
+      const id = state.ticket
+
+      try {
+        const { data } = await axios.get(`${ url }/${ id }`)
+
+        if(data.ok) {
+          ticketData = { ...formatTicketData(data.data) }
+          console.log(ticketData)
+        }
+        else this.props.history.goBack()
+      } catch (e) {
+        console.log('Something Happened....')
+        console.log(e)
+        this.props.history.goBack()
+      }
       // Do axios in here
     }
 
-    this.setState({ ...params })
+    this.setState({ ...params, ...ticketData })
   }
 
   render() {

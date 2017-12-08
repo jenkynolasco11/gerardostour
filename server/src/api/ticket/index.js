@@ -227,10 +227,12 @@ ticketRouter.get('/:id', async ctx => {
   const { id } = ctx.params
 
   try {
-    const tckt = await Ticket.findById(id)
+    const tckt = await Ticket.findOne({ id })
 
     if(tckt) {
       const ticketData = await getTicketData(tckt)
+      
+      console.log(ticketData)
 
       if(ticketData) return ctx.body = { ok : true, data : ticketData, message : '' }
     }

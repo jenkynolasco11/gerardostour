@@ -58,6 +58,51 @@ const tableFormat = {
   ]
 }
 
+const TicketSettings = props => {
+  const {
+    selected,
+    getSelectedTicket
+  } = props
+
+  return (
+    <Card className="ticket-settings">
+      <List>
+        <CardTitle title="Actions"/>
+        <ListDivider />
+        {
+          selected.length ?
+          selected.length > 1 ?
+          // <Link>
+          <ListItem
+            avatar={ <MdBuild /> }
+            caption="Modify Ticket"
+            disabled={ selected.length > 1 }
+          />
+          // </Link>
+          :
+          <Link to={{ pathname : '/ticket/create-modify', state : { ticket : getSelectedTicket(), title : 'Modify', isModify : true }}}>
+            <ListItem
+              avatar={ <MdBuild /> }
+              caption="Modify Ticket"
+              selectable
+            />
+          </Link>
+          :
+          <Link to={{ pathname: '/ticket/create-modify' }}>
+            <ListItem
+              avatar={ <MdReceipt /> }
+              caption="Create a new Ticket"
+              selectable
+            />
+          </Link>
+        }
+        <CardTitle title="Settings"/>
+        <ListDivider />
+      </List>
+    </Card>
+  )
+}
+
 class TicketConsult extends Component {
   constructor(props) {
     super(props)
@@ -72,6 +117,7 @@ class TicketConsult extends Component {
         selected : [],
       }
 
+    this.getSelectedTicket = this.getSelectedTicket.bind(this)
     this.onGetSelected = this.onGetSelected.bind(this)
     this.onPaginate = this.onPaginate.bind(this)
     this.onSort = this.onSort.bind(this)
@@ -140,6 +186,7 @@ class TicketConsult extends Component {
       count,
       selected
     } = this.state
+
     const data = tickets.map(tableFormat.format)
 
     return (
@@ -151,41 +198,10 @@ class TicketConsult extends Component {
           onSort={ this.onSort }
           {...{ data, skip, limit, count }}
         />
-        <Card className="ticket-settings">
-          <List>
-            <CardTitle title="Actions"/>
-            <ListDivider />
-            {
-              selected.length ?
-              selected.length > 1 ?
-              // <Link>
-              <ListItem
-                avatar={ <MdBuild /> }
-                caption="Modify Ticket"
-                disabled={ selected.length > 1 }
-              />
-              // </Link>
-              :
-              <Link to={{ pathname : '/ticket/create-modify', state : { ticket : this.getSelectedTicket(), title : 'Modify' }}}>
-                <ListItem
-                  avatar={ <MdBuild /> }
-                  caption="Modify Ticket"
-                  selectable
-                />
-              </Link>
-              :
-              <Link to={{ pathname: '/ticket/create-modify' }}>
-                <ListItem
-                  avatar={ <MdReceipt /> }
-                  caption="Create a new Ticket"
-                  selectable
-                />
-              </Link>
-            }
-            <CardTitle title="Settings"/>
-            <ListDivider />
-          </List>
-        </Card>
+        <TicketSettings 
+          selected={ selected } 
+          getSelectedTicket={ this.getSelectedTicket }
+        />
       </div>
     )
   }

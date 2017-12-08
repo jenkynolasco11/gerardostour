@@ -55,6 +55,95 @@ const tableFormat = {
   ]
 }
 
+const RideSettings = props => {
+  const { 
+    selected,
+    getSelectedRide,
+    pending,
+    assigned,
+    onTheWay,
+    finished,
+    shouldShowModal,
+    onChange
+  } = props
+
+  return (
+    <Card className="ride-settings">
+      <List>
+        <CardTitle title="Actions" />
+        <ListItem 
+          avatar={ <MdDirectionsBus /> }
+          caption="Set To Bus"
+          onClick={ () => shouldShowModal(true) }
+          disabled={ selected.length === 0 }
+          selectable={ true }
+        />
+        <ListDivider />
+        {
+          selected.length ?
+          selected.length > 1 ?
+          <ListItem
+            avatar={ <MdBuild /> }
+            caption="Modify Ride"
+            disabled={ selected.length > 1 }
+          />
+          :
+          <Link to={{ pathname : '/ride/create-modify', state : { ride : getSelectedRide, title : 'Modify' }}}>
+            <ListItem
+              avatar={ <MdBuild /> }
+              caption="Modify Ride"
+              selectable
+              // disabled={ selected.length > 1 }
+            />  
+          </Link>
+          : 
+          <Link to="/ride/create-modify">
+            <ListItem
+              avatar={ <MdAdd /> }
+              caption="Add a new Ride"
+              selectable
+            />
+          </Link>
+        }
+      </List>
+      <List>
+        <CardTitle title="Settings" />
+        <ListDivider />
+        <ListCheckbox
+          legend="Those rides waiting to be dispatched"
+          inset={ true }
+          caption="Pending rides"
+          checked={ pending }
+          onChange={ val => onChange(val, 'pending') }
+          disabled={ true }
+        />
+        <ListCheckbox
+          legend="Haven't been assigned to a bus"
+          inset={ true }
+          caption="Assigned rides"
+          checked={ assigned }
+          onChange={ val => onChange(val, 'assigned') }
+        />
+        <ListCheckbox
+          legend="Those that are on their way"
+          inset={ true }
+          caption="On the way rides"
+          checked={ onTheWay }
+          onChange={ val => onChange(val, 'onTheWay') }
+        />
+        <ListCheckbox
+          legend="Those rides that have finished for the day"
+          inset={ true }
+          caption="Finished rides"
+          checked={ finished }
+          onChange={ val => onChange(val, 'finished') }
+        />
+        <ListDivider/>
+      </List>
+    </Card>
+  )
+}
+
 class Ride extends Component {
   constructor(props) {
     super(props)
@@ -74,8 +163,9 @@ class Ride extends Component {
       selected : []
     }
 
-    this.onPaginate = this.onPaginate.bind(this)
+    this.shouldShowModal = this.shouldShowModal.bind(this)
     this.onGetSelected = this.onGetSelected.bind(this)
+    this.onPaginate = this.onPaginate.bind(this)
     this.assignBus = this.assignBus.bind(this)
     this.onChange = this.onChange.bind(this)
     this.onSort = this.onSort.bind(this)
@@ -146,7 +236,7 @@ class Ride extends Component {
 
     if(!selected.length) return null
 
-    console.log(selected[ 0 ])
+    // console.log(selected[ 0 ])
     return rides[ selected[ 0 ]].id
   }
 
@@ -179,8 +269,11 @@ class Ride extends Component {
     await this.onPaginate({ selected : 0 })
   }
 
+  shouldShowModal(val) {
+    this.setState({ showModal : val })
+  }
+
   render() {
-    // const { history } = this.props
     const {
       rides,
       count,
@@ -195,7 +288,6 @@ class Ride extends Component {
     } = this.state
 
     const data = rides.map(tableFormat.format)
-    // console.log(selected.length > 2)
 
     return (
       <div className="ride-consult">
@@ -206,79 +298,17 @@ class Ride extends Component {
           onSort={ this.onSort }
           {...{ data, skip, limit, count }}
         />
-        <Card className="ride-settings">
-          <List>
-            <CardTitle title="Actions" />
-            <ListItem 
-              avatar={ <MdDirectionsBus /> }
-              caption="Set To Bus"
-              onClick={ () => this.setState({ showModal : true }) }
-              disabled={ selected.length === 0 }
-              selectable={ true }
-            />
-            <ListDivider />
-            {
-              selected.length ?
-              selected.length > 1 ?
-              <ListItem
-                avatar={ <MdBuild /> }
-                caption="Modify Ride"
-                disabled={ selected.length > 1 }
-              />
-              :
-              <Link to={{ pathname : '/ride/create-modify', state : { ride : this.getSelectedRide(), title : 'Modify' }}}>
-                <ListItem
-                  avatar={ <MdBuild /> }
-                  caption="Modify Ride"
-                  selectable
-                  // disabled={ selected.length > 1 }
-                />  
-              </Link>
-              : 
-              <Link to="/ride/create-modify">
-                <ListItem
-                  avatar={ <MdAdd /> }
-                  caption="Add a new Ride"
-                  selectable
-                />
-              </Link>
-            }
-          </List>
-          <List>
-            <CardTitle title="Settings" />
-            <ListDivider />
-            <ListCheckbox
-              legend="Those rides waiting to be dispatched"
-              inset={ true }
-              caption="Pending rides"
-              checked={ pending }
-              onChange={ val => this.onChange(val, 'pending') }
-              disabled={ true }
-            />
-            <ListCheckbox
-              legend="Haven't been assigned to a bus"
-              inset={ true }
-              caption="Assigned rides"
-              checked={ assigned }
-              onChange={ val => this.onChange(val, 'assigned') }
-            />
-            <ListCheckbox
-              legend="Those that are on their way"
-              inset={ true }
-              caption="On the way rides"
-              checked={ onTheWay }
-              onChange={ val => this.onChange(val, 'onTheWay') }
-            />
-            <ListCheckbox
-              legend="Those rides that have finished for the day"
-              inset={ true }
-              caption="Finished rides"
-              checked={ finished }
-              onChange={ val => this.onChange(val, 'finished') }
-            />
-            <ListDivider/>
-          </List>
-        </Card>
+        <RideSettings
+          {...{
+            assigned,
+            onTheWay,
+            finished,
+            pending,
+            selected,
+            getSelectedRide : this.getSelectedRide,
+            shouldShowModal : this.shouldShowModal,
+            onChange : this.onChange
+        }}/>
         <RideBusModal
           active={ showModal }
           onDialogClose={ () => this.setState({ showModal : false }) }

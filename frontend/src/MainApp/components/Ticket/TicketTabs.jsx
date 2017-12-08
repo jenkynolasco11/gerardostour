@@ -31,59 +31,8 @@ class TicketTabs extends Component{
     this.setState({ index })
   }
 
-  // _onAllowTab(tabName, isDisabled) {
-  //   this.setState({ [ tabName ] : isDisabled })
-  // }
-
-  // _willEnableAddressTab() {
-  //   const { firstname, lastname, email, phoneNumber } = this.props.person
-    
-  //   const shouldEnable = verifyFields([
-  //     { val : firstname.length, min : 2 },
-  //     { val : lastname.length, min : 2 },
-  //     { val : phoneNumber.length, min : 10 },
-  //     { val : email, emtpy : true, match : /[a-z0-9_.-]*@[a-z0-9]*\.[a-z]{2,6}/ },
-  //   ])
-
-  //   // console.log(`Should enable ? ${ shouldEnable }`)
-  //   return shouldEnable
-  // }
-
-  // _willEnablePaymentTab() {
-  //   const {
-  //     to,
-  //     from,
-  //     willPick,
-  //     willDrop,
-  //     pickUpAddress,
-  //     dropOffAddress,
-  //     // date,
-  //     // time,
-  //     ticketMany,
-  //     luggage,
-  //   } = this.props
-
-  //   const shouldEnable = verifyFields([
-  //     { val : to, min : 1 },
-  //     { val : from, min : 1 },
-  //     { val : { ...pickUpAddress }, dependsOn : willDrop},
-  //     { val : { ...dropOffAddress }, dependsOn : willPick},
-  //     { val : ticketMany, min : 1 },
-  //     { val : luggage, min : 0 },
-  //   ])
-
-  //   return shouldEnable
-  // }
-
-  // componentWillReceiveProps(newProps) {
-  //   const tab2Disable = this._willEnableAddressTab()
-  //   // const tab3Disable = this._willEnablePaymentTab()
-  //   const tab4Disable = true
-
-  //   this.setState({ tab2Disable, /*tab3Disable,*/ tab4Disable })
-  // }
-
   render() {
+    const { isModify } = this.props
     // const { tab2Disable, tab3Disable, tab4Disable } = this.state
 
     return (
@@ -100,7 +49,7 @@ class TicketTabs extends Component{
             <TicketAddress { ...this.props } />
           </Tab>
           <Tab
-            // disabled={ /*tab3Disable*/ tab2Disable }
+            disabled={ /*tab3Disable*/ isModify }
             icon={ <MdAttachMoney /> }
             label="Payment Information"
           >
