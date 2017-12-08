@@ -1,26 +1,17 @@
-import { Ticket, Payment, TicketDetail, Person, Meta, Address /*,Bus*/ } from '../../models'
+import { Ticket, Receipt, TicketDetail, Person, Meta, Address /*,Bus*/ } from '../../models'
 import { createPerson, createAddress, filterDoc /*, formatDate, formatHour, formatPhone*/ } from '../../utils'
 
 // ///////////////// Helper functions
 export const getTicketData = async tckt => {
   try {
-    // const ride = await (tckt.ride ? Ride.findById(tckt.ride) : 'none')
     const person = await Person.findById(tckt.person)
     const details = await TicketDetail.findById(tckt.details)
+    const { _id, createdAt, __v, ...receipt } = await Receipt.findById(tckt.receipt)
     const pick = await (tckt.willPick ? Address.findById(details.pickUpAddress) : 'none')
     const drop = await (tckt.willDrop ? Address.findById(details.dropOffAddress) : 'none')
 
-    // console.log(pick)
-    // console.log(drop)
-
     const pickAdd = pick !== 'none' && pick ? { ...pick.toObject() } : pick
     const dropAdd = drop !== 'none' && drop ? { ...drop.toObject() } : drop
-
-    // console.log(pickAdd)
-    // console.log(dropAdd)
-    // console.log('----------------------------')
-
-    // const settingDate = tckt.date
 
     const data = {
       id : tckt.id,
@@ -41,12 +32,35 @@ export const getTicketData = async tckt => {
         lastname : person.lastname,
         email : person.email,
         phoneNumber : person.phoneNumber
-      }
+      },
+      receipt : { ...receipt }
     }
 
     return data//.filter(Boolean)
   } catch (e) {
-    // console.log(e)
+    console.log(e)
+    console.log('ticket.controller.js')
+  }
+
+  return null
+}
+
+export const getTicketReceipt = async tckt => {
+  try {
+    const receipt = await Receipt.findById(tckt.receipt)
+    const { cardLastDigits, cardBrand, totalAmount, type, fee, extraFee } = receipt
+
+    const data = { fee, extraFee, totalAmount, type }
+
+    if(type === 'CARD')
+
+    data.cardBrand = cardBrand
+    data.cardLastDigits = cardLastDigits
+
+    return data
+  } catch (e) {
+    console.log(e)
+    console.log('ticket.controller.js')
   }
 
   return null
@@ -60,6 +74,7 @@ export const reformatTicket = (ctx, next) => {
   console.log(body)
   if(body.isLocal) return next()
 
+  // This is for the page data
   const newBody = {
     frm : body.desde,
     to : body.hacia,
@@ -104,8 +119,16 @@ export const reformatTicket = (ctx, next) => {
 }
 
 // Ticket details
-export const saveTicket = async ({ id, data, person, pickUp, dropOff }) => {
-  // console.log(data)
+export const saveTicket = async ticketInfo => {
+  const { 
+    id,
+    data,
+    receipt,
+    person,
+    pickUp,
+    dropOff
+  } = ticketInfo
+
   const {
     frm,
     to,
@@ -115,36 +138,16 @@ export const saveTicket = async ({ id, data, person, pickUp, dropOff }) => {
     status = 'NEW',
     departureDate,
     departureTime,
-
-    // TICKET DETAILS
-    fee,
-    extraFee,
-
-    // PAYMENT DETAILS
-    cardBrand,
-    cardLastDigits,
-    totalAmount,
-    paymentType
   } = data
 
-  let payment = null
   let details = null
   let tckt = null
 
   try {
-    payment = await new Payment({
-      cardBrand,
-      cardLastDigits,
-      totalAmount,
-      type : paymentType,
-    }).save()
-
     details = await new TicketDetail({ 
       pickUpAddress : pickUp,
       dropOffAddress : dropOff,
       redeemedCount : 0,
-      fee,
-      extraFee,
     }).save()
 
     // TODO: Make sure that the data inserted is sanitized, or it'll break!!!
@@ -152,7 +155,7 @@ export const saveTicket = async ({ id, data, person, pickUp, dropOff }) => {
       id,
       person,
       details : details._id,
-      payment : payment._id,
+      receipt,
       status,
       luggage,
       willPick,
@@ -168,7 +171,7 @@ export const saveTicket = async ({ id, data, person, pickUp, dropOff }) => {
   } catch(e) {
     [ 
       { obj : tckt, coll : Ticket },
-      { obj : payment, coll : Payment },
+      { obj : receipt, coll : Receipt },
       { obj : details, coll : TicketDetail },
     ].forEach( item => {
       if(item.obj) item.coll.remove({ _id : item.obj._id })
@@ -176,6 +179,26 @@ export const saveTicket = async ({ id, data, person, pickUp, dropOff }) => {
     console.log(e)
     return null
   }
+}
+
+const saveReceipt = async data => {
+  const { cardBrand, cardLastDigits, totalAmount, paymentType, fee, extraFee } = data
+  try {
+    const receipt = await new Receipt({
+      cardBrand,
+      cardLastDigits,
+      totalAmount,
+      paymentType,
+      fee,
+      extraFee,
+    }).save()
+
+    return receipt._id
+  } catch (e) {
+    console.log(e)
+  }
+
+  return null
 }
 
 // Create Tickets
@@ -201,14 +224,16 @@ export const saveTickets = async data => {
       : null
     )
 
+    const receipt = await saveReceipt(data)
+
     // If anything got bad on inserting, then erase all the shit back!
-    if(!person || (!pickUp && data.willPick) || (!dropOff && data.willDrop)) {
+    if(!receipt || !person || (!pickUp && data.willPick) || (!dropOff && data.willDrop)) {
       console.log('Erasing shit... Something happened...')
 
       [
         // { obj : details, col : TicketDetail },
         { obj : person, col : Person }, 
-        // { obj : payment, col : Payment },
+        { obj : receipt, col : Receipt },
         { obj : pickUp, col : Address },
         { obj : dropOff, col : Address }
       ].forEach(async itm => {
@@ -223,6 +248,7 @@ export const saveTickets = async data => {
       promises.push(saveTicket({
         id : meta.lastTicketId + i + 1,
         data,
+        receipt,
         person,
         pickUp,
         dropOff
@@ -234,7 +260,8 @@ export const saveTickets = async data => {
     meta.lastTicketId += tickets.length
     await meta.save()
 
-    return tickets
+    // return tickets
+    return receipt
   } catch (e) {
     console.log(e)
     return null

@@ -6,6 +6,7 @@ import Router from 'koa-router'
 import ride from './ride'
 import ticket from './ticket'
 import bus from './bus'
+import receipt from './receipt'
 
 const api = new Router({ prefix : 'api/v1' })
 const rootRoute = new Router({ prefix : '' })
@@ -14,6 +15,7 @@ const apiRoutes = [
   // route,
   // auth,
   // user,
+  receipt,
   ticket,
   ride,
   bus,

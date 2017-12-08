@@ -6,7 +6,7 @@ import './ticket'
 import './person'
 import './address'
 import './bus'
-import './financial'
+import './receipt'
 import './meta'
 
 // // Insert some mock data!!!!!
@@ -22,17 +22,22 @@ export const Ticket = mongoose.model('ticket')
 export const TicketDetail = mongoose.model('ticketDetail')
 export const Address = mongoose.model('address')
 export const Bus = mongoose.model('bus')
-export const Payment = mongoose.model('payment')
+export const Receipt = mongoose.model('receipt')
 export const BusDetail = mongoose.model('busDetail')
 export const Meta = mongoose.model('meta')
 
-const meta = Meta.findOne({}).then(doc => {
-  if(!doc) {
+/* const meta = */
+Meta.findOne({}).then(doc => {
+  if(!doc)
+
     // Default meta data
-    return new Meta({ 
-      lastTicketId : 0
+    return new Meta({
+      lastTicketId : 1,
+      lastRideId : 1,
+      lastBusId : 1,
     }).save()
-  }
+
+  return null
 })
 
 export default {
@@ -43,7 +48,7 @@ export default {
   Address,
   User,
   Bus,
-  Payment,
+  Receipt,
   BusDetail,
   RideDetail,
   Meta

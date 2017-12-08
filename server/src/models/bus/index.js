@@ -1,6 +1,7 @@
 import mongoose, { Schema } from 'mongoose'
 
 const BusSchema = new Schema({
+  id : { type : Number, index : true, unique : true, required : true },
   user : { type : Schema.Types.ObjectId, ref : 'user' },
   alias : String,
   name : String,

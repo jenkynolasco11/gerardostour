@@ -1,33 +1,20 @@
 import Router from 'koa-router'
 
-import { Ticket, Payment, TicketDetail, Ride, Meta } from '../../models'
-import { getTicketData, reformatTicket, saveTickets } from './ticket.controller'
+import { Ticket, Receipt, TicketDetail, Ride, Meta } from '../../models'
+import { getTicketData, getTicketReceipt, reformatTicket, saveTickets } from './ticket.controller'
 
 const ticketRouter = new Router({ prefix : 'ticket' })
 
 // //////////////////////// Routes
 // Retrieve a ticket payment information
-ticketRouter.get('/:id/payment', async ctx => {
+ticketRouter.get('/:id/receipt', async ctx => {
   const { id } = ctx.params
 
     try {
       const tckt = await Ticket.findOne({ id })
 
       if(tckt) {
-        const payment = await Payment.findById(tckt.payment)
-        const { cardLastDigits, cardBrand, totalAmount, type } = payment
-
-        const data = {
-          fee : tckt.fee,
-          extraFee : tckt.fee,
-          totalAmount,
-          type
-        }
-
-        if(type === 'CARD')
-
-        data.cardBrand = cardBrand
-        data.cardLastDigits = cardLastDigits
+        const data = getTicketReceipt(tckt)
 
         return ctx.body = { ok : true, data, message : '' }
       }
@@ -40,7 +27,7 @@ ticketRouter.get('/:id/payment', async ctx => {
 
 // TODO : Check this one when I create the form for ticket creation
 // Saves a(s many) ticket
-ticketRouter.post('/insert', reformatTicket, async ctx => {
+ticketRouter.post('/save', reformatTicket, async ctx => {
   const { body } = ctx.request
 
   // TODO : Add this later. With this, I'll know if it's 
@@ -52,10 +39,10 @@ ticketRouter.post('/insert', reformatTicket, async ctx => {
 
   try {
     const data = await saveTickets(body)
-    console.log(data)
-
     // console.log(data)
-    if(data) return ctx.body = { ok : true, data, message : '' }
+
+    // return the receipt instead
+    if(data) return ctx.body = { ok : true, data : { receipt : data }, message : '' }
 
     return ctx.body = { ok : false, data : null, message : 'Couldn\'t save the ticket. Contact your system administrator.' }
   } catch (e) {
@@ -67,7 +54,7 @@ ticketRouter.post('/insert', reformatTicket, async ctx => {
 // Return all tickets that are not USED nor NULL
 ticketRouter.get('/all', async ctx => {
   const { 
-    status = [ 'NULL', 'USED' ],
+    status = [ 'NULL', 'USED', 'DELETED' ],
     limit = 10,
     skip = 0,
     unassigned = true,
@@ -103,18 +90,19 @@ ticketRouter.get('/all', async ctx => {
     return ctx.body = { ok : false, data : null, message : 'There are no tickets.' }
   } catch (e) {
     console.log(e)
-    return ctx.body = { ok : false, data : null, message : 'Eor retrieving the tickets for this ride' }
   }
+  return ctx.body = { ok : false, data : null, message : 'Eor retrieving the tickets for this ride' }
 })
 
 // Retrieve all tickets from ride
-ticketRouter.get('/all/:ride', async ctx => {
-  const { ride } = ctx.params
+ticketRouter.get('/all/:rideId', async ctx => {
+  const { rideId } = ctx.params
 
   // if(/\D/.test(time)) return ctx.body = { ok : false, data : null, message : 'Not a valid time parameter' }
 
   try {
-    const tickets = await Ticket.find({ ride }).sort({ id : -1 }).exec()
+    const ride = await Ride.findOne({ id : rideId })
+    const tickets = await Ticket.find({ ride : ride._id }).sort({ id : -1 }).exec()
 
     if(tickets.length) {
       const data = await Promise.all(tickets.map(getTicketData))
@@ -128,6 +116,7 @@ ticketRouter.get('/all/:ride', async ctx => {
   }
 })
 
+/** Not assigned yet */
 // Get tickets by Date range (if d2 is not passed, all tickets by date d1)
 ticketRouter.get('/date/:d1/:d2?', async ctx => {
   let { d1, d2 } = ctx.params
@@ -176,6 +165,7 @@ ticketRouter.get('/date/:d1/:d2?', async ctx => {
   }
 })
 
+/** Not assigned yet */
 // Assign ride to ticket
 ticketRouter.put('/modify/ride', async ctx => {
   const { ticketIds, rideId } = ctx.request.body
@@ -200,10 +190,11 @@ ticketRouter.put('/modify/ride', async ctx => {
   }
 })
 
+/** Not assigned yet */
 // Modify ticket status => [ 'USED', 'REDEEMABLE', 'NULL', 'NEW', 'DELETED' ]
 ticketRouter.put('/modify/status', async ctx => {
   const { ticketIds, status } = ctx.request.body
-  console.log(ticketIds)
+
   const tckts = JSON.parse(ticketIds)
 
   try {
@@ -232,8 +223,6 @@ ticketRouter.get('/:id', async ctx => {
     if(tckt) {
       const ticketData = await getTicketData(tckt)
       
-      console.log(ticketData)
-
       if(ticketData) return ctx.body = { ok : true, data : ticketData, message : '' }
     }
 

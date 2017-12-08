@@ -1,5 +1,5 @@
 // import {  } from 'mongoose'
-import { Ride, RideDetail, Bus, BusDetail } from '../../models'
+import { Meta, Ride, RideDetail, Bus, BusDetail } from '../../models'
 // import { formatDate, formatHour } from '../../utils'
 
 export const getRideData = async ride => {
@@ -8,8 +8,8 @@ export const getRideData = async ride => {
 
     let buss = null
     let busDetails = null
-    let seatsAvailable = 0
-    let luggageAvailable = 0
+    let seatsUsed = null
+    let luggageUsed = null
 
     const { seatsOccupied, luggage } = await RideDetail.findOne({ ride : ride._id })
 
@@ -20,19 +20,16 @@ export const getRideData = async ride => {
 
       const seat = parseInt(busDetails.seats) - parseInt(seatsOccupied)
       const lug = parseInt(busDetails.luggage) - parseInt(luggage)
-      seatsAvailable = seat < 0 ? 0 : seat
-      luggageAvailable = lug < 0 ? 0 : lug
+      seatsUsed = seat < 0 ? 0 : seat
+      luggageUsed = lug < 0 ? 0 : lug
+    } else {
+      seatsUsed = seatsOccupied
+      luggageUsed = luggage
     }
 
-    // console.log(date)
-    // const nDate = formatDate(date)
-    // const nTime = formatHour(time)
-
-    // console.log(nDate)
-    // console.log(nTime)
-
     const data = {
-      id : ride._id,
+      // id : ride._id,
+      id : ride.id,
       bus : bus ? {
         id : buss._id,
         alias : buss.alias,
@@ -46,8 +43,8 @@ export const getRideData = async ride => {
       routeFrom,
       time, // : nTime,
       date, // : nDate,
-      seatsAvailable,
-      luggageAvailable,
+      seatsUsed,
+      luggageUsed,
     }
     
     // TODO : CHECK THIS OUT LATER
@@ -61,19 +58,24 @@ export const getRideData = async ride => {
 }
 
 export const saveRide = async data => {
-  try {
-    const {
-      bus = null,
-      routeTo,
-      routeFrom,
-      status,
-      time,
-      date,
-    } = data
+  const {
+    bus = null,
+    routeTo,
+    routeFrom,
+    status,
+    time,
+    date,
+    luggage = 0,
+    seatsOccupied = 0
+  } = data
 
-    console.log(typeof date)
+  try {
+    const meta = await Meta.findOne({})
+
+    // console.log(meta._doc)
 
     const rid = await new Ride({
+      id : meta.lastRideId,
       bus : bus ? bus : null,
       routeTo,
       routeFrom,
@@ -83,9 +85,16 @@ export const saveRide = async data => {
       status : status ? status.toUpperCase() : 'PENDING'
     }).save()
 
-    const details = await new RideDetail({ ride : rid._id }).save()
+    const details = await new RideDetail({
+      ride : rid._id,
+      seatsOccupied,
+      luggage,
+    }).save()
 
-    return rid._id
+    meta.lastRideId += 1
+    await meta.save()
+
+    return rid.id
   } catch (e) {
     console.log(e)
   }
@@ -101,7 +110,9 @@ export const updateRide = async (id, body) => {
       routeFrom,
       status,
       time,
-      date
+      date,
+      luggage = 0,
+      seatsOccupied = 0
     } = body
 
     // console.log(body.bus)
@@ -118,9 +129,10 @@ export const updateRide = async (id, body) => {
       time,
     }
 
-    const rid = await Ride.findByIdAndUpdate(id, data /*, { new : true }*/)
+    const rid = await Ride.findOneAndUpdate({ id }, data /*, { new : true }*/)
+    const details = await RideDetail.findOneAndUpdate({ ride : rid._id }, { luggage, seatsOccupied })
 
-    return rid._id
+    return rid.id
   } catch (e) {
     console.log(e)
   }
