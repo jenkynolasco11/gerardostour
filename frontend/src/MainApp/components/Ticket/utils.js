@@ -1,3 +1,19 @@
+export const getExtraPrice = (obj, zip) => {
+  if(!zip) return 0
+  const len = obj.length
+
+  for(let i = 0; i < len; i++) {
+    // console.log(obj[ i ])
+    if(obj[ i ].zipcodes.includes(zip)) {
+      // console.log('Zip found: ' + zip)
+      return obj[ i ].price
+    }
+  }
+
+  // console.log('No zip found, zip: ' + zip)
+  return 0
+}
+
 export const verifyCard = number => {
   
   // Visa => 16, starts with 4

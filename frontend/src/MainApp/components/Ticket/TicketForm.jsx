@@ -4,7 +4,7 @@ import axios from 'axios'
 
 import TicketTabs from './TicketTabs'
 import configData from '../../config/config-values.json'
-import { formatTicketData, reformatTicketData } from './utils'
+import { formatTicketData, reformatTicketData, getExtraPrice } from './utils'
 
 import './ticket-form.scss'
 
@@ -70,7 +70,7 @@ const defaultState = {
   status : 'NEW',
   redeemedCount : 0,
 }
-/*
+
 const myInfo  = {
   id : '',
   title : 'Create',
@@ -92,13 +92,13 @@ const myInfo  = {
     street : '116  Sherman Ave',
     city : 'New York',
     state : 'NY',
-    zipcode : '10034'
+    zipcode : '10128'
   }, 
   dropOffAddress : {
     street : '172 Smith Street',
     city : 'Brooklyn',
     state : 'NY',
-    zipcode : '10034',
+    zipcode : '10025',
   },
   from : 'NY',
   to : 'NY',
@@ -125,7 +125,7 @@ const myInfo  = {
   luggage : 3,
   ///////////
 }
-*/
+
 
 class TicketForm extends Component {
   constructor(props) {
@@ -133,7 +133,7 @@ class TicketForm extends Component {
 
     this.state = {
       ...defaultState,
-      // ...myInfo
+      ...myInfo
     }
 
     this._onChange = this._onChange.bind(this)
@@ -173,22 +173,52 @@ class TicketForm extends Component {
     return console.log('Something happened...')
   }
 
-  _calculateFees(to, luggage, ticketMany) {
-    let { extraFee, fee, totalAmount } = this.state
+  _calculateFees() {
+    let {
+      to,
+      from,
+      luggage,
+      ticketMany,
+      // extraFee,
+      // fee,
+      // totalAmount,
+      dropOffAddress,
+      pickUpAddress,
+      willDrop,
+      willPick
+    } = this.state
 
-    const prices = configData.prices[ to ]
-                  ? configData.prices[ to ]
-                  : configData.prices.default
+    const { luggagePrice, prices } = configData
 
-    // console.log("Vars => ", luggage, prices)
-    const extraLuggage = luggage - prices.minLuggage
-    // console.log('Extra luggage => ', extraLuggage)
-    extraFee = prices.extraFee * (extraLuggage > 0 ? extraLuggage : 0) 
-    fee = prices.fee * ticketMany
+    let totalAmount = 0
+    let extraFee = 0
+    let fee = prices.default
 
-    totalAmount = extraFee + fee
+    if(willPick) {
+      const extra = getExtraPrice(prices[ from ], pickUpAddress.zipcode)
+      // console.log(extra)
+      fee += extra
+      extraFee += extra
+    }
 
-    return { totalAmount, extraFee, fee }
+    if(willDrop) {
+      const extra = getExtraPrice(prices[ to ], dropOffAddress.zipcode)
+      // console.log(extra)
+      fee += extra
+      extraFee += extra
+    }
+
+    // console.log(luggagePrice)
+    fee = parseFloat(ticketMany * fee)
+
+    totalAmount += parseFloat(fee + (luggagePrice * luggage))
+// console.log(totalAmount)
+    extraFee += parseFloat(luggagePrice * luggage)
+// console.log(extraFee)
+// console.log(fee)
+    console.log(extraFee, fee, totalAmount )
+
+    return { totalAmount, fee, extraFee }
   }
 
   _onCancel() {
@@ -246,7 +276,7 @@ class TicketForm extends Component {
         break
     }
 
-    const fees = this._calculateFees(to, luggage, ticketMany)
+    const fees = this._calculateFees(/*to, luggage, ticketMany*/)
 
     return this.setState({
       ...state,
@@ -263,9 +293,9 @@ class TicketForm extends Component {
 
   async componentWillMount() {
     const { state } = this.props.location
-    let { to, luggage, ticketMany } = this.state
+    // let { to, luggage, ticketMany } = this.state
 
-    const params = this._calculateFees(to, luggage, ticketMany)
+    const params = this._calculateFees()
     let ticketData = null
 
     if(state) {

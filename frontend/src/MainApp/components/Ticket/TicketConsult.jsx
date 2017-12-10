@@ -69,7 +69,7 @@ const TicketSettings = props => {
       <List>
         <CardTitle title="Actions"/>
         <ListDivider />
-        {
+        {/*
           selected.length ?
           selected.length > 1 ?
           // <Link>
@@ -88,6 +88,7 @@ const TicketSettings = props => {
             />
           </Link>
           :
+          */
           <Link to={{ pathname: '/ticket/create-modify' }}>
             <ListItem
               avatar={ <MdReceipt /> }

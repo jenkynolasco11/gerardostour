@@ -1,6 +1,5 @@
 import React /*, { Component }*/ from 'react'
 import { CardTitle, CardActions } from 'react-toolbox/lib/card'
-// import { Input } from 'react-toolbox/lib/input'
 import { List, ListItem, ListDivider } from 'react-toolbox/lib/list'
 import Button from 'react-toolbox/lib/button/Button'
 import {
@@ -19,9 +18,9 @@ import {
 import { TiHome } from 'react-icons/lib/ti'
 import { FaRoad } from 'react-icons/lib/fa'
 
-
 import configData from '../../config/config-values.json'
 import { formatDate, formatHour } from '../../utils'
+import { getExtraPrice } from './utils'
 
 const Title = prop => ([
   <CardTitle key="1" title={ prop.title }/>,
@@ -129,27 +128,37 @@ const ReviewTrip = props => {
 }
 
 const ReviewPayment = props => {
-  const { ticketMany, to, luggage, fee, extraFee, totalAmount } = props
+  const {
+    ticketMany,
+    to,
+    luggage,
+    fee,
+    extraFee,
+    totalAmount,
+    from,
+    willDrop,
+    willPick,
+    pickUpAddress,
+    dropOffAddress
+  } = props
 
-  const prices = configData.prices[ to ]
-                  ? configData.prices[ to ]
-                  : configData.prices.default
+  const { luggagePrice, prices } = configData
+  
+  let dropOffFee = 0
+  let pickUpFee = 0
 
-  const extraLuggage = (luggage - prices.minLuggage) < 0 
-                        ? 0
-                        : luggage - prices.minLuggage
+  if(willPick) {
+    pickUpFee = getExtraPrice(prices[ from ], pickUpAddress.zipcode)
+  }
 
-  // const feesTotal = parseFloat(ticketMany * prices.fee).toFixed(2)
-  // const extraTotal = parseFloat(extraLuggage * prices.extraFee).toFixed(2)
-  // const totalTotal = parseFloat(Number(feesTotal) + Number(extraTotal)).toFixed(2)
+  if(willDrop) {
+    dropOffFee = getExtraPrice(prices[ to ], dropOffAddress.zipcode)
+  }
 
-  const feesTotal = fee
-  const extraTotal = extraFee
-  const totalTotal = totalAmount
-
-  const totalAmoutCaption = `Total Amount : ${ totalTotal }`
-  const feesCaption = `${ feesTotal } (${ ticketMany } tickets x ${ parseFloat(prices.fee).toFixed(2) }) `
-  const extraFeesCaption = `${ extraTotal } (${ extraLuggage } extra luggage x ${ parseFloat(prices.extraFee).toFixed(2) })`
+  const totalAmoutCaption = `Total Amount : ${ totalAmount }`
+  let feesCaption = `${ fee } (${ ticketMany } tickets x ${ prices.default }) `
+  feesCaption += `${ willPick ? willDrop ? ` + ${ pickUpFee } Pick Up + ${ dropOffFee } Drop Off fees` : ` + ${ pickUpFee } Pick Up fee` : willDrop ? ` + ${ dropOffFee } Drop off fee` : '' }`
+  let extraFeesCaption = `${ extraFee } (${ luggage } extra luggage x ${ luggagePrice })`
 
   return (
     <List className="review-payment">
