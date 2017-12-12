@@ -8,7 +8,8 @@ import { formatTicketData, reformatTicketData, getExtraPrice } from './utils'
 
 import './ticket-form.scss'
 
-const url = 'http://localhost:8000/api/v1/ticket'
+import { url } from '../../config/config-values.json'
+// const url = 'http://localhost:8000/api/v1/ticket'
 
 const defaultState = {
   id : '',
@@ -157,10 +158,10 @@ class TicketForm extends Component {
         if(oldDate && oldTime && (body.departureDate.getDate() !== oldDate.getDate() || body.departureTime !== oldTime )) body.status = 'REDEEMED'
 
         // console.log(body)
-        data = await axios.put(`${ url }/modify/`, body)
+        data = await axios.put(`${ url }/ticket/modify/`, body)
         console.log(data)
 
-      } else data = await axios.post(`${ url }/save`, body)
+      } else data = await axios.post(`${ url }/ticket/save`, body)
       
       if(data.data.ok) {
         console.log(data)
@@ -306,7 +307,7 @@ class TicketForm extends Component {
       const id = state.ticket
 
       try {
-        const { data } = await axios.get(`${ url }/${ id }`)
+        const { data } = await axios.get(`${ url }/ticket/${ id }`)
 
         if(data.ok) {
           ticketData = { ...formatTicketData(data.data) }

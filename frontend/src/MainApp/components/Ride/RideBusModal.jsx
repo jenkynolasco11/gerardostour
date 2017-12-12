@@ -8,7 +8,8 @@ import axios from 'axios'
 import { FormatBusItem, formatData } from './utils'
 import './ride-modal.scss'
 
-const url = 'http://localhost:8000/api/v1/bus'
+import { url } from '../../config/config-values.json'
+// const url = 'http://localhost:8000/api/v1/bus'
 
 class RideBusModal extends Component {
   constructor(props) {
@@ -37,7 +38,7 @@ class RideBusModal extends Component {
     const { damaged } = this.state
 
     try {
-      const { data } = await axios.get(`${ url }/all${ damaged ? '?status=DAMAGED' : '' }`)
+      const { data } = await axios.get(`${ url }/bus/all${ damaged ? '?status=DAMAGED' : '' }`)
 
       if(data.ok) {
         const { busses } = data.data

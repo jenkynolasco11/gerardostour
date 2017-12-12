@@ -66,11 +66,11 @@ const server = async done => {
 
     const PORT = (process.env.PORT || config.PORT)
 
-    await app.listen(PORT)
+    const srvr = await app.listen(PORT)
 
     console.log(`Started server at ${ PORT }`)
 
-    return app
+    return srvr
   } catch (e) {
     console.log(e)
     process.exit()

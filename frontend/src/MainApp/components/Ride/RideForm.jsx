@@ -15,10 +15,10 @@ import DatePicker from 'react-toolbox/lib/date_picker/DatePicker'
 // import { formatDate, formatHour } from '../../utils'
 
 import { FormatBusItem, formatData, getMinDate } from './utils'
-import configData from '../../config/config-values.json'
+import configData, { url } from '../../config/config-values.json'
 import './ride-form.scss'
 
-const url = 'http://localhost:8000/api/v1'
+// const url = 'http://localhost:8000/api/v1'
 
 const defaultState = {
   id : '',

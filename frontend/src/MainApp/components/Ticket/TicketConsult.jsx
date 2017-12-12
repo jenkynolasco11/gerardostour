@@ -2,16 +2,17 @@ import React, { Component } from 'react'
 import axios from 'axios'
 import { Link } from 'react-router-dom'
 import { List, ListDivider, ListCheckbox, ListItem } from 'react-toolbox/lib/list'
-import { MdReceipt, MdBuild } from 'react-icons/lib/md'
+import { MdReceipt, MdBuild, MdSearch } from 'react-icons/lib/md'
 import { Card, CardTitle } from 'react-toolbox/lib/card'
 
+import TicketPreview from './TicketPreview'
 import TableContent from '../extras/CustomTable'
 
 
 // import json from './response-ticket-example.json'
 import './ticket-consult.scss'
-
-const url = 'http://localhost:8000/api/v1/ticket'
+import { url } from '../../config/config-values.json'
+// const url = 'http://localhost:8000/api/v1/ticket'
 
 const tableFormat = {
   format :  props => {
@@ -61,7 +62,8 @@ const tableFormat = {
 const TicketSettings = props => {
   const {
     selected,
-    getSelectedTicket
+    getSelectedTicket,
+    openPreview
   } = props
 
   return (
@@ -99,6 +101,13 @@ const TicketSettings = props => {
         }
         <CardTitle title="Settings"/>
         <ListDivider />
+        <ListItem
+          onClick={ openPreview }
+          avatar={ <MdSearch /> }
+          caption="Review details"
+          disabled={ selected.length !== 1 }
+          selectable
+        />
       </List>
     </Card>
   )
@@ -116,16 +125,19 @@ class TicketConsult extends Component {
         sortOrder :  -1,
         tickets : [],
         selected : [],
+        showPreview : true,
+        ticketSelected : 750
       }
 
     this.getSelectedTicket = this.getSelectedTicket.bind(this)
+    this.onPreviewClose = this.onPreviewClose.bind(this)
     this.onGetSelected = this.onGetSelected.bind(this)
     this.onPaginate = this.onPaginate.bind(this)
     this.onSort = this.onSort.bind(this)
   }
 
   async makeRequest(limit, skip, count, unassigned, sort) {
-    return await axios.get(`${url}/all?skip=${ skip }&limit=${ limit }&unassigned=${ unassigned }&sort=${ sort }`)
+    return await axios.get(`${ url }/ticket/all?skip=${ skip }&limit=${ limit }&unassigned=${ unassigned }&sort=${ sort }`)
   }
 
   async onPaginate(skip) {
@@ -175,6 +187,10 @@ class TicketConsult extends Component {
     return tickets[ selected[ 0 ]].id
   }
 
+  onPreviewClose() {
+    this.setState({ showPreview : false })
+  }
+
   async componentWillMount() {
     await this.onPaginate({ selected : 0 })
   }
@@ -185,7 +201,9 @@ class TicketConsult extends Component {
       skip,
       limit,
       count,
-      selected
+      selected,
+      showPreview,
+      ticketSelected
     } = this.state
 
     const data = tickets.map(tableFormat.format)
@@ -199,10 +217,20 @@ class TicketConsult extends Component {
           onSort={ this.onSort }
           {...{ data, skip, limit, count }}
         />
-        <TicketSettings 
+        <TicketSettings
           selected={ selected } 
           getSelectedTicket={ this.getSelectedTicket }
+          openPreview={ () => this.setState({ ticketSelected : this.getSelectedTicket(), showPreview : true }) }
         />
+        {/*
+          <TicketPreview
+            {...{
+              onPreviewClose : this.onPreviewClose,
+              ticketId : ticketSelected,
+              active : showPreview,
+            }}
+          />
+        */}
       </div>
     )
   }

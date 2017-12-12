@@ -14,8 +14,8 @@ import RideBusModal from './RideBusModal'
 
 // import json from './response-rides-example.json'
 import './ride-consult.scss'
-
-const url = 'http://localhost:8000/api/v1/ride'
+import { url } from '../../config/config-values.json'
+// const url = 'http://localhost:8000/api/v1/ride'
 
 const tableFormat = {
   format : props => {
@@ -203,7 +203,7 @@ class Ride extends Component {
   }
 
   async makeRequest(limit, skip, count, /*assigned, */status, sort, future) {
-    return await axios.get(`${ url }/all?skip=${ skip }&limit=${ limit }&sort=${ sort }&status=${ status }&future=${ future }`)//&unassigned=${ true }`)
+    return await axios.get(`${ url }/ride/all?skip=${ skip }&limit=${ limit }&sort=${ sort }&status=${ status }&future=${ future }`)//&unassigned=${ true }`)
   }
 
   async onPaginate(skip) {
@@ -278,7 +278,7 @@ class Ride extends Component {
     const ids = rides.filter((_, i) => selected.includes(i)).map(i => i.id)
 
     try {
-      const { data } = await axios.put(`${ url }/assign-bus`, { bus,  ids })
+      const { data } = await axios.put(`${ url }/ride/assign-bus`, { bus,  ids })
       // console.log(data)
       if(data.ok) this.onPaginate({ selected : skip })
 
