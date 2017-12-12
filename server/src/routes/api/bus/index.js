@@ -1,6 +1,6 @@
 import Router from 'koa-router'
 
-import { Bus, BusDetail, Person, User } from '../../models'
+import { Bus, BusDetail, Person, User } from '../../../models'
 
 const busRouter = new Router({ prefix : 'bus' })
 

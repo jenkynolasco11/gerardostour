@@ -1,4 +1,4 @@
-import { Ride, RideDetail, Bus, BusDetail } from '../../models'
+import { Ride, RideDetail, Bus, BusDetail } from '../../../models'
 
 export const getRideData = async (ride, i) => {
   try {

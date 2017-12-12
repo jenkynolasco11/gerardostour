@@ -4,10 +4,10 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "dev": "nodemon --exec babel-node app.js -e *.js*",
+    "dev": "nodemon --exec babel-node index.js -e *.js*",
     "webpack": "./node_modules/.bin/webpack-dev-server",
     "mockup": "babel-node ./src/models/mockupData.js",
-    "test": "mocha ./tests --require babel-polyfill --compilers js:babel-core/register"
+    "test": "mocha ./test --require babel-polyfill --require babel-core"
   },
   "keywords": [],
   "author": "",

@@ -1,6 +1,6 @@
 import Router from 'koa-router'
 
-import { Ride, RideDetail, Bus, } from '../../models'
+import { Ride, RideDetail, Bus, } from '../../../models'
 import { getRideData, saveRide, updateRide } from './ride.controller'
 
 const rideRouter = new Router({ prefix : 'ride' })

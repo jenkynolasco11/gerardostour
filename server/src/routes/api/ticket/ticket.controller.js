@@ -1,5 +1,5 @@
-import { Ticket, Payment, TicketDetail, Person, Meta, Address /*,Bus*/ } from '../../models'
-import { createPerson, createAddress, filterDoc } from '../../utils'
+import { Ticket, Payment, TicketDetail, Person, Meta, Address /*,Bus*/ } from '../../../models'
+import { createPerson, createAddress, filterDoc } from '../../../utils'
 
 // ///////////////// Helper functions
 export const getTicketData = async tckt => {

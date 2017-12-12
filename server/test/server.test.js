@@ -1,15 +1,10 @@
 import mocha from 'mocha'
 import chai, { assert, expect, should as s } from 'chai'
-import chaiPromse from 'chai-as-promised'
+import chaiPromise from 'chai-as-promised'
 import chaiHttp from 'chai-http'
 import app from '../appTest'
 
-// import server from '../app'
-// const server = require('../app').default
 chai.use(chaiHttp)
-
-const should = s()
-// let app = null
 
 describe('Server => ', () => {
   before(async () => {
