@@ -1,6 +1,6 @@
 import Router from 'koa-router'
 
-import { Ticket, Payment, TicketDetail, Ride, Meta } from '../../../models'
+import { Ticket, Payment, TicketDetail, Ride } from '../../../models'
 import { getTicketData, reformatTicket, saveTickets } from './ticket.controller'
 
 const ticketRouter = new Router({ prefix : 'ticket' })

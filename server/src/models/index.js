@@ -9,9 +9,6 @@ import './bus'
 import './financial'
 import './meta'
 
-// // Insert some mock data!!!!!
-// import './mockupData'
-
 mongoose.Promise = global.Promise
 
 export const Person = mongoose.model('person')
@@ -26,12 +23,11 @@ export const Payment = mongoose.model('payment')
 export const BusDetail = mongoose.model('busDetail')
 export const Meta = mongoose.model('meta')
 
-const meta = Meta.findOne({}).then(doc => {
+Meta.findOne({}).then(doc => {
   if(!doc) {
-    // Default meta data
-    return new Meta({ 
-      lastTicketId : 0
-    }).save()
+    const defaultMeta = { lastTicketId : 1, lastReceiptId : 1, lastRideId : 1 }
+
+    new Meta(defaultMeta).save()
   }
 })
 
