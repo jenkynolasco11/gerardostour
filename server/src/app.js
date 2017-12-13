@@ -5,15 +5,16 @@ import Pug from 'koa-pug'
 import mongoose from 'mongoose'
 import serve from 'koa-static'
 import session from 'koa-session'
-import SessionStore from 'koa-session-mongoose'
+// import SessionStore from 'koa-session-mongoose'
 import bluebird from 'bluebird'
 import passport from 'koa-passport'
 import cors from 'koa2-cors'
 
 import config from './config'
-import routes from './src/api'
-import error404 from './src/api/404'
+import routes from './routes'
+import error404 from './routes/404'
 
+import { createMeta } from './utils'
 import './passport'
 
 // Assign better Promise to global/mongoose
@@ -23,7 +24,8 @@ mongoose.Promise = bluebird.Promise
 const server = async done => {
   try {
     await mongoose.connect(config.DBURI, { useMongoClient : true })
-    
+    await createMeta()
+
     const app = new Koa()
 
     // Views Config
@@ -41,7 +43,6 @@ const server = async done => {
 
     const sessionParams = {
       key : config.KEY,
-      // keys : config.SESSIONID,
       // store,
     }
 
@@ -50,11 +51,12 @@ const server = async done => {
     app
       .use(cors({ 
         origin : () => '*',
+        credentials : true,
         // credentials : true,
         // allowHeaders : [ 
         //   'Origin', 'X-Requested-With', 'Content-Type', 'Accept'
         // ]
-      })) // Security | Modify access to server via http(s)
+      }))
       .use(bodyparser({ multipart : true }))
       .use(serve('./src/public/assets'))
       .use(session(sessionParams, app))
@@ -67,14 +69,17 @@ const server = async done => {
     const PORT = (process.env.PORT || config.PORT)
 
     const srvr = await app.listen(PORT)
-
     console.log(`Started server at ${ PORT }`)
+
+    if(done) done()
 
     return srvr
   } catch (e) {
     console.log(e)
     process.exit()
   }
+
+  return null
 }
 
-server()
+export default server

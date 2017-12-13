@@ -1,7 +1,7 @@
 import mongoose, { Schema } from 'mongoose'
 
 const BusSchema = new Schema({
-  id : { type : Number, index : true, unique : true, required : true },
+  id : { type : Number, unique : { index : true }, required : true },
   user : { type : Schema.Types.ObjectId, ref : 'user' },
   alias : String,
   name : String,
@@ -9,14 +9,12 @@ const BusSchema = new Schema({
     type : String,
     enum : [ 'STANDBY', 'OK', 'DAMAGED', 'RETIRED', '' ]
   },
-  // seats : Number,
-  // luggage : Number,
   createdAt : { type : Date, default : Date.now },
   modifiedAt : { type : Date, default : Date.now }
 })
 
 const BusDetailSchema = new Schema({
-  bus : { type : Schema.Types.ObjectId, ref : 'bus', index : true, unique : true },
+  bus : { type : Schema.Types.ObjectId, ref : 'bus', unique : { index : true }, required : true },
   seats : { type : Number, default : 0 },
   luggage : { type : Number, default : 0 },
   modifiedAt : { type : Date, default : Date.now }

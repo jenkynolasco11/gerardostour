@@ -31,7 +31,7 @@ userRouter.get('/all', async ctx => {
     //                         .limit(Number(limit))
     //                         .exec()
 
-    // const count = await User.count({ position : type })
+    const count = await User.count({ position : type })
 
     return ctx.body = { ok : true, data : { users, count }, message : null }
   } catch (e) {

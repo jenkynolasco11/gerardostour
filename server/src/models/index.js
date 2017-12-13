@@ -9,10 +9,7 @@ import './bus'
 import './receipt'
 import './meta'
 
-// // Insert some mock data!!!!!
-// import './mockupData'
-
-mongoose.Promise = global.Promise
+// mongoose.Promise = global.Promise
 
 export const Person = mongoose.model('person')
 export const User = mongoose.model('user')
@@ -26,22 +23,30 @@ export const Receipt = mongoose.model('receipt')
 export const BusDetail = mongoose.model('busDetail')
 export const Meta = mongoose.model('meta')
 
-/* const meta = */
-Meta.findOne({}).then(doc => {
-  if(!doc)
+export const deleteAllCollections = async () => {
+  try {
+    await Person.collection.remove({})
+    await User.collection.remove({})
+    await Ride.collection.remove({})
+    await RideDetail.collection.remove({})
+    await Ticket.collection.remove({})
+    await TicketDetail.collection.remove({})
+    await Address.collection.remove({})
+    await Bus.collection.remove({})
+    await Receipt.collection.remove({})
+    await BusDetail.collection.remove({})
+    await Meta.collection.remove({})
+  } catch (e) {
+    return false
+  }
 
-    // Default meta data
-    return new Meta({
-      lastReceiptId : 1,
-      lastTicketId : 1,
-      lastRideId : 1,
-      lastBusId : 1,
-    }).save()
-
-  return null
-})
+  return true
+}
 
 export default {
+  deleteAllCollections,
+
+  // 
   Person,
   Ride,
   Ticket,

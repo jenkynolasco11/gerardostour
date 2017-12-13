@@ -4,7 +4,9 @@ export default async (ctx, next) => {
     const status = ctx.status || 404
 
     if(status === 404) {
+      ctx.status = 404
       ctx.body = { 'status' : 'error...' }
+
       return ctx.throw(404)
     }
 

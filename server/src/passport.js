@@ -2,7 +2,7 @@ import passport from 'koa-passport'
 
 import { Strategy } from 'passport-local'
 
-import { User } from './src/models'
+import { User } from './models'
 
 passport.serializeUser((user, done) => {
   console.log('About to authenticate: ', user.username)

@@ -1,6 +1,4 @@
-// import {  } from 'mongoose'
-import { Meta, Ride, RideDetail, Bus, BusDetail } from '../../models'
-// import { formatDate, formatHour } from '../../utils'
+import { Ride, RideDetail, Bus, BusDetail } from '../../../models'
 
 export const getRideData = async ride => {
   try {
