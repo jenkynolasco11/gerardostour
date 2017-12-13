@@ -6,10 +6,13 @@ const routes = [ 'NY', 'PA' ]
 const status = [ 'FINISHED', 'PENDING', 'ASSIGNED', 'ON-THE-WAY' ]
 
 const RideSchema = new Schema({
+  id : { type : Number, index : true, required : true },
   bus : { type : Schema.Types.ObjectId, ref : 'bus', index : true },
   routeTo : { type : String, enum : routes, required : true },
   routeFrom : { type : String, enum : routes, required : true },
   status : { type : String, enum : status, index : true, default : 'PENDING' },
+  time : { type : Number, default : -1 },
+  date : { type : Date },
   createdAt : { type : Date, default : Date.now },
   modifiedAt : { type : Date, default : Date.now },
 })

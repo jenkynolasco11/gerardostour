@@ -7,7 +7,7 @@
     "dev": "nodemon --exec babel-node index.js -e *.js*",
     "webpack": "./node_modules/.bin/webpack-dev-server",
     "mockup": "babel-node ./src/models/mockupData.js",
-    "test": "mocha ./test --require babel-polyfill --require babel-core"
+    "test": "nodemon --exec mocha ./test --require babel-polyfill --require babel-register -e .js"
   },
   "keywords": [],
   "author": "",
@@ -39,6 +39,7 @@
     "babel-polyfill": "^6.26.0",
     "babel-preset-es2015": "^6.22.0",
     "babel-preset-stage-2": "^6.24.1",
+    "babel-register": "^6.26.0",
     "chai": "^4.1.2",
     "chai-as-promised": "^7.1.1",
     "chai-http": "^3.0.0",

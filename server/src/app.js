@@ -14,6 +14,7 @@ import config from './config'
 import routes from './routes'
 import error404 from './routes/404'
 
+import { createMeta } from './utils'
 import './passport'
 
 // Assign better Promise to global/mongoose
@@ -23,7 +24,8 @@ mongoose.Promise = bluebird.Promise
 const server = async done => {
   try {
     await mongoose.connect(config.DBURI, { useMongoClient : true })
-    
+    await createMeta()
+
     const app = new Koa()
 
     // Views Config
@@ -66,15 +68,18 @@ const server = async done => {
 
     const PORT = (process.env.PORT || config.PORT)
 
-    await app.listen(PORT)
-
+    const srvr = await app.listen(PORT)
     console.log(`Started server at ${ PORT }`)
 
-    return app
+    if(done) done()
+
+    return srvr
   } catch (e) {
     console.log(e)
     process.exit()
   }
+
+  return null
 }
 
-export default server()
+export default server

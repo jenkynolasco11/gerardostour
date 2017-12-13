@@ -6,7 +6,7 @@ import './ticket'
 import './person'
 import './address'
 import './bus'
-import './financial'
+import './receipt'
 import './meta'
 
 mongoose.Promise = global.Promise
@@ -19,19 +19,35 @@ export const Ticket = mongoose.model('ticket')
 export const TicketDetail = mongoose.model('ticketDetail')
 export const Address = mongoose.model('address')
 export const Bus = mongoose.model('bus')
-export const Payment = mongoose.model('payment')
+export const Receipt = mongoose.model('receipt')
 export const BusDetail = mongoose.model('busDetail')
 export const Meta = mongoose.model('meta')
 
-Meta.findOne({}).then(doc => {
-  if(!doc) {
-    const defaultMeta = { lastTicketId : 1, lastReceiptId : 1, lastRideId : 1 }
+export const deleteAllCollections = async () => {
+  try {
+    await Person.collection.remove({})
+    await User.collection.remove({})
+    await Ride.collection.remove({})
+    await RideDetail.collection.remove({})
+    await Ticket.collection.remove({})
+    await TicketDetail.collection.remove({})
+    await Address.collection.remove({})
+    await Bus.collection.remove({})
+    await Receipt.collection.remove({})
+    await BusDetail.collection.remove({})
+    await Meta.collection.remove({})
 
-    new Meta(defaultMeta).save()
+  } catch (e) {
+    return false
   }
-})
+
+  return true
+}
 
 export default {
+  deleteAllCollections,
+
+  // 
   Person,
   Ride,
   Ticket,
@@ -39,7 +55,7 @@ export default {
   Address,
   User,
   Bus,
-  Payment,
+  Receipt,
   BusDetail,
   RideDetail,
   Meta

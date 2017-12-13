@@ -12,39 +12,34 @@ ticketRouter.get('/:id/payment', async ctx => {
 
     try {
       const tckt = await Ticket.findOne({ id })
+      const { fee, extraFee } = await TicketDetail.findById(tckt.details)
 
       if(tckt) {
         const payment = await Payment.findById(tckt.payment)
         const { cardLastDigits, cardBrand, totalAmount, type } = payment
 
-        const data = {
-          fee : tckt.fee,
-          extraFee : tckt.fee,
-          totalAmount,
-          type
+        const data = { fee, extraFee, totalAmount, type }
+
+        if(type === 'CARD') {
+          data.cardBrand = cardBrand
+          data.cardLastDigits = cardLastDigits
         }
-
-        if(type === 'CARD')
-
-        data.cardBrand = cardBrand
-        data.cardLastDigits = cardLastDigits
 
         return ctx.body = { ok : true, data, message : '' }
       }
 
       return ctx.body = { ok : false, data : null, message : 'Couldn\'t retrieve payment details' }
     } catch (e) {
-      return ctx.body = { ok : false, data : null, message : 'Error retrieving payment details' }
+      console.log(e)
     }
+
+    return ctx.body = { ok : false, data : null, message : 'Error retrieving payment details' }
 })
 
 // TODO : Check this one when I create the form for ticket creation
 // Saves a(s many) ticket
-ticketRouter.post('/insert', reformatTicket, async ctx => {
+ticketRouter.post('/save', reformatTicket, async ctx => {
   const { body } = ctx.request
-
-  // TODO : Add this later. With this, I'll know if it's 
-  // const { isLocal } = body
 
   try {
     const data = await saveTickets(body)
@@ -55,67 +50,12 @@ ticketRouter.post('/insert', reformatTicket, async ctx => {
     return ctx.body = { ok : false, data : null, message : 'Couldn\'t save the ticket. Contact your system administrator.' }
   } catch (e) {
     console.log(e)
-    return ctx.body = { ok : false, data : null, message : 'Error trying to save your ticket.' }
   }
+
+  return ctx.body = { ok : false, data : null, message : 'Error trying to save your ticket.' }
 })
 
-// Return all tickets that are not USED nor NULL
-ticketRouter.get('/all', async ctx => {
-  const { 
-    status = [ 'NULL', 'USED' ],
-    limit = 10,
-    skip = 0,
-    unassigned = true
-  } = ctx.query
-
-  const list = [].concat(status)
-  const conditions = { status : { $nin : list }}
-
-  if(unassigned) conditions.ride = null
-
-  try {
-    const tickets = await Ticket
-                          .find(conditions)
-                          .sort({ id : -1 })
-                          .skip(skip)
-                          .limit(limit)
-                          .exec()
-
-    if(tickets.length) {
-      const data = await Promise.all(tickets.map(getTicketData))
-
-      const count = await Ticket.count({ status : { $nin : list }})
-
-      return ctx.body = { ok : true, data : { tickets : data, count }, message : '' }
-    }
-    return ctx.body = { ok : false, data : null, message : 'There are no tickets.' }
-  } catch (e) {
-    console.log(e)
-    return ctx.body = { ok : false, data : null, message : 'Eor retrieving the tickets for this ride' }
-  }
-})
-
-// Retrieve all tickets from ride
-ticketRouter.get('/all/:ride', async ctx => {
-  const { ride } = ctx.params
-
-  // if(/\D/.test(time)) return ctx.body = { ok : false, data : null, message : 'Not a valid time parameter' }
-
-  try {
-    const tickets = await Ticket.find({ ride }).sort({ id : -1 }).exec()
-
-    if(tickets.length) {
-      const data = await Promise.all(tickets.map(getTicketData))
-
-      return ctx.body = { ok : true, data, message : '' }
-    }
-
-    return ctx.body = { ok : false, data : null, message : 'There are no ticket for this ride' }
-  } catch (e) {
-    return ctx.body = { ok : false, data : null, message : 'Error retrieving the tickets for this ride' }
-  }
-})
-
+/*
 // Get tickets by Date range (if d2 is not passed, all tickets by date d1)
 ticketRouter.get('/date/:d1/:d2?', async ctx => {
   let { d1, d2 } = ctx.params
@@ -163,51 +103,129 @@ ticketRouter.get('/date/:d1/:d2?', async ctx => {
     return ctx.body = { ok : false, data : null, message : 'Error retrieving the tickets for this ride' }
   }
 })
+*/
 
 // Assign ride to ticket
 ticketRouter.put('/modify/ride', async ctx => {
   const { ticketIds, rideId } = ctx.request.body
+
   const tickts = JSON.parse(ticketIds)
 
   try {
-    const rid = await Ride.findById(rideId)
+    const rid = await Ride.findById(rideId, { _id : 1 })
 
     if(!rid) return ctx.body = { ok : false, data : null, message : 'There is no ride assigned to this id.' }
 
-    const data = await Promise.all(
-      tickts.map( tcktId => (
-        Ticket.findByIdAndUpdate(tcktId, { ride : rid._id })
-      ))
+    await Promise.all(
+      tickts.map( tcktId => Ticket.findByIdAndUpdate(tcktId, { ride : rid }))
     )
 
-    if(data.length) return ctx.body = { ok : true, data : null, message : '' }
-
-    return ctx.body = { ok : false, data : null, message : 'There is no ticket with that id.' }
+    return ctx.body = { ok : true, data : null, message : '' }
   } catch (e) {
-    return ctx.body = { ok : false, data : null, message : 'Error retrieving assigning ride to ticket' }
+    console.log(e)
   }
+
+  return ctx.body = { ok : false, data : null, message : 'Error retrieving assigning ride to ticket' }
 })
 
-// Modify ticket status => [ 'USED', 'REDEEMABLE', 'NULL', 'NEW', 'DELETED' ]
+// Modify ticket status => [ 'USED', 'REDEEMED', 'NULL', 'NEW' ]
 ticketRouter.put('/modify/status', async ctx => {
   const { ticketIds, status } = ctx.request.body
-  console.log(ticketIds)
+
   const tckts = JSON.parse(ticketIds)
 
   try {
-    const data = await Promise.all(
-      tckts.map( ticktId => (
-        Ticket.findByIdAndUpdate(ticktId, { status })
-      ))
+    await Promise.all(
+      tckts.map( ticktId => Ticket.findByIdAndUpdate(ticktId, { status }))
     )
 
-    if(data) return ctx.body = { ok : true, data : null, message : '' }
-
-    return ctx.body = { ok : false, data : null, message : 'There is no ticket with that id.' }
+    return ctx.body = { ok : true, data : null, message : '' }
   } catch (e) {
     console.log(e)
-    return ctx.body = { ok : false, data : null, message : 'Error changing ticket status' }
   }
+
+  return ctx.body = { ok : false, data : null, message : 'Error on changing tickets status' }
+})
+
+// Deletes tickets
+ticketRouter.put('/delete', async ctx => {
+  const { tickets } = ctx.request.body
+
+  try {
+    await Promise.all(
+      tickets.map( id => Ticket.findOneAndUpdate({ id }, { status : 'DELETED' }))
+    )
+
+    return ctx.body = { ok : true, data : null, message : 'Tickets deleted!' }
+  } catch (e) {
+    console.log(e)
+  }
+
+  return ctx.body = { ok : false, data : null, message : 'Error on deleting tickets' }
+})
+
+// Return all tickets that are not USED nor NULL
+ticketRouter.get('/all', async ctx => {
+  const {
+    status = 'NULL,USED,DELETED',
+    limit = 10,
+    skip = 0,
+    unassigned = true
+  } = ctx.query
+
+  const list = [].concat(status.split(','))
+  const conditions = { status : { $nin : list }}
+
+  if(unassigned) conditions.ride = null
+
+  try {
+    const tickets = await Ticket
+                          .find(conditions)
+                          .sort({ id : -1 })
+                          .skip(skip)
+                          .limit(limit)
+                          .exec()
+
+    if(tickets.length) {
+      const data = await Promise.all(tickets.map(getTicketData))
+
+      const count = await Ticket.count({ status : { $nin : list }})
+
+      return ctx.body = { ok : true, data : { tickets : data, count }, message : '' }
+    }
+
+    return ctx.body = { ok : false, data : null, message : 'There are no tickets.' }
+  } catch (e) {
+    console.log(e)
+  }
+
+  return ctx.body = { ok : false, data : null, message : 'Eor retrieving the tickets for this ride' }
+})
+
+// Retrieve all tickets from ride
+ticketRouter.get('/all/:ride', async ctx => {
+  const { ride } = ctx.params
+
+  // if(/\D/.test(time)) return ctx.body = { ok : false, data : null, message : 'Not a valid time parameter' }
+
+  try {
+    const tickets = await Ticket
+                          .find({ ride })
+                          .sort({ id : -1 })
+                          .exec()
+
+    if(tickets.length) {
+      const data = await Promise.all(tickets.map(getTicketData))
+
+      return ctx.body = { ok : true, data, message : '' }
+    }
+
+    return ctx.body = { ok : false, data : null, message : 'There are no ticket for this ride' }
+  } catch (e) {
+    console.log(e)
+  }
+
+  return ctx.body = { ok : false, data : null, message : 'Error retrieving the tickets for this ride' }
 })
 
 // Retrieve a ticket information
@@ -215,7 +233,7 @@ ticketRouter.get('/:id', async ctx => {
   const { id } = ctx.params
 
   try {
-    const tckt = await Ticket.findById(id)
+    const tckt = await Ticket.findOne({ id })
 
     if(tckt) {
       const ticketData = await getTicketData(tckt)
@@ -225,8 +243,10 @@ ticketRouter.get('/:id', async ctx => {
 
     return ctx.body = { ok : false, data : null, message : 'Couldn\'t retrieve ticket. Either doesn\'t exist or we have a problem on the server' }
   } catch (e) {
-    return ctx.body = { ok : false, data : null, message : 'Error retrieving ticket' }
+    console.log(e)
   }
+
+  return ctx.body = { ok : false, data : null, message : 'Error retrieving ticket' }
 })
 
 export default ticketRouter

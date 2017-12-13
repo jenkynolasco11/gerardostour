@@ -13,6 +13,6 @@ routes.forEach(route => {
   rootRoute.use('/', route.routes(), route.allowedMethods())
 })
 
-rootRoute.stack.forEach(p => console.log(p.path /* , p.methods*/ ))
+// rootRoute.stack.forEach(p => console.log(p.path /* , p.methods*/ ))
 
 export default rootRoute.routes()

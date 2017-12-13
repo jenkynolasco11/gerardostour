@@ -1,60 +1,15 @@
-import { Ticket, Payment, TicketDetail, Person, Meta, Address /*,Bus*/ } from '../../../models'
-import { createPerson, createAddress, filterDoc } from '../../../utils'
+import { Ticket, Receipt, TicketDetail, Person, Meta, Address /*,Bus*/ } from '../../../models'
+import { filterDoc, createTicketSideData } from '../../../utils'
 
 // ///////////////// Helper functions
-export const getTicketData = async tckt => {
-  try {
-    // const ride = await (tckt.ride ? Ride.findById(tckt.ride) : 'none')
-    const person = await Person.findById(tckt.person)
-    const details = await TicketDetail.findById(tckt.details)
-    const pick = await (tckt.willPick ? Address.findById(details.pickUpAddress) : 'none')
-    const drop = await (tckt.willDrop ? Address.findById(details.dropOffAddress) : 'none')
-
-    // console.log(pick)
-    // console.log(drop)
-
-    const pickAdd = pick !== 'none' && pick ? { ...pick.toObject() } : pick
-    const dropAdd = drop !== 'none' && drop ? { ...drop.toObject() } : drop
-
-    // console.log(pickAdd)
-    // console.log(dropAdd)
-    // console.log('----------------------------')
-
-    const data = {
-      id : tckt.id,
-      _id : tckt._id,
-      willDrop : tckt.willDrop,
-      willPick : tckt.willPick,
-      luggage : tckt.luggage,
-      status : tckt.status,
-      from : tckt.from,
-      to : tckt.to,
-      pickUpAddress : filterDoc(pickAdd),
-      dropOffAddress : filterDoc(dropAdd),
-      time : details.time,
-      date : details.date,
-      person : {
-        firstname : person.firstname,
-        lastname : person.lastname,
-        email : person.email,
-        phoneNumber : person.phoneNumber
-      }
-    }
-
-    return data//.filter(Boolean)
-  } catch (e) {
-    // console.log(e)
-  }
-
-  return null
-}
 
 // Middleware for webhook data
 export const reformatTicket = (ctx, next) => {
   const { body } = ctx.request
+  // console.log(body)
 
   // If its local, return. No need to reformat data structure
-  if(body.isLocal) return next()
+  if(body._isLocal) return next()
 
   // console.log(body)
 
@@ -101,51 +56,70 @@ export const reformatTicket = (ctx, next) => {
   return next()
 }
 
+export const getTicketData = async tckt => {
+  try {
+    const person = await Person.findById(tckt.person)
+    const details = await TicketDetail.findById(tckt.details)
+    const pick = await (tckt.willPick ? Address.findById(details.pickUpAddress) : '')
+    const drop = await (tckt.willDrop ? Address.findById(details.dropOffAddress) : '')
+
+    const pickAdd = pick && pick ? { ...pick.toObject() } : 'none'
+    const dropAdd = drop && drop ? { ...drop.toObject() } : 'none'
+
+    const data = {
+      id : tckt.id,
+      _id : tckt._id,
+      willDrop : tckt.willDrop,
+      willPick : tckt.willPick,
+      luggage : tckt.luggage,
+      status : tckt.status,
+      from : tckt.from,
+      to : tckt.to,
+      pickUpAddress : filterDoc(pickAdd),
+      dropOffAddress : filterDoc(dropAdd),
+      time : details.time,
+      date : details.date,
+      person : {
+        firstname : person.firstname,
+        lastname : person.lastname,
+        email : person.email,
+        phoneNumber : person.phoneNumber
+      }
+    }
+
+    return data//.filter(Boolean)
+  } catch (e) {
+    console.log(e)
+    console.log('... @ src/routes/api/ticket/ticket.controller.js')
+  }
+
+  return null
+}
+
 // Ticket details
-export const saveTicket = async ({ id, data, person, pickUp, dropOff }) => {
-  // console.log(data)
+export const saveTicket = async body => {
+  const { id, data, person, pickUp, dropOff, receipt } = body
   const {
     frm,
     to,
-    luggage,
     willPick,
     willDrop,
     status = 'NEW',
-
-    // TICKET DETAILS
-    fee,
-    extraFee,
     departureDate,
     departureTime,
-
-    // PAYMENT DETAILS
-    cardBrand,
-    cardLastDigits,
-    totalAmount,
-    paymentType
   } = data
 
-  let payment = null
   let details = null
   let tckt = null
-// console.log(data)
 
   try {
-    payment = await new Payment({
-      cardBrand,
-      cardLastDigits,
-      totalAmount,
-      type : paymentType
-    }).save()
+    const date = new Date(new Date(departureDate).setHours(0,0,0,0))
+    const time = Number(departureTime)
 
-    details = await new TicketDetail({ 
+    details = await new TicketDetail({
       pickUpAddress : pickUp,
       dropOffAddress : dropOff,
       redeemedCount : 0,
-      fee,
-      extraFee,
-      date : departureDate,
-      time : departureTime,
     }).save()
 
     // TODO: Make sure that the data inserted is sanitized, or it'll break!!!
@@ -153,27 +127,32 @@ export const saveTicket = async ({ id, data, person, pickUp, dropOff }) => {
       id,
       person,
       details : details._id,
-      payment : payment._id,
+      receipt,
       status,
-      luggage,
       willPick,
       willDrop,
       from : frm,
-      to
+      to,
+      date,
+      time,
     }).save()
 
-    return tckt._id
+    if(!details || !tckt) throw new Error('Error while inserting data on tickets!')
+
+    return tckt.id
   } catch(e) {
-    [ 
-      { obj : tckt, coll : Ticket },
-      { obj : payment, coll : Payment },
-      { obj : details, coll : TicketDetail },
-    ].forEach( item => {
-      if(item.obj) item.coll.remove({ _id : item.obj._id })
-    })
+    console.log('heyy')
+    // Oh snap! Some shit happened... rolling back.... again...
+
+    if(details) TicketDetail.findByIdAndRemove(details._id).exec()
+    if(tckt) Ticket.findByIdAndRemove(tckt._id).exec()
+
     console.log(e)
-    return null
+    console.log('... @ src/routes/api/ticket/ticket.controller.js')
   }
+
+  // Tempted to throw an error in here to roll back everything!
+  return null
 }
 
 // Create Tickets
@@ -181,61 +160,62 @@ export const saveTickets = async data => {
   const { howMany } = data
 
   const promises = []
+  let meta = null
+  let person = null
+  let pickUp = null
+  let dropOff = null
+  let receipt = null
 
   try {
-    const meta = await Meta.findOne({})
+    meta = await Meta.findOne({})
 
-    const person = await createPerson(data)
+    const [ prsn, pckup, drpff, rcpt ] = await createTicketSideData({ ...data, ...filterDoc(meta.toObject()) })
 
-    const pickUp = await (
-      data.willPick 
-      ? createAddress({ ...data.pickUpAddress })
-      : null
-    )
+    person = prsn
+    pickUp = pckup
+    dropOff = drpff
+    receipt = rcpt
 
-    const dropOff = await (
-      data.willDrop 
-      ? createAddress({ ...data.dropOffAddress })
-      : null
-    )
+    const willDrop = data.willDrop === 'true'
+    const willPick = data.willPick === 'true'
 
-    // If anything got bad on inserting, then erase all the shit back!
-    if(!person || (!pickUp && data.willPick) || (!dropOff && data.willDrop)) {
-      console.log('Erasing shit... Something happened...')
+    if(!person || (willDrop && !dropOff) || (willPick && !pickUp) || !receipt)
+      throw new Error('Shit happened... Rolling back everything!')
 
-      [
-        // { obj : details, col : TicketDetail },
-        { obj : person, col : Person }, 
-        // { obj : payment, col : Payment },
-        { obj : pickUp, col : Address },
-        { obj : dropOff, col : Address }
-      ].forEach(async itm => {
-        // Remove entries if any
-        if(itm.obj) await itm.col.remove({ _id : itm.obj._id ? itm.obj._id : itm.obj })
-      })
+    const lastTicket = meta.lastTicketId
 
-      return null
-    }
-
-    for(let i = 0; i < howMany; i++) 
+    for(let i = 0; i < howMany; i++)
       promises.push(saveTicket({
-        id : meta.lastTicketId + i + 1,
+        id : lastTicket + i,
         data,
         pickUp,
         person,
-        dropOff
+        dropOff,
+        receipt
       }))
-    
-    // const data = await Promise.all(promises)
+
     const tickets = await Promise.all(promises)
 
-    meta.lastTicketId += tickets.length
+    // update meta
+    meta.lastTicketId += Number(howMany)
+    meta.lastReceiptId += 1
     await meta.save()
 
     return tickets
   } catch (e) {
+    // Some shit happened... Roll back everything!!!
+
+    if(person) Person.findByIdAndRemove(person._id).exec()
+    if(pickUp) Address.findByIdAndRemove(pickUp._id).exec()
+    if(dropOff) Address.findByIdAndRemove(dropOff._id).exec()
+    if(receipt) Receipt.findByIdAndRemove(receipt._id).exec()
+
     console.log(e)
-    return null
+    console.log('... @ src/routes/api/ticket/ticket.controller.js')
   }
+
+  // This means that something happened
+  return null
 }
-//////////////////////////////////////
+
+// ////////////////////////////////////

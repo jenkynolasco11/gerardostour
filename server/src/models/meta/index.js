@@ -2,6 +2,9 @@ import mongoose, { Schema } from 'mongoose'
 
 const MetaSchema = new Schema({
   lastTicketId : Number,
+  lastReceiptId: Number,
+  lastRideId : Number,
+  lastBusId : Number,
   modifiedAt : { type : Number, default : Date.now }
 })
 
