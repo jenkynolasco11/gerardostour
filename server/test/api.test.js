@@ -43,10 +43,24 @@ let agent = null
 let srv = null
 
 describe('Api => Tickets', () => {
+  // console.log(this)
+  // this.timeout(10000)
+
+  function commonExpects(res, status, ok, dataType, msg) {
+    expect(res).to.be.status(status)
+    expect(res.body).to.be.an('object')
+    expect(res.body).to.haveOwnProperty('message')
+    expect(res.body.message).to.have.eql(msg)
+    expect(res.body).to.haveOwnProperty('ok')
+    expect(res.body.ok).to.be.eql(ok)
+    expect(res.body).to.haveOwnProperty('data')
+    expect(res.body.data).to.be.an(dataType)
+  }
+
   before(async() => {
     // const srvr = app()
     try {
-      await deleteAllCollections()
+      // await deleteAllCollections()
       srv = await app()
 
       agent = chai.request.agent(srv)
@@ -63,15 +77,13 @@ describe('Api => Tickets', () => {
       .send(ticketData)
       .end((err, res) => {
         const { body } = res
-        expect(res).to.be.status(200)
-        expect(body).to.be.an('object')
-        expect(body).to.haveOwnProperty('message')
-        expect(body.message).to.have.eql('')
-        expect(body).to.haveOwnProperty('ok')
-        expect(body.ok).to.be.true
-        expect(body).to.haveOwnProperty('data')
-        expect(body.data).to.haveOwnProperty('receipt')
-        expect(body.data.receipt).to.be.eql(1)
+        commonExpects(res, 200, true, 'object', '')
+        expect(body.data).to.haveOwnProperty('tickets')
+        expect(body.data.tickets).to.be.an('array')
+
+        body.data.tickets.forEach(id => {
+          expect(id).to.be.an('number')
+        })
 
         done()
       })
@@ -82,14 +94,8 @@ describe('Api => Tickets', () => {
       .get('/api/v1/ticket/2')
       .end((err, res) => {
         const { body } = res
-        expect(res).to.be.status(200)
-        expect(body).to.be.an('object')
-        expect(body).to.haveOwnProperty('message')
-        expect(body.message).to.be.eql('')
-        expect(body).to.haveOwnProperty('ok')
-        expect(body.ok).to.be.true
-        expect(body).to.haveOwnProperty('data')
-        expect(body.data).to.be.an('object')
+
+        commonExpects(res, 200, true, 'object', '')
         expect(body.data).to.haveOwnProperty('id')
         expect(body.data.id).to.be.eql(2)
         expect(body.data).to.haveOwnProperty('person')
@@ -105,17 +111,71 @@ describe('Api => Tickets', () => {
       .get('/api/v1/ticket/all')
       .end((err, res) => {
         const { body } = res
-        expect(res).to.be.status(200)
-        expect(body).to.be.an('object')
-        expect(body).to.haveOwnProperty('message')
-        expect(body.message).to.be.eql('')
-        expect(body).to.haveOwnProperty('ok')
-        expect(body.ok).to.be.true
-        expect(body).to.haveOwnProperty('data')
+
+        commonExpects(res, 200, true, 'object', '')
         expect(body.data).to.haveOwnProperty('tickets')
         expect(body.data.tickets).to.be.an('array')
+        expect(body.data.tickets).to.be.length.gte(4)
+        expect(body.data.tickets).to.have.any.keys([0,1,2,3])
+
+        body.data.tickets.forEach(ticket => {
+          expect(ticket).to.deep.include.any.keys('id', '_id', 'person.firstname', 'person.email', 'status', 'to', 'from', 'person')
+          expect(ticket).to.haveOwnProperty('willPick')
+          if(ticket.willPick) expect(ticket.pickUpAddress).to.be.an('object')
+          expect(ticket).to.haveOwnProperty('willDrop')
+          if(ticket.willDrop) expect(ticket.dropOffAddress).to.be.an('object')
+        })
+        
+        done()
+      })
+  })
+
+  it('Should query a receipt', done => {
+    agent
+      .get('/api/v1/ticket/3/receipt')
+      .end((err, res) => {
+        const { body } = res
+        commonExpects(res, 200, true, 'object', '')
+        expect(body.data).to.haveOwnProperty('receipt')
+        expect(body.data.receipt).to.have.any.keys('fee', 'extraFee', 'ticketsIssued')
+        expect(body.data.receipt.ticketsIssued).to.be.an('array')
+        expect(body.data.receipt.ticketsIssued).to.include.members([1,2,3,4])
+        if(body.data.receipt.paymentType === 'CARD') {
+          expect(body.data.receipt.cardBrand).to.be.an('string').of.length.gte(4)
+          expect(body.data.receipt.cardLastDigits).to.be.an('number')
+        }
+        expect(body.data.receipt.fee).to.be.an('number')
+        expect(body.data.receipt.extraFee).to.be.an('number')
 
         done()
+      })
+  })
+
+  it('Should update status of 2 tickets', done => {
+    agent
+      .put('/api/v1/ticket/modify/status')
+      .send({ ticketIds : [ 1, 4 ], status : 'REDEEMED' })
+      .end((err, res) => {
+        const { body } = res
+        commonExpects(res, 200, true, 'null', '')
+
+        agent
+          .get('/api/v1/ticket/all?status=REDEEMED')
+          .end((err, res) => {
+            const { body } = res
+            commonExpects(res, 200, true, 'object', '')
+            expect(body.data).to.haveOwnProperty('tickets')
+            expect(body.data.tickets).to.be.an('array')
+            expect(body.data.tickets).to.be.lengthOf(2)
+            expect(body.data.tickets).to.have.all.keys([0,1])
+
+            body.data.tickets.forEach(ticket => {
+              expect(ticket).to.haveOwnProperty('status')
+              expect(ticket.status).to.be.eql('REDEEMED')
+            })
+
+            done()
+          })
       })
   })
 
@@ -125,23 +185,14 @@ describe('Api => Tickets', () => {
       .set('Content-Type', 'application/x-www-form-urlencoded')
       .send({ tickets : [ 1,2,3,4 ] })
       .end((err, res) => {
-        const { body } = res
-
-        expect(res).to.be.status(200)
-        expect(body).to.be.an('object')
-        expect(body).to.haveOwnProperty('message')
-        expect(body.message).to.have.eql('Tickets deleted!')
-        expect(body).to.haveOwnProperty('ok')
-        expect(body.ok).to.be.true
-        expect(body).to.haveOwnProperty('data')
-        expect(body.data).to.be.null
+        commonExpects(res, 200, true, 'null', 'Tickets deleted!')
 
         done()
       })
   })
 
   after(async () => {
-    await deleteAllCollections()
+    // await deleteAllCollections()
 
     srv.close()
   })

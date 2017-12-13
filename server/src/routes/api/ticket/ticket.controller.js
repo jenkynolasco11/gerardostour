@@ -211,7 +211,7 @@ export const saveTickets = async data => {
     await meta.save()
 
     // return either tickets or receipt number
-    return receipt.id
+    return tickets
   } catch (e) {
     // Some shit happened... Roll back everything!!!
     eraseData({ person, pickUp, dropOff, receipt })
@@ -221,6 +221,34 @@ export const saveTickets = async data => {
   }
 
   // This means that something happened
+  return null
+}
+
+export const getTicketReceipt = async id => {
+  try {
+    const tckt = await Ticket.findOne({ id })
+
+    const ticketsIssued = (await Ticket.find({ receipt : tckt.receipt }, { id : 1, _id : 0 }))
+                                        .map(i => i.id)
+                                        .sort((a,b) => a - b)
+
+    if(tckt) {
+      const receipt = await Receipt.findById(tckt.receipt)
+      const { cardLastDigits, cardBrand, totalAmount, paymentType, fee, extraFee } = receipt
+
+      const data = { fee, extraFee, totalAmount, paymentType, ticketsIssued }
+
+      if(paymentType === 'CARD') {
+        data.cardBrand = cardBrand
+        data.cardLastDigits = cardLastDigits
+      }
+
+      return data
+    }
+  } catch (e) {
+    console.log(e)
+  }
+
   return null
 }
 
