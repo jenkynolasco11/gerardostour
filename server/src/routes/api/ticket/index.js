@@ -119,9 +119,6 @@ ticketRouter.put('/modify/ride', async ctx => {
 ticketRouter.put('/modify/status', async ctx => {
   const { ticketIds, status } = ctx.request.body
 
-  // console.log(ticketIds)
-  // const tckts = JSON.parse(ticketIds)
-
   try {
     const data = await Promise.all(
       ticketIds.map( id => Ticket.findOneAndUpdate({ id }, { status }))
@@ -157,6 +154,7 @@ ticketRouter.get('/all', async ctx => {
   const {
     nonstatus = 'NULL,USED,DELETED',
     status = 'NEW',
+    sort = 'id -1',
     limit = 10,
     skip = 0,
     unassigned = true
@@ -164,22 +162,32 @@ ticketRouter.get('/all', async ctx => {
 
   const nonlist = [].concat(nonstatus.split(','))
   const list = [].concat(status.split(','))
-  const conditions = { $and : [{ status : { $in : list }}, { status : { $nin : nonlist }}] }
+  const conditions = {
+    $and : [
+      { status : { $in : list }},
+      { status : { $nin : nonlist }}
+    ]
+  }
+  const [ srt, asc ] = sort.split(' ')
+  const sortCondition = { [ srt ] : asc }
+
+  if(srt === 'departureDate') sortCondition.departureTime = asc < 0 ? -1 : 1
+  if(srt === 'departureTime') sortCondition.departureDate = asc < 0 ? -1 : 1
 
   if(unassigned) conditions.ride = null
 
   try {
     const tickets = await Ticket
                           .find(conditions)
-                          .sort({ id : -1 })
-                          .skip(skip)
-                          .limit(limit)
+                          .skip(Number(skip))
+                          .limit(Number(limit))
+                          .sort(sortCondition)
                           .exec()
 
     if(tickets.length) {
       const data = await Promise.all(tickets.map(getTicketData))
 
-      const count = await Ticket.count({ status : { $nin : list }})
+      const count = await Ticket.count(conditions)
 
       return ctx.body = { ok : true, data : { tickets : data, count }, message : '' }
     }

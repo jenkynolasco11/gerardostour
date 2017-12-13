@@ -234,9 +234,9 @@ export const getTicketReceipt = async id => {
 
     if(tckt) {
       const receipt = await Receipt.findById(tckt.receipt)
-      const { cardLastDigits, cardBrand, totalAmount, paymentType, fee, extraFee } = receipt
+      const { cardLastDigits, cardBrand, totalAmount, paymentType, fee, extraFee, luggage } = receipt
 
-      const data = { fee, extraFee, totalAmount, paymentType, ticketsIssued }
+      const data = { fee, extraFee, totalAmount, paymentType, ticketsIssued, luggage }
 
       if(paymentType === 'CARD') {
         data.cardBrand = cardBrand

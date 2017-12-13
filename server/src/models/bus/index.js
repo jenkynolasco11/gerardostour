@@ -3,7 +3,7 @@ import mongoose, { Schema } from 'mongoose'
 const BusSchema = new Schema({
   id : { type : Number, unique : { index : true }, required : true },
   user : { type : Schema.Types.ObjectId, ref : 'user' },
-  alias : String,
+  // alias : String,
   name : String,
   status : {
     type : String,

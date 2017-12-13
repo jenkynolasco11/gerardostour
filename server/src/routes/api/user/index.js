@@ -1,124 +1,98 @@
 import Router from 'koa-router'
 
-import { User, Person } from '../../models'
+import { User } from '../../../models'
+import { createUser, getUserData, updateUser } from './user.controller'
 
 const userRouter = new Router({ prefix : 'user' })
 
-const getUserData = async data => {
+userRouter.get('/all', async ctx => {
   try {
-    
+    const data = await User.find({})
+
+    if(data) return ctx.body = { ok : true, data : { users : data }, message : '' }
+
+    return ctx.body = { ok : false, data : null, message : 'There are no users to show' }
   } catch (e) {
     console.log(e)
   }
 
-  return null
-}
-
-userRouter.get('/all', async ctx => {
-  const { limit = 10, skip = 0 } = ctx.query
-
-  try {
-    const users = await User.find({})
-                          .skip(skip)
-                          .limit(limit)
-                          .exec()
-
-    if(users.length) {
-
-    }
-    // const query = await User.find({ position : type })
-    //                         .skip(Number(skip))
-    //                         .limit(Number(limit))
-    //                         .exec()
-
-    const count = await User.count({ position : type })
-
-    return ctx.body = { ok : true, data : { users, count }, message : null }
-  } catch (e) {
-    return ctx.body = { data : null, message : 'Error retrieving users' }
-  }
+  return ctx.body = { ok : false, data : null, message : 'Error while retrieving the users' }
 })
 
-userRouter.get('/current', async ctx => {
-  if(!ctx.state.user) return ctx.body = { 
-    data : null,
-    message : 'Error. There is no logged in user.'
-  }
+userRouter.get('/:username', async ctx => {
+  const { username } = ctx.params
 
-  const { personid = null } = ctx.state.user
-  
   try {
-    const { firstname, lastname } = await Person.findById(personid)
+    const user = await User.findOne({ username })
 
-    return ctx.body = { data : { firstname, lastname }, message : null }
-  } catch (e) {
-    return ctx.body = {
-      data : null,
-      message : 'Error retrieving logged user. Are you logged in?'
+    if(user) {
+      const data = await getUserData(user)
+
+      if(data) return ctx.body = { ok : true, data : { user : data }, message : '' }
     }
+
+    return ctx.body = { ok : false, data : null, message : 'There is no user under that username' }
+  } catch(e) {
+    console.log(e)
   }
+
+  return ctx.body = { ok : false, data : null, message : 'Error while retrieving the user' }
 })
 
-userRouter.post('/create-or-update', async ctx => {
-  // IF PERSON EXISTS, UPDATE
-  const {
-    uid = '',
-    pid = '',
-    username,
-    firstname,
-    lastname,
-    password,
-    phoneNumber,
-    position = 'NONE'
-  } = ctx.request.body
+userRouter.post('/save', async ctx => {
+  const { body } = ctx.request
 
   try {
-    const p = await Person.findById(pid)
-    const u = await User.findById(uid)
+    const username = await createUser(body)
 
-    if(p) {
-      await Person.update({ _id : pid }, {
-        firstname,
-        lastname,
-        phoneNumber
-      })
+    if(username) return ctx.body = { ok : true, data : { username }, message : '' }
 
-      const pass = u.generateHash(password)
-
-      await User.update({ _id : uid }, {
-        username,
-        password : pass,
-        position
-      })
-
-      return ctx.body = { data : true, message : 'User saved satisfactorily!' }
-    }
-    // else {
-
-    const person = await new Person({
-      firstname,
-      lastname, 
-      phoneNumber
-    }).save()
-
-    const usr = new User({
-      username,
-      position,
-      personid : person._id,
-    })
-
-    usr.password = usr.generateHash(password)
-
-    await usr.save()
-
-    return ctx.body = { data : true, message : '' }
-    // }
+    return ctx.body = { ok : false, data : null, message : 'Couldn\'t save user on Database' }
   } catch (e) {
-    return ctx.body = { 
-      data : null, 
-      message : 'Error while saving the user to the DB' 
-    }
+    console.log(e)
   }
+
+  return ctx.body = { ok : false, data : null, message : 'Error while creating the user' }
+})
+
+userRouter.put('/:username/modify', async ctx => {
+  const { username } = ctx.params
+  const { body } = ctx.request
+
+  console.log('in modify')
+
+  try {
+    const user = await User.findOne({ username })
+
+    if(user) {
+      const data = await updateUser(user, body)
+
+      if(data) return ctx.body = { ok : true, data : { user : data }, message : '' }
+    }
+
+    return ctx.body = { ok : false, data : null, message : 'There is no username under than name' }
+  } catch (e) {
+    console.log(e)
+  }
+
+  return ctx.body = { ok : false, data : null, message : 'Error while updating the user' }
+})
+
+userRouter.put('/:username/delete', async ctx => {
+  const { username } = ctx.params
+  console.log('in delete')
+
+  try {
+    const usr = await User.findOneAndUpdate({ username }, { status : 'DELETED' }, { new : true })
+
+    if(usr.status === 'DELETED') return ctx.body = { ok : true, data : null, message : 'User deleted successfully!' }
+
+    return ctx.body = { ok : false, data : null, message : 'Couldn\'t delete user' }
+  } catch (e) {
+    console.log(e)
+  }
+
+  return ctx.body = { ok : false, data : null, message : 'Error while deleting the user' }
 })
 
 export default userRouter

@@ -1,48 +1,47 @@
 import Router from 'koa-router'
 
-import { Ride, RideDetail, Bus, } from '../../../models'
-import { getRideData, saveRide, updateRide } from './ride.controller'
+import { Ride } from '../../../models'
+import { getRideData, createRide, updateRide } from './ride.controller'
 
 const rideRouter = new Router({ prefix : 'ride' })
 
 // Retrieve all rides
 rideRouter.get('/all', async ctx => {
   const {
-    status = 'FINISHED,ASSIGNED',
+    nonstatus = 'FINISHED,ASSIGNED,CANCELLED',
     limit = 10,
     skip = 0,
     sort = 'date -1',
     future = 'true',
   } = ctx.query
 
-  const list = [].concat(status ? status.split(',') : '')
-  const conditions = { status : { $in : list }}
+  const list = [].concat(nonstatus.split(','))
+  const conditions = { status : { $nin : list }}
 
   const [ srt, asc ] = sort.split(' ')
   const sortCondition = { [ srt ] : Number(asc) }
 
-  if(srt === 'date') sortCondition.time = 1
-  if(future === 'true') {
-    const tmpDate = new Date()
+  if(srt === 'date') sortCondition.time = asc < 0 ? -1 : 1
+  if(srt === 'time') sortCondition.date = asc < 0 ? -1 : 1
 
-    conditions.date = { $gte : new Date(new Date().setDate( tmpDate.getDate() - 1)) }
+  if(future === 'true') {
+    const tmpDate = new Date().setHours(0,0,0,0)
+
+    conditions.date = { $gte : new Date(tmpDate - 86400000) }
   }
 
   try {
     const rides = await Ride
-                          .find(conditions)
-                          .skip(Number(skip))
-                          .limit(Number(limit))
-                          .sort(sortCondition)
-                          .exec()
+                        .find(conditions)
+                        .skip(Number(skip))
+                        .limit(Number(limit))
+                        .sort(sortCondition)
+                        .exec()
 
     if(rides.length) {
       const data = await Promise.all(rides.map(getRideData))
 
-      // data.forEach(e => console.log(e.date))
-
       const count = await Ride.count(conditions)
-      // console.log(count)
 
       if(data.length) return ctx.body = { ok : true, data : { rides : data, count }, message : '' }
     }
@@ -51,6 +50,7 @@ rideRouter.get('/all', async ctx => {
   } catch (e) {
     console.log(e)
   }
+
   return ctx.body = { ok : false, data : null, message : 'Error retrieving rides' }
 })
 
@@ -58,17 +58,10 @@ rideRouter.get('/all', async ctx => {
 rideRouter.post('/save', async ctx => {
   const { body } = ctx.request
 
-  // console.log(body)
-
   try {
-    let { time, date } = body
+    const rid = await createRide(body)
 
-    time = parseInt(time)
-    date = new Date(date)
-
-    const rid = await saveRide(body)
-
-    if(rid) return ctx.body = { ok : true, data : { routeId : rid }, message : '' }
+    if(rid) return ctx.body = { ok : true, data : { ride : rid }, message : '' }
 
     return ctx.body = { ok : false, data : null, message : 'Couldn\'t save route in DB' }
   } catch (e) {
@@ -111,6 +104,7 @@ rideRouter.get('/date/:date/hour/:hour', async ctx => {
   return ctx.body = { ok : false, data : null, message : 'There are no rides for this date' }
 })
 
+/* not assigned */
 // Assign bus to ride
 rideRouter.put('/assign-bus', async ctx => {
   const { bus, ids = [] } = ctx.request.body
@@ -139,14 +133,15 @@ rideRouter.put('/assign-bus', async ctx => {
 rideRouter.put('/:id/modify', async ctx => {
   const { id } = ctx.params
   const { body } = ctx.request
-  // console.log(body)
-  // console.log(id)
 
   try {
-    // console.log(body)
-    const data = await updateRide(id, body)
-    // console.log(data)
-    if(data) return ctx.body = { ok : true, data, message : '' }
+    const rid = await Ride.findOne({ id })
+
+    if(rid) {
+      const data = await updateRide(rid, body)
+
+      if(data) return ctx.body = { ok : true, data : { ride : data }, message : '' }
+    }
 
     return ctx.body = { ok : false, data : null, message : 'There is no ride assigned to that id' }
   } catch(e) {
@@ -160,17 +155,18 @@ rideRouter.get('/:id', async ctx => {
   const { id } = ctx.params
   try {
     const rid = await Ride.findOne({ id })
-    console.log(rid)
+
     if(rid) {
       const data = await getRideData(rid)
 
-      if(data) return ctx.body = { ok : true, data, message : '' }
+      if(data) return ctx.body = { ok : true, data : { ride : data }, message : '' }
     }
 
     return ctx.body = { ok : false, data : null, message : 'There is no ride assigned to that id' }
   } catch(e) {
-    return ctx.body = { ok : false, data : null, message : 'Error retrieving ride' }
+    console.log(e)
   }
+  return ctx.body = { ok : false, data : null, message : 'Error retrieving ride' }
 })
 
 export default rideRouter
