@@ -17,7 +17,7 @@ import {
 
 export const createMeta = async () => {
   try {
-    const meta = await Meta.findOne({})
+    const meta = await Promise.resolve(Meta.findOne({}))
 
     if(!meta) {
       const defaultMeta = {
@@ -27,8 +27,10 @@ export const createMeta = async () => {
         lastBusId : 1,
       }
 
-      await new Meta(defaultMeta).save()
+      await Promise.resolve(new Meta(defaultMeta).save())
     }
+
+    // console.log(meta)
   } catch (e) { }
 }
 
@@ -114,16 +116,19 @@ export const filterDoc = doc => {
   return rest
 }
 
+// TODO : Make sure willPick and willDrop are sent as booleans
 export const createTicketSideData = async (data) => {
   try {
     const person = await createPerson(data)
     const pickUp = await (
-      data.willPick === 'true'
+      // data.willPick === 'true'
+      data.willPick
       ? createAddress({ ...data.pickUpAddress })
       : null)
 
     const dropOff = await (
-      data.willDrop === 'true'
+      // data.willDrop === 'true'
+      data.willDrop
       ? createAddress({ ...data.dropOffAddress })
       : null)
 

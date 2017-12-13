@@ -25,18 +25,17 @@ export const Meta = mongoose.model('meta')
 
 export const deleteAllCollections = async () => {
   try {
+    await Meta.collection.remove({})
     await Person.collection.remove({})
-    await User.collection.remove({})
-    await Ride.collection.remove({})
-    await RideDetail.collection.remove({})
+    await Address.collection.remove({})
     await Ticket.collection.remove({})
     await TicketDetail.collection.remove({})
-    await Address.collection.remove({})
-    await Bus.collection.remove({})
     await Receipt.collection.remove({})
+    await Ride.collection.remove({})
+    await RideDetail.collection.remove({})
+    await User.collection.remove({})
+    await Bus.collection.remove({})
     await BusDetail.collection.remove({})
-    await Meta.collection.remove({})
-
   } catch (e) {
     return false
   }

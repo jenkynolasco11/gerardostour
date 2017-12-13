@@ -1,39 +1,41 @@
 import Router from 'koa-router'
 
-import { Ticket, Payment, TicketDetail, Ride } from '../../../models'
+import { Ticket, Receipt, TicketDetail, Ride } from '../../../models'
 import { getTicketData, reformatTicket, saveTickets } from './ticket.controller'
 
 const ticketRouter = new Router({ prefix : 'ticket' })
 
 // //////////////////////// Routes
 // Retrieve a ticket payment information
-ticketRouter.get('/:id/payment', async ctx => {
+ticketRouter.get('/:id/receipt', async ctx => {
   const { id } = ctx.params
 
     try {
       const tckt = await Ticket.findOne({ id })
-      const { fee, extraFee } = await TicketDetail.findById(tckt.details)
+      const ticketsIssued = (await Ticket.find({ receipt : tckt.receipt }, { id : 1, _id : 0 }))
+                                          .map(i => i.id)
+                                          .sort((a,b) => a - b)
 
       if(tckt) {
-        const payment = await Payment.findById(tckt.payment)
-        const { cardLastDigits, cardBrand, totalAmount, type } = payment
+        const receipt = await Receipt.findById(tckt.receipt)
+        const { cardLastDigits, cardBrand, totalAmount, paymentType, fee, extraFee } = receipt
 
-        const data = { fee, extraFee, totalAmount, type }
+        const data = { fee, extraFee, totalAmount, paymentType, ticketsIssued }
 
-        if(type === 'CARD') {
+        if(paymentType === 'CARD') {
           data.cardBrand = cardBrand
           data.cardLastDigits = cardLastDigits
         }
 
-        return ctx.body = { ok : true, data, message : '' }
+        return ctx.body = { ok : true, data : { receipt : data }, message : '' }
       }
 
-      return ctx.body = { ok : false, data : null, message : 'Couldn\'t retrieve payment details' }
+      return ctx.body = { ok : false, data : null, message : 'Couldn\'t retrieve receipt details' }
     } catch (e) {
       console.log(e)
     }
 
-    return ctx.body = { ok : false, data : null, message : 'Error retrieving payment details' }
+    return ctx.body = { ok : false, data : null, message : 'Error retrieving receipt details' }
 })
 
 // TODO : Check this one when I create the form for ticket creation
@@ -109,7 +111,7 @@ ticketRouter.get('/date/:d1/:d2?', async ctx => {
 ticketRouter.put('/modify/ride', async ctx => {
   const { ticketIds, rideId } = ctx.request.body
 
-  const tickts = JSON.parse(ticketIds)
+  // const tickts = JSON.parse(ticketIds)
 
   try {
     const rid = await Ride.findById(rideId, { _id : 1 })
@@ -132,11 +134,12 @@ ticketRouter.put('/modify/ride', async ctx => {
 ticketRouter.put('/modify/status', async ctx => {
   const { ticketIds, status } = ctx.request.body
 
-  const tckts = JSON.parse(ticketIds)
+  // console.log(ticketIds)
+  // const tckts = JSON.parse(ticketIds)
 
   try {
-    await Promise.all(
-      tckts.map( ticktId => Ticket.findByIdAndUpdate(ticktId, { status }))
+    const data = await Promise.all(
+      ticketIds.map( id => Ticket.findOneAndUpdate({ id }, { status }))
     )
 
     return ctx.body = { ok : true, data : null, message : '' }
@@ -167,14 +170,16 @@ ticketRouter.put('/delete', async ctx => {
 // Return all tickets that are not USED nor NULL
 ticketRouter.get('/all', async ctx => {
   const {
-    status = 'NULL,USED,DELETED',
+    nonstatus = 'NULL,USED,DELETED',
+    status = 'NEW',
     limit = 10,
     skip = 0,
     unassigned = true
   } = ctx.query
 
+  const nonlist = [].concat(nonstatus.split(','))
   const list = [].concat(status.split(','))
-  const conditions = { status : { $nin : list }}
+  const conditions = { $and : [{ status : { $in : list }}, { status : { $nin : nonlist }}] }
 
   if(unassigned) conditions.ride = null
 
