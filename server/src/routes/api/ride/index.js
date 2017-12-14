@@ -1,6 +1,6 @@
 import Router from 'koa-router'
 
-import { Ride } from '../../../models'
+import { Ride, Bus } from '../../../models'
 import { getRideData, createRide, updateRide } from './ride.controller'
 
 const rideRouter = new Router({ prefix : 'ride' })
@@ -107,18 +107,21 @@ rideRouter.get('/date/:date/hour/:hour', async ctx => {
 /* not assigned */
 // Assign bus to ride
 rideRouter.put('/assign-bus', async ctx => {
-  const { bus, ids = [] } = ctx.request.body
+  // const { id } = ctx.params
+  const { bus, rides = [] } = ctx.request.body
 
   try {
     const bs = await Bus.findById(bus)
     const promises = []
 
     if(bs) {
-      for(let i = 0; i < ids.length; i++) promises.push(Ride.findOneAndUpdate({ id : ids[ i ] }, { bus, status : 'ASSIGNED' }))
+      rides.forEach(id => {
+        promises.push(Ride.findOneAndUpdate({ id }, { bus, status : 'ASSIGNED' }))
+      })
 
       const rids = await Promise.all(promises)
 
-      if(rids) return ctx.body = { ok : true, data : null, message : '' }
+      if(rids) return ctx.body = { ok : true, data : null, message : `Ride${ rides.length > 1 ? 's' : '' } assigned!` }
     }
   } catch (e) {
     console.log(e)

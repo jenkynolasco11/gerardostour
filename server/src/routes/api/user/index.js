@@ -59,8 +59,6 @@ userRouter.put('/:username/modify', async ctx => {
   const { username } = ctx.params
   const { body } = ctx.request
 
-  console.log('in modify')
-
   try {
     const user = await User.findOne({ username })
 
@@ -80,7 +78,6 @@ userRouter.put('/:username/modify', async ctx => {
 
 userRouter.put('/:username/delete', async ctx => {
   const { username } = ctx.params
-  console.log('in delete')
 
   try {
     const usr = await User.findOneAndUpdate({ username }, { status : 'DELETED' }, { new : true })

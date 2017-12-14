@@ -1,16 +1,29 @@
-import { BusDetail, Bus, User, Person } from '../../../models'
+import { BusDetail, Bus, User, Person, Meta } from '../../../models'
+
+const eraseAll = async objects => {
+  const { bus, details } = objects
+
+  try {
+    if(bus) await Bus.findByIdAndRemove(bus._id)
+    if(details) await BusDetail.findByIdAndRemove(details._id)
+  } catch (e) {
+    return false
+  }
+
+  return true
+}
 
 export const getBusData = async bus => {
+  const { _id, user, id, name, status } = bus
+
   try {
-    const { seats, luggage } = await BusDetail.findOne({ bus })
-    const { _id, alias, name, status, user } = await Bus.findById(bus)
+    const { seats, luggage } = await BusDetail.findOne({ bus : _id })
     const { person, position } = await User.findById(user)
     const { firstname, lastname, phoneNumber } = await Person.findById(person)
 
     const data = {
-      id : _id,
+      id,
       name,
-      alias,
       driver : {
         firstname,
         lastname,
@@ -31,32 +44,62 @@ export const getBusData = async bus => {
 }
 
 export const saveBus = async data => {
+  let bus = null
+  let details = null
+
   try {
+    const meta = await Meta.findOne({})
+    const { lastBusId } = meta
+
     const {
       user,
-      alias,
       name,
       status = 'STANDBY',
       seats,
       luggage,
     } = data
 
-    const bus = await new Bus({
+    bus = await new Bus({
+      id : lastBusId,
       user,
-      alias,
       name,
       status
     }).save()
 
-    const details = await new BusDetail({
+    details = await new BusDetail({
       bus : bus._id,
       seats,
       luggage
     }).save()
 
-    return bus._id
+    meta.lastBusId += 1
+    await meta.save()
+
+    return bus.id
   } catch (e) {
-    // Delete bus in case there is an error in here
+    await eraseAll({ bus, details })
+    console.log(e)
+  }
+
+  return null
+}
+
+export const updateBus = async (buss, body) => {
+  let details = null
+  let bus = null
+
+  const { _id, __v, createdAt, modifiedAt, id, ...busx } = buss.toObject()
+
+  const data = { ...busx, ...body }
+  
+  try {
+    // console.log(data)
+    bus = await Bus.findByIdAndUpdate(_id, data, { new : true })
+    details = await BusDetail.findOneAndUpdate({ bus : bus._id }, data)
+
+    return await getBusData(bus)
+  } catch (e) {
+    eraseAll({ details, bus })
     console.log(e)
   }
 

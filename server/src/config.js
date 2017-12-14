@@ -2,12 +2,15 @@ const user = 'database'
 const pass = 'database'
 const session = 'key for my session'  // generate this differently
 
+export const userDefault = 'admin'
+export const passDefault = 'admin12345'
+
 export const PORT = 8000
 export const DBURI = `mongodb://${ user }:${ pass }@ds137826.mlab.com:37826/gerardostrans`
 export const KEY = 'THIS IS MY KEY'
 export const SESSIONID = session
 export const KEYS = ['asdbkjqnwe', 'akhdasjdkajhkasjdn']
-export const ALLOWER_USERS = [ 'SUPERUSER', /*'DISPATCHER', 'MANAGER', */ ]
+export const ALLOWED_USERS = [ 'SUPERUSER', /*'DISPATCHER', 'MANAGER', */ ]
 
 export default {
   PORT,
@@ -15,5 +18,5 @@ export default {
   KEY,
   SESSIONID,
   KEYS,
-  ALLOWER_USERS
+  ALLOWED_USERS
 }

@@ -4,10 +4,10 @@ const BusSchema = new Schema({
   id : { type : Number, unique : { index : true }, required : true },
   user : { type : Schema.Types.ObjectId, ref : 'user' },
   // alias : String,
-  name : String,
+  name : { type : String, unique : { index : true }},
   status : {
     type : String,
-    enum : [ 'STANDBY', 'OK', 'DAMAGED', 'RETIRED', '' ]
+    enum : [ 'STANDBY', 'OK', 'DAMAGED', 'RETIRED', 'DISABLED' ]
   },
   createdAt : { type : Date, default : Date.now },
   modifiedAt : { type : Date, default : Date.now }

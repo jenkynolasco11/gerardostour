@@ -15,25 +15,6 @@ import {
   // User
 } from '../models'
 
-export const createMeta = async () => {
-  try {
-    const meta = await Promise.resolve(Meta.findOne({}))
-
-    if(!meta) {
-      const defaultMeta = {
-        lastTicketId : 1,
-        lastReceiptId : 1,
-        lastRideId : 1,
-        lastBusId : 1,
-      }
-
-      await Promise.resolve(new Meta(defaultMeta).save())
-    }
-
-    // console.log(meta)
-  } catch (e) { }
-}
-
 // TODO : Add how many times this person has bought tickets in the application for logging purposes
 export const createPerson = async data => {
   const { firstname, lastname, email, phoneNumber } = data

@@ -1,21 +1,21 @@
 import Router from 'koa-router'
 
-// import auth from './auth'
+import auth from './auth'
 // import route from './route'
 import ticket from './ticket'
 import user from './user'
 import ride from './ride'
-// import bus from './bus'
+import bus from './bus'
 
 const api = new Router({ prefix : 'api/v1' })
 
 const apiRoutes = [
   // route,
-  // auth,
   ticket,
+  auth,
   user,
   ride,
-  // bus,
+  bus,
 ]
 
 // Combine all routes to api

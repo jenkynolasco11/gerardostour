@@ -14,7 +14,7 @@ import config from './config'
 import routes from './routes'
 import error404 from './routes/404'
 
-import { createMeta } from './utils'
+import { createMeta } from './models'
 import './passport'
 
 // Assign better Promise to global/mongoose
@@ -24,7 +24,7 @@ mongoose.Promise = bluebird.Promise
 const server = async done => {
   try {
     await mongoose.connect(config.DBURI, { useMongoClient : true })
-    await createMeta()
+    await createMeta(true)
 
     const app = new Koa()
 
@@ -52,10 +52,8 @@ const server = async done => {
       .use(cors({ 
         origin : () => '*',
         credentials : true,
-        // credentials : true,
-        // allowHeaders : [ 
-        //   'Origin', 'X-Requested-With', 'Content-Type', 'Accept'
-        // ]
+        exposeHeaders: ['WWW-Authenticate', 'Server-Authorization'],
+        allowHeaders: ['Content-Type', 'Authorization', 'Accept']
       }))
       .use(bodyparser({ multipart : true }))
       .use(serve('./src/public/assets'))

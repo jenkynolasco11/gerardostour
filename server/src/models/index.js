@@ -9,7 +9,7 @@ import './bus'
 import './receipt'
 import './meta'
 
-// mongoose.Promise = global.Promise
+import { userDefault, passDefault } from '../config'
 
 export const Person = mongoose.model('person')
 export const User = mongoose.model('user')
@@ -41,6 +41,52 @@ export const deleteAllCollections = async () => {
   }
 
   return true
+}
+
+export const createDefaultUser = async () => {
+  try {
+    const p = await new Person({
+      firstname : 'jenky',
+      lastname : 'nolasco',
+      email : 'jenky_nolasco@hotmail.com',
+      phoneNumber : '3479742990'
+    }).save()
+
+    const u = new User({
+      username : userDefault,
+      person : p._id,
+      position : 'SUPERUSER',
+      status : 'ACTIVE',
+    })
+
+    u.password = u.generateHash(passDefault)
+
+    await u.save()
+  } catch (e) {
+    // console.log(e)
+  }
+}
+
+export const createMeta = async (clear) => {
+  try {
+    if(clear) await deleteAllCollections()
+
+    const meta = await Promise.resolve(Meta.findOne({}))
+
+    if(!meta) {
+      const defaultMeta = {
+        lastTicketId : 1,
+        lastReceiptId : 1,
+        lastRideId : 1,
+        lastBusId : 1,
+      }
+
+      await Promise.resolve(new Meta(defaultMeta).save())
+    }
+
+    await createDefaultUser()
+    // console.log(meta)
+  } catch (e) { }
 }
 
 export default {
