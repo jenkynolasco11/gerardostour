@@ -6,7 +6,7 @@ import { MdReceipt, MdBuild, MdSearch } from 'react-icons/lib/md'
 import { Card, CardTitle } from 'react-toolbox/lib/card'
 
 import TicketPreview from './TicketPreview'
-import TableContent from '../extras/CustomTable'
+import TableContent from '../extras/CustomizedTable'
 
 
 // import json from './response-ticket-example.json'

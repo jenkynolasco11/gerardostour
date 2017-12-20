@@ -1,9 +1,9 @@
 @import '../../styles/scss/globals.scss';
 @import '~/react-toolbox/lib/colors.css';
 
-body {
-  // overflow : hidden;
-  // background : var(--palette-blue-500);
+.login-form {
+  @include alignCenter;
+  height : 100%;
 
   .login {
     padding : 30px;
@@ -16,9 +16,9 @@ body {
       @include alignCenter();
       margin-top : 30px;
 
-      .login-button {
-        background : var(--palette-indigo-50);
-      }
+      // .login-button {
+      //   background : var(--palette-blue-100);
+      // }
     }
   }
 }

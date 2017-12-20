@@ -2,54 +2,61 @@ import React, { Component } from 'react'
 import { connect } from 'react-redux'
 
 import { BrowserRouter as Router } from 'react-router-dom'
+// import { logUserIn } from './store-redux/actions'
 
 // import Login from './components/Login'
-import Dashboard from './components/Dashboard'
-// import RTSnackbar from './components/extras/RTSnackbar'
-// import LoaderOverlay from './components/extras/LoaderOverlay'
+// import Dashboard from './components/Dashboard'
+import RTSnackbar from './components/extras/RTSnackbar'
+import LoaderOverlay from './components/extras/LoaderOverlay'
 
-import { checkAuthentication } from './store-redux/actions'
+import { checkAuth } from './store-redux/actions'
+import asyncComp from './utils/asyncComp'
+
+const AsyncLogin = asyncComp(() => import('./components/Login'), 'login')
+const AsyncDash = asyncComp(() => import('./components/Dashboard'), 'dashboard')
+
 
 class MainApp extends Component{
-  componentWillMount() {
-    // this.props.checkAuth()
+  state = {
+    dashboard : null,
+    login : null
+  }
+
+  async componentWillMount() {
+    // TODO : send the username stored in LocalStorage
+
+    const username = window.sessionStorage.getItem('session:user')
+
+    this.props.isAuthenticated(username)
   }
 
   render() {
-    // const {
-    //   // isUserLoggedIn,
-    //   // isFetching
-    // } = this.props
-
     return (
       <Router>
-        <div>
+        <React.Fragment>
           {
-            //*
-            // isUserLoggedIn 
-            // ? <Dashboard />
-            /*:*/ 
-            // <Login />
-            // :*/ 
-            <Dashboard />
-            //*/
+            this.props.isAuth
+            ? <AsyncDash />
+            : <AsyncLogin />
+            // ?  <Dashboard />
+            // : <Login />
           }
-          {/* <RTSnackbar /> */}
-          {/* <LoaderOverlay loading={ isFetching }/> */}
-        </div>
+          <LoaderOverlay />
+          <RTSnackbar />
+        </React.Fragment>
       </Router>
     )
   }
 }
 
 const mapDispatchToProps = dispatch => ({
-  checkAuth : () => dispatch(checkAuthentication())
+  isAuthenticated : username => dispatch(checkAuth(username))
 })
 
 const mapStateToProps = state => {
-  const { isUserLoggedIn, isFetching } = state.app
+  const { isAuth } = state.auth
 
-  return { isUserLoggedIn, isFetching }
+  return { isAuth }
 }
 
 export default connect(mapStateToProps, mapDispatchToProps)(MainApp)

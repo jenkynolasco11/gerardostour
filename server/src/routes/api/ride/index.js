@@ -8,20 +8,20 @@ const rideRouter = new Router({ prefix : 'ride' })
 // Retrieve all rides
 rideRouter.get('/all', async ctx => {
   const {
-    nonstatus = 'FINISHED,ASSIGNED,CANCELLED',
+    status = 'PENDING',
     limit = 10,
     skip = 0,
     sort = 'date -1',
     future = 'true',
   } = ctx.query
 
-  const list = [].concat(nonstatus.split(','))
-  const conditions = { status : { $nin : list }}
+  const list = [].concat(status.split(','))
+  const conditions = { status : { $in : list }}
 
   const [ srt, asc ] = sort.split(' ')
   const sortCondition = { [ srt ] : Number(asc) }
 
-  if(srt === 'date') sortCondition.time = asc < 0 ? -1 : 1
+  if(srt === 'date') sortCondition.time = 1// asc < 0 ? -1 : 1
   if(srt === 'time') sortCondition.date = asc < 0 ? -1 : 1
 
   if(future === 'true') {
@@ -107,16 +107,15 @@ rideRouter.get('/date/:date/hour/:hour', async ctx => {
 /* not assigned */
 // Assign bus to ride
 rideRouter.put('/assign-bus', async ctx => {
-  // const { id } = ctx.params
   const { bus, rides = [] } = ctx.request.body
 
   try {
-    const bs = await Bus.findById(bus)
+    const bs = await Bus.findOne({ id : bus })
     const promises = []
 
     if(bs) {
       rides.forEach(id => {
-        promises.push(Ride.findOneAndUpdate({ id }, { bus, status : 'ASSIGNED' }))
+        promises.push(Ride.findOneAndUpdate({ id }, { bus : bs._id, status : 'ASSIGNED' }))
       })
 
       const rids = await Promise.all(promises)

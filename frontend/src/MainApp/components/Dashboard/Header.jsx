@@ -1,39 +1,24 @@
 import React, { Component } from 'react'
-import { MdMenu } from 'react-icons/lib/md/'
-
-// import PropTypes from 'prop-types'
 import { connect } from 'react-redux'
+import { MdMenu } from 'react-icons/lib/md/'
 import AppBar from 'react-toolbox/lib/app_bar/AppBar'
-// import Button from 'react-toolbox/lib/button/Button'
-// import Navigation from 'react-toolbox/lib/navigation/Navigation'
-// import Link from 'react-toolbox/lib/link/Link'
-// import Ripple from 'react-toolbox/lib/ripple/Ripple'
+import Button from 'react-toolbox/lib/button/Button'
 
-import { toggleDrawer/*, logUserOut*/ } from '../../store-redux/actions'
+import { toggleDrawer, logUserOut } from '../../store-redux/actions'
 
-// const LogoutButton = props => (
-//   <Button
-//     className="logout-button"
-//     label="logout"
-//     onClick={ props.logout }
-//     accent
-//     mini
-//   />
-// )
-
-// const mapToProps = dispatch => ({
-//   logout : () => dispatch(logUserOut())
-// })
-
-// const RippleLink = Ripple({ spread : 2 })(
-  
-// )
-
-// const RTLogout = connect(null, mapToProps)(LogoutButton)
+const LogoutButton = props => (
+  <Button
+    className="logout-button"
+    label="logout"
+    onClick={ props.logout }
+    style={{ color : 'white' }}
+    mini
+  />
+)
 
 class NavBar extends Component{
   render() {
-    const { onMenuClick } = this.props
+    const { onMenuClick, logout } = this.props
     
   return (
       <AppBar
@@ -42,27 +27,23 @@ class NavBar extends Component{
         onLeftIconClick={ onMenuClick }
         leftIcon={ <MdMenu /> }
         // fixed={ true }
-        scrollHide={ true }
-        // rightIcon={ <RTLogout /> }
+        // scrollHide={ true }
       >
-      {/*
-        <Navigation type="horizontal">
-          { Ripple }
-        </Navigation>
-      */}
+        <LogoutButton logout={ logout } />
       </AppBar>
     )
   }
 }
 
 const mapDispatchToProps = dispatch => ({
-  onMenuClick : () => dispatch(toggleDrawer(true))
+  onMenuClick : () => dispatch(toggleDrawer(true)),
+  logout : () => dispatch(logUserOut())
 })
 
 const mapStateToProps = state => {
   const { isDrawerOpen } = state.app
 
-return { isDrawerOpen }
+  return { isDrawerOpen }
 }
 
 export default connect(mapStateToProps, mapDispatchToProps)(NavBar)

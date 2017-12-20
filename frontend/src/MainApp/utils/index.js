@@ -26,6 +26,15 @@ export const onlyNumber = val => {
   return ''
 }
 
+// export const dropDownData = data => {
+//   const { id, ...rest } = data
+
+//   return {
+//     ...rest,
+//     value : id
+//   }
+// }
+
 // export const verifyFields = (fields) => {
 //   for(let i = 0; i < fields.length; i++) {
 //     const field = fields[i]

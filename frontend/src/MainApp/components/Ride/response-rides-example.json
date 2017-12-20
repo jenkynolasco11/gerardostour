@@ -2,7 +2,7 @@
   "ok": true,
   "data": {
     "rides": [{
-      "id": "5a232a2c4b84f83104f0f1b9",
+      "id": "1",
       "bus": null,
       "status": "ON-THE-WAY",
       "routeTo": "PA",
@@ -12,7 +12,7 @@
       "seatsAvailable": 0,
       "luggageAvailable": 0
     }, {
-      "id": "5a232a2c4b84f83104f0f1a8",
+      "id": "1",
       "bus": {
         "alias": "Blanquita",
         "name": "Blanquita",
@@ -27,7 +27,7 @@
       "seatsAvailable": 0,
       "luggageAvailable": 29
     }, {
-      "id": "5a232a2c4b84f83104f0f1a5",
+      "id": "1",
       "bus": {
         "alias": "Maria la del Barrio",
         "name": "Maria la del Barrio",
@@ -42,7 +42,7 @@
       "seatsAvailable": 33,
       "luggageAvailable": 16
     }, {
-      "id": "5a232a2c4b84f83104f0f1a4",
+      "id": "1",
       "bus": {
         "alias": "Rocio",
         "name": "Rocio",
@@ -57,7 +57,7 @@
       "seatsAvailable": 16,
       "luggageAvailable": 35
     }, {
-      "id": "5a232a2c4b84f83104f0f19d",
+      "id": "1",
       "bus": null,
       "status": "PENDING",
       "routeTo": "NY",
@@ -67,7 +67,7 @@
       "seatsAvailable": 0,
       "luggageAvailable": 0
     }, {
-      "id": "5a232a2c4b84f83104f0f19c",
+      "id": "1",
       "bus": null,
       "status": "ON-THE-WAY",
       "routeTo": "PA",
@@ -77,7 +77,7 @@
       "seatsAvailable": 0,
       "luggageAvailable": 0
     }, {
-      "id": "5a232a2c4b84f83104f0f19f",
+      "id": "1",
       "bus": null,
       "status": "ON-THE-WAY",
       "routeTo": "NY",
@@ -87,7 +87,7 @@
       "seatsAvailable": 0,
       "luggageAvailable": 0
     }, {
-      "id": "5a232a2c4b84f83104f0f1a3",
+      "id": "1",
       "bus": {
         "alias": "Rocio",
         "name": "Rocio",
@@ -102,7 +102,7 @@
       "seatsAvailable": 1,
       "luggageAvailable": 41
     }, {
-      "id": "5a232a2c4b84f83104f0f19b",
+      "id": "1",
       "bus": {
         "alias": "Calle 14",
         "name": "Calle 14",
@@ -117,7 +117,7 @@
       "seatsAvailable": 34,
       "luggageAvailable": 47
     }, {
-      "id": "5a232a2c4b84f83104f0f18b",
+      "id": "1",
       "bus": null,
       "status": "ON-THE-WAY",
       "routeTo": "PA",

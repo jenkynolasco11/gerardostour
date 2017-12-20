@@ -3,8 +3,8 @@ const defaultState = {
   errorMsg : ''
 }
 
-export const meta = (state = defaultState, action) => {
-  switch (action.type) {
+export const meta = (state = defaultState, { type, payload }) => {
+  switch (type) {
     case 'LOG_USER_OUT' :
       return {
         ...state,
@@ -12,12 +12,12 @@ export const meta = (state = defaultState, action) => {
           firstname : '',
           lastname : ''
         },
-        errorMsg : action.payload
+        errorMsg : payload
       }
     case 'LOG_USER_IN' :
-      return { ...state, user : action.payload }
+      return { ...state, user : payload }
     case 'ERROR_MESSAGE' : 
-      return { ...state, errorMsg : action.payload }
+      return { ...state, errorMsg : payload }
     default :
       return state
   }

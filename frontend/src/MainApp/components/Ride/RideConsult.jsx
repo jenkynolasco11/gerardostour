@@ -1,354 +1,263 @@
 import React, { Component } from 'react'
-// import { withRouter } from 'react-router-dom'
-import { Link } from 'react-router-dom'
-import axios from 'axios'
+import { connect } from 'react-redux'
 
-import { List, ListDivider, ListCheckbox, ListItem, ListSubHeader } from 'react-toolbox/lib/list'
-import { Card, /*CardActions, /*CardMedia,*/ CardTitle } from 'react-toolbox/lib/card'
-// import Dropdown from 'react-toolbox/lib/dropdown/Dropdown'
-// import Button from 'react-toolbox/lib/button/Button'
-import { MdDirectionsBus, MdBuild, MdAdd, MdPublish } from 'react-icons/lib/md'
-
-import TableContent from '../extras/CustomTable'
 import RideBusModal from './RideBusModal'
+import CustomTable from '../extras/CustomizedTable'
+import RideSettings from './RideSettings'
+import RideForm from './RideForm'
 
-// import json from './response-rides-example.json'
+import { retrieveRides, assignBusToRides } from '../../store-redux/actions'
+import { formatDate, formatHour } from '../../utils'
+
 import './ride-consult.scss'
-import { url } from '../../config/config-values.json'
-// const url = 'http://localhost:8000/api/v1/ride'
+import { ListDivider, ListItem, List } from 'react-toolbox/lib/list'
+import { CardTitle } from 'react-toolbox/lib/card'
 
-const tableFormat = {
-  format : props => {
-    const { 
-      id,
-      bus,
-      status,
-      routeTo,
-      routeFrom,
-      time,
-      date,
-      seatsUsed,
-      luggageUsed,
-    } = props
-  
+const formatData = data => {
+  /* format data */
+  return data.map(item => {
+    const { time, date } = item
+    
     return {
-      id,
-      bus : bus ? bus.name : 'Not Assigned yet',
-      status : status.replace(/-/g, ' '),
-      to : routeTo,
-      from : routeFrom,
-      time : time,
-      date : date,
-      seats : seatsUsed,
-      luggage : luggageUsed
+      ...item,
+      time : formatHour(time),
+      date : formatDate(date)
     }
-  },
-  header : [
-    { 'id' : 'Ride ID' },
-    { 'bus' : 'Bus' },
-    { 'status' : 'Status' },
-    { 'from' : 'From' },
-    { 'to' : 'To' },
-    { 'time' : 'Hour' },
-    { 'date' : 'Date' },
-    { 'seats' : 'Seats' },
-    { 'luggage' : 'Luggage' }
+  })
+}
+
+const tableData = {
+  headers : [
+    { value : "id", label : "Ride ID", flex : 1 },
+    { value : "routeFrom", label : "From", flex : 1 },
+    { value : "routeTo", label : "To", flex : 1 },
+    { value : "status", label : "Status", flex : 1 },
+    { value : "time", label : "Time", flex : 2 },
+    { value : "date", label : "Date", flex : 2 },
   ]
 }
 
-const RideSettings = props => {
-  const { 
-    selected,
-    getSelectedRide,
-    pending,
-    assigned,
-    onTheWay,
-    finished,
-    shouldShowModal,
-    onChange,
-    future
-  } = props
-
-  return (
-    <Card className="ride-settings">
-      <List>
-        <CardTitle title="Actions" />
+const DetailTemplate = props => (
+  <List className="detail-template">
+    <CardTitle title="Ride Details" />
+    <ListDivider />
+    <ListItem ripple={ false } selectable={ false } caption={ `Seats Available: ${ props.seatsUsed }` } />
+    <ListItem ripple={ false } selectable={ false } caption={ `Luggage Available: ${ props.luggageUsed }` } />
+    {
+      props.bus &&
+      <List className="detail-template bus-items">
+        <CardTitle title="Bus Details" />
         <ListDivider />
-        <ListItem 
-          avatar={ <MdDirectionsBus /> }
-          caption="Set To Bus"
-          onClick={ () => shouldShowModal(true) }
-          disabled={ selected.length === 0 }
-          selectable
-        />
-        {
-          selected.length ?
-          selected.length > 1 ?
-          <ListItem
-            avatar={ <MdBuild /> }
-            caption="Modify Ride"
-            disabled={ selected.length > 1 }
-          />
-          :
-          <Link to={{ pathname : '/ride/create-modify', state : { ride : getSelectedRide(), title : 'Modify' }}}>
-            <ListItem
-              avatar={ <MdBuild /> }
-              caption="Modify Ride"
-              selectable
-              // disabled={ selected.length > 1 }
-            />  
-          </Link>
-          : 
-          <Link to="/ride/create-modify">
-            <ListItem
-              avatar={ <MdAdd /> }
-              caption="Add a new Ride"
-              selectable
-            />
-          </Link>
-        }
+        <ListItem ripple={ false } selectable={ false } caption={ `Bus Name: ${ props.bus.name }` } />
+        <ListItem ripple={ false } selectable={ false } caption={ `Status: ${ props.bus.status }` }/>
+        <ListItem ripple={ false } selectable={ false } caption={ `Seats: ${ props.bus.seats }` } />
+        <ListItem ripple={ false } selectable={ false } caption={ `Luggage: ${ props.bus.luggage }` } />
       </List>
-      <CardTitle title="Dispatch" />
-      <ListDivider />
-      <ListItem 
-        avatar={ <MdPublish /> }
-        caption="Dispatch to Bus"
-        onClick={ e => console.log('Clicked on dispatch!') }
-        disabled={ true }
-        selectable
-      />
-      <List>
-        <CardTitle title="Settings" />
-        <ListDivider />
-        <ListCheckbox
-          legend="Those rides waiting to be dispatched"
-          inset={ true }
-          caption="Pending rides"
-          checked={ pending }
-          onChange={ val => onChange(val, 'pending') }
-          disabled={ true }
-        />
-        <ListCheckbox
-          legend="Haven't been assigned to a bus"
-          inset={ true }
-          caption="Assigned rides"
-          checked={ assigned }
-          onChange={ val => onChange(val, 'assigned') }
-        />
-        <ListCheckbox
-          legend="Those that are on their way"
-          inset={ true }
-          caption="On the way rides"
-          checked={ onTheWay }
-          onChange={ val => onChange(val, 'onTheWay') }
-        />
-        <ListCheckbox
-          legend="Those rides that have finished for the day"
-          inset={ true }
-          caption="Finished rides"
-          checked={ finished }
-          onChange={ val => onChange(val, 'finished') }
-        />
-        {
-          //////////////////////////////////////////
-          ///// ADMIN SETTINGS
-          //////////////////////////////////////////
-          false &&
-            <List>
-              <CardTitle title="Admin Settings" />
-              <ListDivider/>
-              <ListCheckbox
-                legend="Those rides that have finished for the day"
-                inset={ true }
-                caption="Past rides"
-                checked={ future }
-                onChange={ val => onChange(val, 'future') }
-                // Come here later....
-                disabled={ true }
-              />
-          </List>
-        }
-      </List>
-    </Card>
-  )
-}
+    }
+  </List>
+)
 
 class Ride extends Component {
   constructor(props) {
     super(props)
 
     this.state = {
-      limit : 10,
+      limit : 20,
       skip : 0,
       count : 0,
-      pending : true,
-      finished : false,
-      assigned : false,
-      onTheWay : false,
-      future : true,
-      sort : 'date',
+      sortBy : 'date',
       sortOrder : -1,
-      rides : [],
-      showModal : false,
-      selected : []
+      selected : [],
+      showForm : false, // Show create ride form
+      showBusForm : false, // Show assign bus modal
+      rideToModify : null,
     }
 
-    this.shouldShowModal = this.shouldShowModal.bind(this)
-    this.getSelectedRide = this.getSelectedRide.bind(this)
-    this.onGetSelected = this.onGetSelected.bind(this)
-    this.onPaginate = this.onPaginate.bind(this)
-    this.assignBus = this.assignBus.bind(this)
-    this.onChange = this.onChange.bind(this)
-    this.onSort = this.onSort.bind(this)
+    this._onRowSelected = this._onRowSelected.bind(this)
+    this._clearSelected = this._clearSelected.bind(this)
+    this._requestRides = this._requestRides.bind(this)
+    this._onAssignBus = this._onAssignBus.bind(this)
+    this._onPaginate = this._onPaginate.bind(this)
+    this._getStatus = this._getStatus.bind(this)
+    this._showForm = this._showForm.bind(this)
+    this._onChange = this._onChange.bind(this)
+    this._onSort = this._onSort.bind(this)
   }
 
-  async makeRequest(limit, skip, count, /*assigned, */status, sort, future) {
-    return await axios.get(`${ url }/ride/all?skip=${ skip }&limit=${ limit }&sort=${ sort }&status=${ status }&future=${ future }`)//&unassigned=${ true }`)
-  }
+  _onAssignBus(bus) {
+    const { selected, sortBy, sortOrder, skip, limit } = this.state
+    const { rides } = this.props
 
-  async onPaginate(skip) {
-    const {
+    const selectedRides = rides
+                          .filter((_, i) => selected.includes(i))
+                          .map(x => x.id)
+
+    const query = {
+      skip,
       limit,
-      count,
-      sort,
-      sortOrder,
-      assigned,
-      onTheWay,
-      finished,
-      pending,
-      future
-     } = this.state
+      sort : `${ sortBy } ${ sortOrder }`,
+      status : this._getStatus(),
+      future : true,
+    }
 
-    const newSkip = skip.selected * limit
+    this.props.assignBus(bus, selectedRides, query)
+    return this._clearSelected()
+  }
 
-    const statusList = { 'ON-THE-WAY' : onTheWay, 'FINISHED' : finished, 'ASSIGNED' : assigned, 'PENDING' : pending }
+  _getStatus() {
+    const { onTheWay, finished, assigned, pending /*, future*/ } = this.props
+
+    const statusList = {
+      'ON-THE-WAY' : onTheWay,
+      'FINISHED' : finished,
+      'ASSIGNED' : assigned,
+      'PENDING' : pending 
+    }
 
     const status = Object
       .keys(statusList)
-      .map(stat => statusList[stat] ? stat : '')
+      .map(stat => statusList[ stat ] ? stat : '')
       .filter(stat => stat !== '')
       .join(',')
 
-    try {
-      const { data } = await this.makeRequest(limit, newSkip, count,/* unassigned,*/ status, `${ sort } ${ sortOrder }`, future)
-
-      if(data.ok) {
-        let { rides, count } = data.data
-
-        // rides = rides.map(({ date, ...rest }) => ({ date : formatDate() }))
-
-        return this.setState({ rides : [].concat(rides), count, skip : skip.selected })
-      }
-
-    } catch (e) {
-      return setTimeout(() => this.onPaginate(skip), 1000)
-    }
+    return status
   }
 
-  // TODO : DRY with RideConsult - Also, fix the sort engine
-  // For example, sorting by fields in other tables (bus, details, etc)
-  async onSort(val) {
-    let { sort, sortOrder, skip } = this.state
+  _requestRides() {
+    const { skip, limit, sortBy, sortOrder } = this.state
+    const { /*onTheWay, finished, assigned, pending,*/ future } = this.props
 
-    if(val === sort) sortOrder = sortOrder * -1
-    else {
-      sort = val
-      sortOrder = -1
-    }
+    const newSkip = skip * limit
+    
+    const status = this._getStatus()
 
-    this.setState({ sort, sortOrder }, () => this.onPaginate({ selected : skip }))
+    const sort = `${ sortBy } ${ sortOrder }`
+
+    this.props.queryRides({ skip : newSkip, status, sort, future, limit })
+    return this._clearSelected()
   }
 
-  // async createRide() {
-
-  // }
-
-  getSelectedRide() {
-    const { selected, rides } = this.state
-
-    if(!selected.length) return null
-
-    // console.log(selected[ 0 ])
-    return rides[ selected[ 0 ]].id
+  _onChange(val, name) {
+    return this.setState({ [ name ] : val }, this._requestRides)
   }
 
-  async assignBus(bus) {
-    const { selected, rides, skip } = this.state
-
-    const ids = rides.filter((_, i) => selected.includes(i)).map(i => i.id)
-
-    try {
-      const { data } = await axios.put(`${ url }/ride/assign-bus`, { bus,  ids })
-      // console.log(data)
-      if(data.ok) this.onPaginate({ selected : skip })
-
-    } catch(e) {
-      console.log(e)
-    }
-
-    this.setState({ showModal : false })
+  _onRowSelected(rows) {
+    this.setState({ selected : [].concat(rows) })
   }
 
-  onChange(val, field) {
-    this.setState({ [ field ] : val }, () => this.onPaginate({ selected : 0 }))
+  _clearSelected() {
+    this.setState({ selected : [] })
   }
 
-  onGetSelected(selected) {
-    this.setState({ selected : [].concat(selected) })
+  _onPaginate(skip) {
+    this.setState({ skip : skip.selected, selected : [] }, this._requestRides)
   }
 
-  async componentWillMount() {
-    await this.onPaginate({ selected : 0 })
+  _onSort(nextSortBy) {
+    let { sortBy, sortOrder } = this.state
+
+    if(sortBy !== nextSortBy) sortOrder = -1
+    else sortOrder = sortOrder * -1
+
+    sortBy = nextSortBy
+
+    this.setState({ sortBy, sortOrder, selected : [] }, this._requestRides)
   }
 
-  shouldShowModal(val) {
-    this.setState({ showModal : val })
+  _showForm(which, willShow) {
+    let rideToModify = null
+    const { selected } = this.state
+    
+    // 'if' opens the form, 'else' closes it
+    if(which === 'showForm' && willShow && selected.length === 1) {
+      const { rides } = this.props
+      rideToModify = rides[ selected[ 0 ] ]
+    } else setTimeout(this._requestRides, 100)
+
+    this.setState({ [ which ] : willShow, rideToModify })
+  }
+
+  componentWillMount() {
+    return this._requestRides()
+  }
+
+  componentWillReceiveProps(nextProps) {
+    const { count } = nextProps
+
+    this.setState({ count })
   }
 
   render() {
     const {
-      rides,
-      count,
-      skip, 
+      skip,
       limit,
-      assigned,
-      onTheWay,
-      finished,
-      pending,
+      count,
       selected,
-      showModal
+      showForm,
+      rideToModify,
+      showBusForm
     } = this.state
 
-    const data = rides.map(tableFormat.format)
+    const { rides } = this.props
+    const data = formatData(rides)
 
     return (
       <div className="ride-consult">
-        <TableContent
-          getSelectedRows={ this.onGetSelected }
-          onPaginate={ this.onPaginate }
-          header={ tableFormat.header }
-          onSort={ this.onSort }
-          {...{ data, skip, limit, count }}
+        <CustomTable
+          className="ride-consult-table"
+          selected={ selected }
+          onRowSelect={ this._onRowSelected }
+          onPaginate={ this._onPaginate }
+          onSort={ this._onSort }
+          data={ data }
+          skip={ skip }
+          limit={ limit }
+          total={ count }
+          headerProps={ tableData.headers }
+          template={ <DetailTemplate /> }
         />
-        <RideSettings
-          {...{
-            assigned,
-            onTheWay,
-            finished,
-            pending,
-            selected,
-            getSelectedRide : this.getSelectedRide,
-            shouldShowModal : this.shouldShowModal,
-            onChange : this.onChange
-        }}/>
+        <RideSettings {...{ 
+            selected, 
+            requestRides : this._requestRides,
+            showForm : this._showForm,
+          }} 
+        />
+        <RideForm
+          active={ showForm }
+          closeForm={ this._showForm }
+          ride={ rideToModify }
+          onSubmitData={ this._requestRides }
+        />
         <RideBusModal
-          active={ showModal }
-          onDialogClose={ () => this.setState({ showModal : false }) }
-          onAccept={ val => this.assignBus(val) }
+          active={ showBusForm }
+          onDialogClose={ () => this._showForm('showBusForm', false) }
+          onAccept={ this._onAssignBus }
         />
       </div>
     )
   }
 }
 
-export default Ride
+const mapStateToProps = state => {
+  const { rides, count, /*selectedRides,*/ searchOptions } = state.ride
+  const { onTheWay, finished, assigned, pending, future } = searchOptions
+
+  return {
+    rides,
+    count,
+    onTheWay,
+    finished,
+    assigned,
+    pending,
+    future
+    // selected : selectedRides
+  }
+}
+
+const mapDispatchToProps = dispatch => ({
+  queryRides : args => dispatch(retrieveRides(args)),
+  assignBus : (bus, rides, query) => dispatch(assignBusToRides(bus, rides, query)),
+  // setSelected : rides => dispatch(setSelectedRides(rides))
+})
+
+export default connect(mapStateToProps, mapDispatchToProps)(Ride)

@@ -1,31 +1,40 @@
 import App from './app'
-import Meta from './meta'
-import Rides from './rides'
+import Auth from './auth'
+// import Meta from './meta'
+import Ride from './ride'
 
 export const {
-  tryLogin,
   logUserIn,
   logUserOut,
-  errorMessage,
-  checkAuthentication,
-} = Meta
+  checkAuth,
+} = Auth
+
+// export const {
+//   snackBarMessage
+//   // tryLogin,
+//   // logUserIn,
+//   // logUserOut,
+//   // errorMessage,
+//   // checkAuthentication,
+// } = Meta
 
 export const {
-  fetchingStatus,
-  savingStatus,
-  loginFailed,
-  loginSuccess,
   toggleDrawer,
-  showError,
+  showLoader,
+  showSnackBar,
+  showSnackBarWithMessage,
 } = App
 
-export const { 
-  addRides,
-  getAllRides
-} = Rides
+export const {
+  retrieveRides,
+  setSelectedRides,
+  setQueryOption,
+  submitRideData,
+  assignBusToRides
+} = Ride
 
 export default {
-  ...Meta,
+  // ...Meta,
   ...App,
-  ...Rides
+  ...Ride
 }

@@ -4,6 +4,7 @@ import bodyparser from 'koa-body'
 import Pug from 'koa-pug'
 import mongoose from 'mongoose'
 import serve from 'koa-static'
+// import session from 'koa-session-minimal'
 import session from 'koa-session'
 // import SessionStore from 'koa-session-mongoose'
 import bluebird from 'bluebird'
@@ -24,7 +25,7 @@ mongoose.Promise = bluebird.Promise
 const server = async done => {
   try {
     await mongoose.connect(config.DBURI, { useMongoClient : true })
-    await createMeta(true)
+    await createMeta(false)
 
     const app = new Koa()
 
@@ -43,21 +44,22 @@ const server = async done => {
 
     const sessionParams = {
       key : config.KEY,
+      // httpOnly : true,
       // store,
     }
 
     app.keys = config.KEYS
 
     app
+      .use(bodyparser({ multipart : true }))
+      .use(session(sessionParams, app))
       .use(cors({ 
         origin : () => '*',
-        credentials : true,
+        // credentials : true,
         exposeHeaders: ['WWW-Authenticate', 'Server-Authorization'],
-        allowHeaders: ['Content-Type', 'Authorization', 'Accept']
+        allowHeaders: ['Content-Type', 'Authorization', 'Accept', 'Cache-Control']
       }))
-      .use(bodyparser({ multipart : true }))
       .use(serve('./src/public/assets'))
-      .use(session(sessionParams, app))
       .use(passport.initialize())
       .use(passport.session())
       .use(logger())

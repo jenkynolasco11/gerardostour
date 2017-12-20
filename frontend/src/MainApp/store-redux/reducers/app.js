@@ -1,25 +1,22 @@
 const defaultApp = {
   isUserLoggedIn : false, // change this later to false
-  isFetching : false,
-  isError : false,
+  isLoading : false,
   isDrawerOpen : false,
   isSaving : false,
+
+  // Snackbar
+  showSnackbar : false,
+  snackbarMessage : '',
 }
 
-export const app = (state = defaultApp, action) => {
-  switch(action.type) {
-    case 'FETCHING_DATA' :
-      return { ...state, isFetching : action.payload }
-    case 'SAVING_DATA' : 
-      return { ...state, isSaving : action.payload }
-    case 'SHOW_ERROR' :
-      return { ...state, isError : action.payload }
-    case 'LOGIN_FAILED' :
-      return { ...state, isUserLoggedIn : false }
-    case 'LOGIN_SUCCESS' :
-      return { ...state, isUserLoggedIn : true }
+export const app = (state = defaultApp, { type, payload }) => {
+  switch(type) {
+    case 'SHOW_LOADER' :
+      return { ...state, isLoading : payload }
+    case 'SHOW_SNACKBAR' :
+      return { ...state, ...payload }
     case 'TOGGLE_DRAWER' :
-      return { ...state, isDrawerOpen : action.payload }
+      return { ...state, isDrawerOpen : payload }
     default :
       return state
   }

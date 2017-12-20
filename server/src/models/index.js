@@ -45,25 +45,36 @@ export const deleteAllCollections = async () => {
 
 export const createDefaultUser = async () => {
   try {
-    const p = await new Person({
-      firstname : 'jenky',
-      lastname : 'nolasco',
-      email : 'jenky_nolasco@hotmail.com',
-      phoneNumber : '3479742990'
-    }).save()
+    let u = await User.findOne({ username : userDefault })
 
-    const u = new User({
-      username : userDefault,
-      person : p._id,
-      position : 'SUPERUSER',
-      status : 'ACTIVE',
-    })
+    if(!u) {
+      let p = await Person.findOne({
+        $or : [
+          { email : 'jenky_nolasco@hotmail.com' },
+          { phoneNumber : '3479742990' }
+        ]
+      })
+      
+      if(!p) p = await new Person({
+        firstname : 'Jenky',
+        lastname : 'Nolasco',
+        email : 'jenky_nolasco@hotmail.com',
+        phoneNumber : '3479742990'
+      }).save()
+      
+      u = new User({
+        username : userDefault,
+        person : p._id,
+        position : 'SUPERUSER',
+        status : 'ACTIVE',
+      })
 
-    u.password = u.generateHash(passDefault)
+      u.password = u.generateHash(passDefault)
 
-    await u.save()
+      await u.save()
+    }
   } catch (e) {
-    // console.log(e)
+    console.log(e)
   }
 }
 
@@ -74,6 +85,7 @@ export const createMeta = async (clear) => {
     const meta = await Promise.resolve(Meta.findOne({}))
 
     if(!meta) {
+      // console.log(meta)
       const defaultMeta = {
         lastTicketId : 1,
         lastReceiptId : 1,

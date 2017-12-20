@@ -2,14 +2,14 @@ import React, { Component } from 'react'
 import { connect } from 'react-redux'
 import Snackbar from 'react-toolbox/lib/snackbar/Snackbar'
 
-import { showError, errorMessage } from '../../store-redux/actions'
+import { showSnackBar } from '../../store-redux/actions'
 
 class RTSnackBar extends Component{
   render() {
     const {
-      isError,
-      errorMsg,
-      onSnackbarClearError
+      showSnackbar,
+      snackbarMessage,
+      onSnackClose
     } = this.props
 
     return (
@@ -17,27 +17,23 @@ class RTSnackBar extends Component{
         action="Dismiss"
         timeout={ 5000 }
         type="cancel"
-        onTimeout={ onSnackbarClearError }
-        onClick={ onSnackbarClearError }
-        active={ isError }
-        label={ errorMsg }
+        onTimeout={ onSnackClose }
+        onClick={ onSnackClose }
+        active={ showSnackbar }
+        label={ snackbarMessage }
       />
     )
   }
 }
 
 const mapDispatchToProps = dispatch => ({
-  onSnackbarClearError : () => {
-    dispatch(showError(false))
-    dispatch(errorMessage(''))
-  }
+  onSnackClose : () => dispatch(showSnackBar({ showSnackBar : false, snackbarMessage : '' }))
 })
 
 const mapStateToProps = state => {
-  const { isUserLoggedIn, isError } = state.app
-  const { errorMsg } = state.meta
+  const { snackbarMessage, showSnackbar } = state.app
 
-  return { isUserLoggedIn, isError, errorMsg }
+  return { snackbarMessage, showSnackbar }
 }
 
 export default connect(mapStateToProps, mapDispatchToProps)(RTSnackBar)

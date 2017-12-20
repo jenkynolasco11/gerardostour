@@ -4,8 +4,9 @@
 
 body {
   #root {
-    background : var(--palette-blue-500);
-    display : flex;
+    font-family : Roboto,Helvetica,Arial,sans-serif;
+    background : var(--palette-blue-100);
     @include hw();
+    // @include alignCenter();
   }
 }

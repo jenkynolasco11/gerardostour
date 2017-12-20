@@ -4,7 +4,7 @@ import { Input } from 'react-toolbox/lib/input'
 import { Card, CardTitle, CardActions } from 'react-toolbox/lib/card'
 import Button from 'react-toolbox/lib/button/Button'
 
-import { tryLogin, /*checkAuthentication*/ } from '../../store-redux/actions'
+import { logUserIn } from '../../store-redux/actions'
 
 import './login.scss'
 
@@ -13,8 +13,8 @@ class Login extends Component{
     super(props)
 
     this.state = {
-      username : 'jenky',
-      password : 'lllll',
+      username : '',
+      password : ''
     }
 
     this._onInputChange = this._onInputChange.bind(this)
@@ -35,10 +35,9 @@ class Login extends Component{
 
   render() {
     return (
-      // <Layout>
-      <form onSubmit={ this._onSubmit }>
+      <form onSubmit={ this._onSubmit } className="login-form">
         <Card className="login">
-          <CardTitle title="Login" />
+          <CardTitle title="Login"/>
           <Input
             name="username"
             label="Username"
@@ -59,7 +58,6 @@ class Login extends Component{
               className="login-button"
               type="submit"
               label="Login"
-              onClick={ this._onSubmit }
             />
           </CardActions>
         </Card>
@@ -68,19 +66,12 @@ class Login extends Component{
     )
   }
 
-  // componentWillMount() {
-  //   console.log('gotta check this guy out!')
-  //   this.props.checkLogin()
-  // }
 }
 
 const mapDispatchToProps = dispatch => {
   return {
-    login : (username, password) => dispatch(tryLogin({ username, password})),
-    // checkLogin : () => dispatch(checkAuthentication())
+    login : (username, password) => dispatch(logUserIn(username, password)),
   }
 }
 
 export default connect(null,mapDispatchToProps)(Login)
-
-// export default Login

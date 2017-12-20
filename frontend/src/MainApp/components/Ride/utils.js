@@ -8,8 +8,8 @@ export const getMinDate = () => {
   return date
 }
 
-export const formatData = bus => {
-  const { id, ...rest } = bus
+export const dropDownData = data => {
+  const { id, ...rest } = data
 
   return {
     ...rest,

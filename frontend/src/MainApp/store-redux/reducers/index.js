@@ -1,15 +1,15 @@
 import { combineReducers } from 'redux'
 import { routerReducer } from 'react-router-redux'
 
-import { meta } from './meta'
+import { ride } from './ride'
 import { app } from './app'
-import { rides } from './rides'
+import { auth } from './auth'
 
 const reducers = combineReducers({
-  routing : routerReducer,
-  rides,
-  meta,
+  routing : routerReducer, // React-Router
+  ride,
   app,
+  auth,
 })
 
 export default reducers

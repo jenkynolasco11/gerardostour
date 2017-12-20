@@ -5,7 +5,7 @@ import { Strategy } from 'passport-local'
 import { User } from './models'
 
 passport.serializeUser((user, done) => {
-  console.log('About to authenticate: ', user.username)
+  console.log(`About to authenticate: ${ user.username }`)
 
   return done(null, user._id)
 })
@@ -25,14 +25,11 @@ passport.use('local', new Strategy({
   passwordField : 'password',
 }, async (username, password, done) => {
   try {
-    // console.log(username, password)
     const user = await User.findOne({ username })
 
     if(user) {
       // If password is not valid
       if(!user.validPassword(password)) return done(null, false, 'Invalid password')
-
-      user.updateLastSession()
 
       return done(null, user)
     }

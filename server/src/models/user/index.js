@@ -25,7 +25,7 @@ UserSchema.methods.generateHash = function(password){
 
 UserSchema.methods.validPassword = function(password){ 
   const isValid = bcrypt.compareSync(password, this.password) 
-  console.log(`Password is ${ isValid ? 'valid' : 'not valid' }`)
+  // console.log(`Password is ${ isValid ? 'valid' : 'not valid' }`)
   return isValid
 }
 

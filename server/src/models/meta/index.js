@@ -1,10 +1,10 @@
 import mongoose, { Schema } from 'mongoose'
 
 const MetaSchema = new Schema({
-  lastReceiptId : Number,
-  lastTicketId : Number,
-  lastRideId : Number,
-  lastBusId : Number,
+  lastReceiptId : { type : Number, default : 1 },
+  lastTicketId : { type : Number, default : 1 },
+  lastRideId : { type : Number, default : 1 },
+  lastBusId : { type : Number, default : 1 },
   modifiedAt : { type : Number, default : Date.now }
 })
 

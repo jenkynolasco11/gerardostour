@@ -1,44 +1,22 @@
 @import '../../styles/scss/globals.scss';
 
-.loader-overlay {
-  position: absolute;
-  margin-top: -100vh;
-  height: 100vh;
-  width: 100vw;
-  background : rgba(0, 0, 0, 0.549);
-  z-index : 1;
-  
-  animation : fade-in .3s ease-out;
-
-  @include alignCenter;
-
-  &.leaving {
-    animation : fade-out .3s ease-in;
-  }
-  // &-loader {
+.custom-loader {
+  .overlay {
+    position: absolute;
+    margin-top: -100vh;
+    height: 100vh;
+    width: 100vw;
+    background : rgba(0, 0, 0, 0.549);
+    z-index : 1;
     
+    animation : fade-in .3s ease-out;
   
-  // }
-
-  // .transition-group {
-  //   &-enter {
-  //     opacity : 0.01;
-
-  //     &.transition-group-enter-active {
-  //       opacity : 1;
-  //       transition : opacity 500ms ease-in;
-  //     }
-  //   }
-
-  //   &-leave {
-  //     opacity : 1;
-
-  //     &.transition-group-leave-active {
-  //       opacity : 1;
-  //       transition : opacity 300ms ease-in;
-  //     }
-  //   }
-  // }
+    @include alignCenter;
+  
+    &.leaving {
+      animation : fade-out .3s ease-in;
+    }
+  }
 }
 
 @keyframes fade-in {

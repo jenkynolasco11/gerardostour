@@ -1,19 +1,31 @@
 .ride-consult {
+  padding : 0 30px 0 12px;
+  // overflow : hidden;
   display : flex;
-  // flex-flow : row wrap;
-  // width : 100vw;
 
-  @media (max-width : 1120px) {
+  @media (max-width : 1024px){
     flex-flow : column nowrap;
-
-    // .ride-settings {
-    //   order : -1;
-    // }
   }
-  // background : red;
+
+  &-table {
+    display : flex;
+    flex-flow : column nowrap;
+    // width : 100%;
+    flex : 3;
+
+    @media (max-width : 1024px ) {
+      margin-bottom : 22px;
+    }
+    // width : 500px;
+  }
+
   .ride-settings {
-    margin-left : 4px;
-    // margin-right : 4px;
-    
+    // display : none;
+    flex : 1;
+    align-self : baseline;
+
+    @media (min-width : 1024px){
+      margin-left : 10px;
+    }
   }
 }

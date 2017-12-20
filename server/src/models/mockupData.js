@@ -1,5 +1,5 @@
 import mongoose from 'mongoose'
-import config from '../../config'
+import config from '../config'
 
 mongoose.connect(config.DBURI, { useMongoClient : true }, async () => {
   console.log('Connected to the DB')
@@ -91,6 +91,9 @@ mongoose.connect(config.DBURI, { useMongoClient : true }, async () => {
   
   //   return num
   // }
+  // let meta = await Meta.findOne({ })
+
+  // if(!meta) meta = await new Meta({}).save()
 
   const getRandCard = () => cardAffiliates[ genRand(cardAffiliates.length) ]
   // const getRandAddress = () => addresses[ genRand(addresses.length) ]
@@ -155,6 +158,8 @@ mongoose.connect(config.DBURI, { useMongoClient : true }, async () => {
         luggage,
       }).save()
   
+      // meta.lastBusId += 1
+
       return bus._id
     } catch (e) {
       console.log('shit happened at Bus')
@@ -203,6 +208,7 @@ mongoose.connect(config.DBURI, { useMongoClient : true }, async () => {
       }).save()
 
       // console.log(ride.time)
+      // meta.lastRideId += 1
 
       return ride._id
     } catch (e) {
@@ -225,19 +231,19 @@ mongoose.connect(config.DBURI, { useMongoClient : true }, async () => {
         luggage,
         ticketCount,
       }).save()
-  
+
+      // meta.lastReceiptId += 1
+
       return receipt._id
     } catch (e) {
       console.log(e)
       process.exit()
-      // console.log('shit happened at Payment')
-      // throw new Error(`Payment =====> ${ JSON.stringify(e) }`)
     }
 
     return null
   }
 
-  const createTicket = async (ticketData) => {
+  const createTicket = async ticketData => {
     const {
       id,
       to,
@@ -284,6 +290,8 @@ mongoose.connect(config.DBURI, { useMongoClient : true }, async () => {
         to,
       }).save()
 
+      // meta.lastTicketId += 1
+
       return ticket._id
     } catch (e) {
       console.log(e)
@@ -305,7 +313,6 @@ mongoose.connect(config.DBURI, { useMongoClient : true }, async () => {
   }
 
   const createPeople = async () => {
-    
     console.log(`There are going to be ${ peopleLimit } people!`)
 
     const promises = []
@@ -423,7 +430,12 @@ mongoose.connect(config.DBURI, { useMongoClient : true }, async () => {
 
       await Promise.all(aggregate)
 
+      // meta.lastRideId = rideLimit + 1
+
       console.log('Rides created!!!')
+      // await meta.save()
+
+      return rideLimit
     } catch (e) {
       console.log(e)
       process.exit()
@@ -431,29 +443,29 @@ mongoose.connect(config.DBURI, { useMongoClient : true }, async () => {
   }
 
   const createBusses = async () => {
+    const promises = []
     try {
       const drivers = await User.find({ position : 'DRIVER' })
 
-      if(!drivers.length) throw new Error('No drivers!!!!')
-
       const bussesCount = busNames.length
 
-      const drvrs = drivers.slice(0, bussesCount).map(async (driver, i) => {
+      for(let i = 0; i < bussesCount; i++) {
         const status = busStatus[ genRand([ busStatus.length ]) ]
         const name = busNames[ i ]
         const seats = genRand(30,20)
         const luggage = genRand(50,30)
 
-        return createBus({ id : i, user : driver._id, name, status, seats, luggage })
-      })
+        promises.push(createBus({ id : i + 1, user : (drivers[ i ] ? drivers[ i ]._id : null), name, status, seats, luggage }))
+      }
 
-      await Promise.all(drvrs)
+      await Promise.all(promises)
 
       console.log('Busses created!!')
+
+      return bussesCount
     } catch (e) {
       console.log(e)
       process.exit()
-      // throw new Error(`Create Busses =====> ${ JSON.stringify(e) }`)
     }
   }
 
@@ -536,7 +548,6 @@ mongoose.connect(config.DBURI, { useMongoClient : true }, async () => {
                           : null
                         )
 
-
               const ticket = await createTicket({
                 id : i + 1,
                 to : assignedRide ? ride.routeTo : toState,
@@ -564,10 +575,13 @@ mongoose.connect(config.DBURI, { useMongoClient : true }, async () => {
       // // console.log(py)
       // const meta = await new Meta({ lastTicketId : py.length }).save()
       
+      // meta.lastTicketId = ticketLimit + 1
+      // meta.lastReceiptId = ticketLimit + 1
+
       console.log('Tickets created!!')
+      // await meta.save()
 
-      // process.exit()
-
+      return ticketLimit
     } catch (e) {
       console.log(e)
       console.log('shit happened')
@@ -613,29 +627,29 @@ mongoose.connect(config.DBURI, { useMongoClient : true }, async () => {
 
   (async () => {
     try {
+      // console.log(meta)
       await eraseContent()
       await createSuperUser()
       await createPeople()
       await createUsers()
-      await createAddresses()
-      await createBusses()
-      await createRides()
-      await createTickets()
+      // await createAddresses()
+      const bs = await createBusses()
+      const rd = await createRides()
+      // const tkt = await createTickets()
 
       await new Meta({
-        lastReceiptId : ticketLimit + 1,
-        lastTicketId : ticketLimit + 1,
-        lastRideId : rideLimit + 1,
-        lastBusId : busNames.length + 1,
+        // lastReceiptId : (tkt + 1) || 1,
+        // lastTicketId : (tkt + 1) || 1,
+        lastRideId : (rd + 1) || 1,
+        lastBusId : (bs + 1) || 1,
       }).save()
-
+      
       await mongoose.connection.close()
+
       console.log('')
       console.log('')
       console.log('Process done!')
       console.log('')
-
-      return
     } catch (e) {
       console.log(e, 'Something happened on data (models/mockupData.js)...') 
       process.exit()

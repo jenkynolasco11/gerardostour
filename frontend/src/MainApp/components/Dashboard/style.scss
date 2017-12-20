@@ -2,6 +2,8 @@
 
 .dashboard {
   overflow-y : auto;
+  overflow-x : hidden;
+  position : relative;
 
   @include hw();
 }

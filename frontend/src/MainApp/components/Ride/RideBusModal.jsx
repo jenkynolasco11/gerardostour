@@ -5,11 +5,10 @@ import Dropdown from 'react-toolbox/lib/dropdown/Dropdown'
 import Dialog from 'react-toolbox/lib/dialog/Dialog'
 import axios from 'axios'
 
-import { FormatBusItem, formatData } from './utils'
+import { FormatBusItem, dropDownData } from './utils'
 import './ride-modal.scss'
 
 import { url } from '../../config/config-values.json'
-// const url = 'http://localhost:8000/api/v1/bus'
 
 class RideBusModal extends Component {
   constructor(props) {
@@ -31,7 +30,8 @@ class RideBusModal extends Component {
   }
 
   onAccept() {
-    this.props.onAccept( this.state.selected )
+    this.props.onAccept(this.state.selected)
+    this.props.onDialogClose()
   }
 
   async makeRequest() {
@@ -43,13 +43,13 @@ class RideBusModal extends Component {
       if(data.ok) {
         const { busses } = data.data
   
-        const busFormatted = busses.map(formatData)
+        const busFormatted = busses.map(dropDownData)
 
         this.setState({ busses : [].concat(busFormatted), selected : busFormatted[ 0 ].value })
-
       }
     } catch(e) {
-      return setTimeout(() => this.makeRequest(), 1000)
+      console.log(e)
+      console.log('This happened in rideBusModal.jsx')
     }
   }
 

@@ -1,8 +1,8 @@
-import mocha from 'mocha'
+// import mocha from 'mocha'
 import chai, { expect } from 'chai'
 import chaiPromise from 'chai-as-promised'
 import chaiHttp from 'chai-http'
-import axios from 'axios'
+// import axios from 'axios'
 
 import app from '../src/app'
 
@@ -325,7 +325,7 @@ describe('API => ', () => {
       Bus
         .findOne({})
         .then(bus => {
-          busId = bus._id
+          busId = bus.id
 
           done()
         })
