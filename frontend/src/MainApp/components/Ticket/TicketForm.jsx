@@ -1,22 +1,22 @@
-import React, { Component } from 'react'
+import React, { Component, ReactFragment } from 'react'
+import { connect } from 'react-redux'
 import Dialog from 'react-toolbox/lib/dialog/Dialog'
+import FontIcon from 'react-toolbox/lib/font_icon/FontIcon'
+// import { MdClose } from 'react-icons/lib/md'
 import axios from 'axios'
 
 import TicketTabs from './TicketTabs'
-import configData from '../../config/config-values.json'
-import { formatTicketData, reformatTicketData, getExtraPrice } from './utils'
+import configData, { url } from '../../config/config-values.json'
+import { /*formatTicketData, reformatTicketData,*/ getExtraPrice } from './utils'
 
 import './ticket-form.scss'
 
-import { url } from '../../config/config-values.json'
-// const url = 'http://localhost:8000/api/v1/ticket'
-
 const defaultState = {
-  id : '',
-  isModify : false,
-  isLocal : true,
-  showDialog : false,
-  title : 'Create',
+  id : 0,
+  _isLocal : true,
+  // title : 'Create',
+  // isModify : false,
+  // showDialog : false,
 
   // Person Form Fields
   person : {
@@ -63,15 +63,13 @@ const defaultState = {
   
   /////////////////
 
-  // Ticket Information
-  // ticketNumber : 0,
   ticketMany : 1,
   luggage : 0,
   ///////////
   status : 'NEW',
   redeemedCount : 0,
 }
-
+/*
 const myInfo  = {
   id : '',
   title : 'Create',
@@ -126,7 +124,27 @@ const myInfo  = {
   luggage : 3,
   ///////////
 }
+*/
+const checkValidation = state => {
 
+  for(const key in state) {
+    switch(key) {
+      case 'person':
+        if(!checkValidation(state.person)) return false
+        break
+      case 'willPick':
+        if(state.willPick && !checkValidation(state.pickUpAddress)) return false
+        break
+      case 'willDrop':
+        if(state.willlDrop && !checkValidation(state.dropOffAddress)) return false
+        break
+      default:
+        break
+    }
+  }
+
+  return true
+}
 
 class TicketForm extends Component {
   constructor(props) {
@@ -134,7 +152,7 @@ class TicketForm extends Component {
 
     this.state = {
       ...defaultState,
-      ...myInfo
+      // ...myInfo
     }
 
     this._onChange = this._onChange.bind(this)
@@ -146,35 +164,12 @@ class TicketForm extends Component {
   async _onSubmit(e) {
     e.preventDefault()
 
-    const { history } = this.props
-    const { title, oldDate, oldTime, isModify, ...rest } = this.state
-
-    // console.log(this.state)
-    let data = null
-    const body = reformatTicketData(rest)
-    
-    try {
-      if(isModify) {
-        if(oldDate && oldTime && (body.departureDate.getDate() !== oldDate.getDate() || body.departureTime !== oldTime )) body.status = 'REDEEMED'
-
-        // console.log(body)
-        data = await axios.put(`${ url }/ticket/modify/`, body)
-        console.log(data)
-
-      } else data = await axios.post(`${ url }/ticket/save`, body)
-      
-      if(data.data.ok) {
-        console.log(data)
-        return history.push('/ticket')
-      }
-    } catch (e) {
-      console.log(e)
-    }
-
-    return console.log('Something happened...')
+    // 1985
   }
 
-  _calculateFees() {
+  _calculateFees(ticket = {}) {
+    const obj = { ...this.state, ...ticket }
+
     let {
       to,
       from,
@@ -187,7 +182,7 @@ class TicketForm extends Component {
       pickUpAddress,
       willDrop,
       willPick
-    } = this.state
+    } = obj
 
     const { luggagePrice, prices } = configData
 
@@ -213,19 +208,17 @@ class TicketForm extends Component {
     fee = parseFloat(ticketMany * fee)
 
     totalAmount += parseFloat(fee + (luggagePrice * luggage))
-// console.log(totalAmount)
     extraFee += parseFloat(luggagePrice * luggage)
-// console.log(extraFee)
-// console.log(fee)
+
     console.log(extraFee, fee, totalAmount )
 
     return { totalAmount, fee, extraFee }
   }
 
   _onCancel() {
-    const { history } = this.props
+    // const { history } = this.props
 
-    return history.push('/')
+    // return history.push('/')
   }
 
   _onChange(val, name, extra) {
@@ -235,7 +228,7 @@ class TicketForm extends Component {
       person,
       pickUpAddress,
       dropOffAddress,
-      ticketMany
+      // ticketMany
     } = state
 
     let {
@@ -292,57 +285,96 @@ class TicketForm extends Component {
     })
   }
 
-  async componentWillMount() {
-    const { state } = this.props.location
+  componentWillMount() {
+    const { ticket = {} } = this.props
+
+    if(ticket) {
+
+      // TODO : Show ticket ID, request payment info, set date properly
+      ticket.date = new Date(ticket.date)
+
+      setTimeout(async () => {
+        try {
+          const { data } = await axios.get(`${ url }/ticket/${ ticket.id }/receipt`)
+          console.log(data)
+
+        } catch (e) {
+          console.log(e)
+        }
+      }, 100)
+    }
+
+    const fees = this._calculateFees(ticket)
+    
+    return this.setState({ ...ticket, ...fees })
+    // const { state } = this.props.location
     // let { to, luggage, ticketMany } = this.state
 
-    const params = this._calculateFees()
-    let ticketData = null
+    // const params = this._calculateFees()
+    // let ticketData = null
 
-    if(state) {
-      params.title = state.title
-      params.isModify = state.isModify
-      // if(params.isModify) params.status = 'REDEEMED'
+    // if(state) {
+    //   params.title = state.title
+    //   params.isModify = state.isModify
+    //   // if(params.isModify) params.status = 'REDEEMED'
 
-      const id = state.ticket
+    //   const id = state.ticket
 
-      try {
-        const { data } = await axios.get(`${ url }/ticket/${ id }`)
+    //   try {
+    //     const { data } = await axios.get(`${ url }/ticket/${ id }`)
 
-        if(data.ok) {
-          ticketData = { ...formatTicketData(data.data) }
-          console.log(ticketData)
-        }
-        else this.props.history.goBack()
-      } catch (e) {
-        console.log('Something Happened....')
-        console.log(e)
-        this.props.history.goBack()
-      }
-      // Do axios in here
-    }
-    console.log(params)
-    console.log(ticketData)
-    this.setState({ ...ticketData, ...params, })
+    //     if(data.ok) {
+    //       ticketData = { ...formatTicketData(data.data) }
+    //       console.log(ticketData)
+    //     }
+    //     // else this.props.history.goBack()
+    //   } catch (e) {
+    //     console.log('Something Happened....')
+    //     console.log(e)
+    //     // this.props.history.goBack()
+    //   }
+    //   // Do axios in here
+    // }
+    // console.log(params)
+    // console.log(ticketData)
+    // this.setState({ ...ticketData, ...params, })
   }
 
   render() {
-    // console.log(this.state)
-    const { showDialog } = this.state
+    console.log(this.state)
 
     return (
       <form onSubmit={ this._onSubmit }>
         <TicketTabs
           { ...this.state }
           onChange={ this._onChange }
-          onCancel={ this._onCancel }
-        />
-        <Dialog
-          active={ showDialog }
+          onCancel={ () => this.props.closeForm() }
         />
       </form>
     )
   }
 }
 
-export default TicketForm
+const TicketFormTop = props => (
+  <div className="ticket-form-top">
+    <FontIcon value="close" onClick={ props.closeForm } style={{ cursor : 'pointer' }} />
+    {
+      props.ticket
+      ? <div>{ `Ticket ID: ${ props.ticket.id }` }</div>
+      : null
+    }
+  </div>
+)
+
+const Form = props => (
+  <Dialog
+    className="ticket-form dialog"
+    active={ props.active }
+    // theme={ theme }
+  >
+    <TicketFormTop { ...props } />
+    <TicketForm { ...props } />
+  </Dialog>
+)
+
+export default connect(null)(Form)

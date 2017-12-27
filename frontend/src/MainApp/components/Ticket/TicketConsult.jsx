@@ -1,21 +1,20 @@
 import React, { Component } from 'react'
-import axios from 'axios'
-import { Link } from 'react-router-dom'
-import { List, ListDivider, ListCheckbox, ListItem } from 'react-toolbox/lib/list'
-import { MdReceipt, MdBuild, MdSearch } from 'react-icons/lib/md'
-import { Card, CardTitle } from 'react-toolbox/lib/card'
+import { connect } from 'react-redux'
 
-import TicketPreview from './TicketPreview'
-import TableContent from '../extras/CustomizedTable'
+import { List, ListDivider, /*ListCheckbox,*/ ListItem } from 'react-toolbox/lib/list'
+import { /*Card, CardActions, CardMedia,*/ CardTitle } from 'react-toolbox/lib/card'
 
+import TicketSettings from './TicketSettings'
+import TicketForm from './TicketForm'
+import CustomTable from '../extras/CustomizedTable'
 
-// import json from './response-ticket-example.json'
+import { formatDate, formatHour, formatPhone } from '../../utils'
+import { retrieveTickets } from '../../store-redux/actions'
+
 import './ticket-consult.scss'
-import { url } from '../../config/config-values.json'
-// const url = 'http://localhost:8000/api/v1/ticket'
 
-const tableFormat = {
-  format :  props => {
+const formatData = data => {
+  return data.map( item => {
     const {
       id,
       willDrop,
@@ -26,8 +25,9 @@ const tableFormat = {
       time,
       date,
       person,
-      luggage,
-    } = props
+      dropOffAddress,
+      pickUpAddress
+    } = item
 
     return {
       id,
@@ -35,205 +35,210 @@ const tableFormat = {
       willPick : willPick ? 'YES' : 'NO' ,
       to,
       from,
-      time,
-      date,
-      luggage,
+      time : formatHour(time),
+      date : formatDate(date),
       status,
       person : `${ person.firstname } ${ person.lastname }`,
-      phoneNumber : person.phoneNumber,
-      // lastname : person.lastname,
+      phoneNumber : formatPhone(person.phoneNumber),
+      dropOffAddress,
+      pickUpAddress
     }
-  },
-  header : [
-    { 'id' : 'Ticket ID' },
-    { 'status' : 'Status' },
-    { 'person' : 'Person' },
-    { 'phoneNumber' : 'Phone Number' },
-    { 'from' : 'From' },
-    { 'to' : 'To' },
-    { 'luggage' : 'Luggage' },
-    { 'willPick' : 'Pick Up?' },
-    { 'willDrop' : 'Drop Off?' },
-    { 'time' : 'Hour' },
-    { 'date' : 'Date' },
-  ]
+  })
 }
 
-const TicketSettings = props => {
-  const {
-    selected,
-    getSelectedTicket,
-    openPreview
-  } = props
-
-  return (
-    <Card className="ticket-settings">
-      <List>
-        <CardTitle title="Actions"/>
-        <ListDivider />
-        {/*
-          selected.length ?
-          selected.length > 1 ?
-          // <Link>
-          <ListItem
-            avatar={ <MdBuild /> }
-            caption="Modify Ticket"
-            disabled={ selected.length > 1 }
-          />
-          // </Link>
-          :
-          <Link to={{ pathname : '/ticket/create-modify', state : { ticket : getSelectedTicket(), title : 'Modify', isModify : true }}}>
-            <ListItem
-              avatar={ <MdBuild /> }
-              caption="Modify Ticket"
-              selectable
-            />
-          </Link>
-          :
-          */
-          <Link to={{ pathname: '/ticket/create-modify' }}>
-            <ListItem
-              avatar={ <MdReceipt /> }
-              caption="Create a new Ticket"
-              selectable
-            />
-          </Link>
-        }
-        <CardTitle title="Settings"/>
-        <ListDivider />
-        <ListItem
-          onClick={ openPreview }
-          avatar={ <MdSearch /> }
-          caption="Review details"
-          disabled={ selected.length !== 1 }
-          selectable
-        />
-      </List>
-    </Card>
-  )
+const tableData = {
+  headers : [
+    { value : 'id', label : 'Ticket ID', flex : 1 },
+    { value : 'person', label : 'Name', flex : 2 },
+    { value : 'time', label : 'Time', flex : 1 },
+    { value : 'date', label : 'Date', flex : 2 },
+    { value : 'phoneNumber', label : 'Phone Number', flex : 2 },
+  ] 
 }
+
+const TicketTemplate = props => (
+  <List className="detail-template">
+    <CardTitle title="Ticket Details" />
+    <ListDivider />
+    <ListItem ripple={ false } selectable={ false } caption={ `From :  ${ props.from }` } />
+    <ListItem ripple={ false } selectable={ false } caption={ `To :  ${ props.to }` } />
+    <ListItem ripple={ false } selectable={ false } caption={ `Will Pick? ${ props.willPick }` } />
+    <ListItem ripple={ false } selectable={ false } caption={ `Will Drop? ${ props.willDrop }` } />
+    <List className="address-location">
+      {
+        props.willPick === 'YES' &&
+        <List className="detail-template pick-up-items">
+          <CardTitle title="Pick Up Location" />
+          <ListDivider />
+          <ListItem ripple={ false } selectable={ false } caption={ `Address: ${ props.pickUpAddress.street }, ${ props.pickUpAddress.city }, ${ props.pickUpAddress.state } ${ props.pickUpAddress.zipcode }` } />
+        </List>
+      }
+      {
+        props.willDrop === 'YES' &&
+        <List className="detail-template drop-off-items">
+          <CardTitle title="Drop Off Location" />
+          <ListDivider />
+          <ListItem ripple={ false } selectable={ false } caption={ `Address: ${ props.dropOffAddress.street }, ${ props.dropOffAddress.city }, ${ props.dropOffAddress.state } ${ props.dropOffAddress.zipcode }` } />
+        </List>
+      }
+    </List>
+  </List>
+)
 
 class TicketConsult extends Component {
   constructor(props) {
     super(props)
       this.state = {
-        limit : 10,
+        limit : 20,
         skip : 0,
-        count : 0,
-        unassigned : true,
-        sort : 'date',
-        sortOrder :  -1,
-        tickets : [],
+        sortBy : 'date',
+        sortOrder : -1,
         selected : [],
-        showPreview : true,
-        ticketSelected : 750
+        showForm : false,
+        ticketToModify : null,
       }
 
-    this.getSelectedTicket = this.getSelectedTicket.bind(this)
-    this.onPreviewClose = this.onPreviewClose.bind(this)
-    this.onGetSelected = this.onGetSelected.bind(this)
-    this.onPaginate = this.onPaginate.bind(this)
-    this.onSort = this.onSort.bind(this)
+    this._requestTickets = this._requestTickets.bind(this)
+    this._clearSelected = this._clearSelected.bind(this)
+    this._onRowSelected = this._onRowSelected.bind(this)
+    this._onPaginate = this._onPaginate.bind(this)
+    this._getStatus = this._getStatus.bind(this)
+    this._showForm = this._showForm.bind(this)
+    this._onChange = this._onChange.bind(this)
+    this._onSort = this._onSort.bind(this)
   }
+//#region Private functions
 
-  async makeRequest(limit, skip, count, unassigned, sort) {
-    return await axios.get(`${ url }/ticket/all?skip=${ skip }&limit=${ limit }&unassigned=${ unassigned }&sort=${ sort }`)
-  }
+  _getStatus() {
+    const { used, redeemed, tnull, tnew, deleted } = this.props
 
-  async onPaginate(skip) {
-    const {
-      limit,
-      count,
-      unassigned,
-      sort,
-      sortOrder
-    } = this.state
-
-    const newSkip = skip.selected * limit
-
-    try {
-      const { data } = await this.makeRequest(limit, newSkip, count, unassigned, `${ sort } ${ sortOrder }`)
-      
-      if(data.ok) {
-        const { tickets, count } = data.data
-
-        return this.setState({ tickets : [].concat(tickets), count, skip : skip.selected })
-      }
-    } catch (e) {
-      return setTimeout(() => this.onPaginate(skip), 1000)
+    const statusList = {
+      'REDEEMED' : redeemed,
+      'DELETED' : deleted,
+      'USED' : used,
+      'NULL' : tnull,
+      'NEW' : tnew,
     }
+
+    const status = Object
+      .keys(statusList)
+      .map(stat => statusList[ stat ] ? stat : '')
+      .filter(stat => stat !== '')
+      .join(',')
+
+    return status
   }
 
-  // TODO : DRY with RideConsult - Also, fix the sort engine
-  // For example, sorting by fields in other tables (person, details, etc)
-  async onSort(val) {
-    let { sort, sortOrder, skip } = this.state
+  _requestTickets() {
+    const { skip : oldSkip, limit, sortBy, sortOrder } = this.state
 
-    if(val === sort) sortOrder = sortOrder * -1
-    else sort = val
+    const skip = oldSkip * limit
 
-    this.setState({ sort, sortOrder }, () => this.onPaginate({ selected : skip }))
+    const status = this._getStatus()
+
+    const sort = `${ sortBy } ${ sortOrder }`
+
+    return this.props.queryTickets({ skip, status, sort, limit, unassigned : true })
   }
 
-  onGetSelected(selected) {
-    this.setState({ selected : [].concat(selected) })
+  _onChange(val, name) {
+    return this.setState({ [ name ] : val }, this._requestTickets)
   }
 
-  getSelectedTicket() {
-    const { selected, tickets } = this.state
-
-    if(!selected.length) return null
-
-    return tickets[ selected[ 0 ]].id
+  _onRowSelected(rows) {
+    return this.setState({ selected : [].concat(rows) })
   }
 
-  onPreviewClose() {
-    this.setState({ showPreview : false })
+  _clearSelected() {
+    return this.setState({ selected : [] })
   }
 
-  async componentWillMount() {
-    await this.onPaginate({ selected : 0 })
+  _onPaginate({ selected : skip }) {
+    return this.setState({ skip, selected : [] }, this._requestTickets)
   }
 
+  _onSort(nextSortBy) {
+    let { sortBy, sortOrder } = this.state
+
+    if(sortBy !== nextSortBy) sortOrder = -1
+    else sortOrder = sortOrder * -1
+
+    sortBy = nextSortBy
+
+    this.setState({ sortBy, sortOrder, selected : [] }, this._requestTickets)
+  }
+
+  _showForm(willShow) {
+    let ticketToModify = null
+    const { selected } = this.state
+
+    if(willShow && selected.length === 1) {
+      const { tickets } = this.props
+      ticketToModify = tickets[ selected[ 0 ] ]
+    } else setTimeout(this._requestTickets, 100)
+
+    return this.setState({ showForm : willShow, ticketToModify })
+  }
+//#endregion
+
+//#region Lifecycle
+  componentWillMount() {
+    return this._requestTickets()
+  }
+
+//#endregion
   render() {
     const {
-      tickets,
       skip,
       limit,
-      count,
       selected,
-      showPreview,
-      ticketSelected
+      showForm,
+      ticketToModify
     } = this.state
 
-    const data = tickets.map(tableFormat.format)
+    const { tickets, count } = this.props
+    const data = formatData(tickets)
 
     return (
       <div className="ticket-consult">
-        <TableContent
-          getSelectedRows={ this.onGetSelected }
-          onPaginate={ this.onPaginate }
-          header={ tableFormat.header }
-          onSort={ this.onSort }
-          {...{ data, skip, limit, count }}
+        <CustomTable
+          className="ticket-consult-table"
+          selected={ selected }
+          onRowSelect={ this._onRowSelected }
+          onPaginate={ this._onPaginate }
+          onSort={ this._onSort }
+          data={ data }
+          skip={ skip }
+          limit={ limit }
+          total={ count }
+          headerProps={ tableData.headers }
+          template={ <TicketTemplate /> }
         />
         <TicketSettings
-          selected={ selected } 
-          getSelectedTicket={ this.getSelectedTicket }
-          openPreview={ () => this.setState({ ticketSelected : this.getSelectedTicket(), showPreview : true }) }
+          selected={ selected }
+          showForm={ () => this._showForm(true) }
+          requestTickets={ this._requestTickets }
         />
-        {/*
-          <TicketPreview
-            {...{
-              onPreviewClose : this.onPreviewClose,
-              ticketId : ticketSelected,
-              active : showPreview,
-            }}
-          />
-        */}
+        <TicketForm
+          active={ showForm }
+          closeForm={ () => this._showForm(false) }
+          ticket={ ticketToModify }
+          onSubmitData={ this._requestTickets }
+        />
       </div>
     )
   }
 }
 
-export default TicketConsult
+const mapDispatchToProps = dispatch => ({
+  queryTickets : args => dispatch(retrieveTickets(args))
+})
+
+const mapStateToProps = state => {
+  const { tickets, searchOptions, count } = state.ticket
+  const { used, redeemed, tnull, tnew, deleted, unassigned } = searchOptions
+
+  return { tickets, used, redeemed, tnull, tnew, deleted, unassigned, count }
+}
+
+export default connect(mapStateToProps, mapDispatchToProps)(TicketConsult)

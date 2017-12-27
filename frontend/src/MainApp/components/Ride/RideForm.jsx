@@ -6,14 +6,14 @@ import { CardTitle, CardActions } from 'react-toolbox/lib/card'
 import Dialog from 'react-toolbox/lib/dialog/Dialog'
 import { List, ListDivider } from 'react-toolbox/lib/list'
 import Dropdown from 'react-toolbox/lib/dropdown/Dropdown'
-import { /*MdChevronLeft, MdChevronRight, */ MdEventAvailable } from 'react-icons/lib/md'
+import { MdEventAvailable } from 'react-icons/lib/md'
 import DatePicker from 'react-toolbox/lib/date_picker/DatePicker'
 import Button from 'react-toolbox/lib/button/Button'
 
 import { submitRideData } from '../../store-redux/actions'
+import configData, { url } from '../../config/config-values.json'
 
 import { FormatBusItem, dropDownData, getMinDate } from './utils'
-import configData, { url } from '../../config/config-values.json'
 import './ride-form.scss'
 
 import theme from './ride.theme.scss'
@@ -54,6 +54,8 @@ class RideForm extends Component {
   async componentWillMount() {
     const { ride } = this.props
 
+    console.log(ride)
+
     if(ride) {
       const { id, bus, routeTo, routeFrom, time, date, status } = ride
 
@@ -89,7 +91,7 @@ class RideForm extends Component {
     const busData = busses.map(dropDownData)
 
     return (
-      <form className="" onSubmit={ this.onSubmit }>
+      <form onSubmit={ this.onSubmit }>
         <List className="ride-form-header">
           <CardTitle className="" title={`${ title } Ride`}/>
           { id ? <p>Ride ID: { id }</p> : null }
@@ -144,7 +146,7 @@ const Form = props => (
     className="ride-form dialog"
     active={ props.active }
     theme={ theme }
-    autoScrollBodyContent
+    // autoScrollBodyContent
   >
     <RideForm { ...props } />
   </Dialog>

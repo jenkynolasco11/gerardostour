@@ -38,7 +38,7 @@ auth.post('/login', ctx => {
         username : user.username,
         lastSession : user.lastSession
       }
-      console.log(ctx.session)
+      // console.log(ctx.session)
       // console.log(`Is authenticated ? ${ ctx.isAuthenticated() }`)
 
       return ctx.body = { ok : true, data : { userInfo : data }, message : '' }
@@ -67,7 +67,7 @@ auth.get('/logout', /* isAuthenticated, */ ctx => {
 })
 
 auth.get('/check-auth', ctx => {
-  console.log(ctx.session)
+  // console.log(ctx.session)
   // console.log(`User is ${ ctx.isAuthenticated() ? '' : 'not' } authenticated`)
 
   if(ctx.isAuthenticated()) {

@@ -1,38 +1,7 @@
 @import '../../styles/scss/globals.scss';
 
 .main-body {
-  // padding : 10px 10px 50px;
-  // margin-top : 65px;
-  margin : 20px 0 20px;
+  position : absolute;
+  margin : 78px 0 20px;
   width : 100vw;
-  // position : absolute;
-  // display : flex;
-  // // justify-content : center;
-
-  // @media (max-width : 1100px) {
-  //   padding : 20px 0 50px;
-  // }
-
-  // overflow-x : hidden;
-  // overflow-y : auto;
-
-  // @include hw();
-
-  // [class*=consult] {
-  //   display : flex;
-  //   flex : 1;
-
-  //   @media (max-width : 1120px) {
-  //     flex-flow : column nowrap;
-  //   }
-
-  //   [class*=settings] {
-  //     margin-left : 4px;
-  //     flex : 0.5;
-
-  //     @media (max-width : 1120px) {
-  //       margin : 0px;
-  //     }
-  //   }
-  // }
 }

@@ -9,8 +9,9 @@ import { Autocomplete } from 'react-toolbox/lib/autocomplete'
 import { FontIcon } from 'react-toolbox/lib/font_icon'
 
 import configData from '../../config/config-values.json'
-
 import { onlyNumber } from '../../utils'
+
+import theme from './ticket.theme.scss'
 
 const getMinDate = () => {
   const date = new Date()
@@ -29,7 +30,7 @@ const TimeInfo = props => {
   const { date, time } = props
 
   return (
-    <List className="address-trip-info time">
+    <List className="address-trip-info time" theme={ theme.listItem }>
       <ListItem ripple={ false }>
         <DatePicker
           autoOk
@@ -38,10 +39,13 @@ const TimeInfo = props => {
           value={ date }
           onChange={ val => props.onChange(val, 'date') }
         />
+      </ListItem>
+      <ListItem ripple={ false }>
         <FontIcon
           value="timer"
         />
         <Dropdown
+          allowBlank={ false }
           label="Departure Time"
           source={ configData.times }
           value={ time }
@@ -58,54 +62,62 @@ const TripInfo = props => {
   return (
     <List className="address-dropdown">
       <List className="list">
-        <p>Tickets:</p>
-        <Input
-          min="1"
-          max="20"
-          required
-          type="number"
-          label="Tickets"
-          hint="How Many?"
-          value={ ticketMany }
-          disabled={ isModify }
-          onChange={ val => props.onChange(val, 'ticketMany') }
-        />
-        <p>Luggage:</p>
-        <Input
-          required
-          type="number"
-          label="Luggage"
-          hint="How Many?"
-          value={ luggage }
-          disabled={ isModify }
-          onChange={ val => props.onChange(val, 'luggage') }
-        />
+        <ListItem ripple={ false }>
+          <p>Tickets:</p>
+          <Input
+            min="1"
+            max="20"
+            required
+            type="number"
+            label="Tickets"
+            hint="How Many?"
+            value={ ticketMany }
+            disabled={ isModify }
+            onChange={ val => props.onChange(val, 'ticketMany') }
+          />
+        </ListItem>
+        <ListItem ripple={ false }>
+          <p>Luggage:</p>
+          <Input
+            required
+            type="number"
+            label="Luggage"
+            hint="How Many?"
+            value={ luggage }
+            disabled={ isModify }
+            onChange={ val => props.onChange(val, 'luggage') }
+          />
+        </ListItem>
       </List>
       <List className="list">
-        <p>Going From:</p>
-        <Dropdown
-          className="address-dropdown from"
-          label="From"
-          required
-          allowBlank={ false }
-          disabled={ isModify }
-          // template={ typeTemplate }
-          source={ configData.routes }
-          value={ from }
-          onChange={ val => props.onChange(val, 'from') }
-        />
-        <p>Going To:</p>
-        <Dropdown
-          className="address-dropdown to"
-          label="To"
-          required
-          allowBlank={ false }
-          disabled={ isModify }
-          // template={ typeTemplate }
-          source={ configData.routes }
-          value={ to }
-          onChange={ val => props.onChange(val, 'to') }
-        />
+        <ListItem ripple={ false }>
+          <p>From:</p>
+          <Dropdown
+            className="address-dropdown from"
+            label="From"
+            required
+            allowBlank={ false }
+            disabled={ isModify }
+            // template={ typeTemplate }
+            source={ configData.routes }
+            value={ from }
+            onChange={ val => props.onChange(val, 'from') }
+          />
+        </ListItem>
+        <ListItem ripple={ false }>
+          <p>To:</p>
+          <Dropdown
+            className="address-dropdown to"
+            label="To"
+            required
+            allowBlank={ false }
+            disabled={ isModify }
+            // template={ typeTemplate }
+            source={ configData.routes }
+            value={ to }
+            onChange={ val => props.onChange(val, 'to') }
+          />
+        </ListItem>
       </List>
     </List>
   )
@@ -216,25 +228,25 @@ const AddressInfo = props => {
 }
 
 class TicketAddress extends Component {
-  componentWillMount() {
-  //   const { to } = this.props
-  //   const prices = configData.prices[ to ]
-  //                   ? configData.prices[ to ]
-  //                   : configData.prices.default
+  // componentWillMount() {
+  // //   const { to } = this.props
+  // //   const prices = configData.prices[ to ]
+  // //                   ? configData.prices[ to ]
+  // //                   : configData.prices.default
 
-  //   const fee = null
-  //   const extraFee = null
+  // //   const fee = null
+  // //   const extraFee = null
 
-  //   /*    
-  // const feesTotal = parseFloat(ticketMany * prices.fee).toFixed(2)
-  // const extraTotal = parseFloat(extraLuggage * prices.extraFee).toFixed(2)
+  // //   /*    
+  // // const feesTotal = parseFloat(ticketMany * prices.fee).toFixed(2)
+  // // const extraTotal = parseFloat(extraLuggage * prices.extraFee).toFixed(2)
 
-  // const totalAmoutCaption = `Total Amount : ${ parseFloat(Number(feesTotal) + Number(extraTotal)).toFixed(2) }`
-  // const feesCaption = `${ feesTotal } (${ ticketMany } tickets x ${ parseFloat(prices.fee).toFixed(2) }) `
-  // const extraFeesCaption = `${ extraTotal } (${ extraLuggage } extra luggage x ${ parseFloat(prices.extraFee).toFixed(2) })`
-  //    */
-  //   this.setState({ extraFee, fee })
-  }
+  // // const totalAmoutCaption = `Total Amount : ${ parseFloat(Number(feesTotal) + Number(extraTotal)).toFixed(2) }`
+  // // const feesCaption = `${ feesTotal } (${ ticketMany } tickets x ${ parseFloat(prices.fee).toFixed(2) }) `
+  // // const extraFeesCaption = `${ extraTotal } (${ extraLuggage } extra luggage x ${ parseFloat(prices.extraFee).toFixed(2) })`
+  // //    */
+  // //   this.setState({ extraFee, fee })
+  // }
 
   render() {
     return (

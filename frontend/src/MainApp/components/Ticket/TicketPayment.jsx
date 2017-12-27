@@ -1,5 +1,5 @@
 import React from 'react'
-import { List, ListDivider, ListCheckbox, ListItem } from 'react-toolbox/lib/list'
+import { List, ListDivider, ListCheckbox, /*ListItem*/ } from 'react-toolbox/lib/list'
 import { MdCreditCard, MdDateRange, MdLabelOutline } from 'react-icons/lib/md'
 import { CardTitle } from 'react-toolbox/lib/card'
 import { Input } from 'react-toolbox/lib/input'

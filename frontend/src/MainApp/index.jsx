@@ -4,23 +4,29 @@ import { connect } from 'react-redux'
 import { BrowserRouter as Router } from 'react-router-dom'
 // import { logUserIn } from './store-redux/actions'
 
-// import Login from './components/Login'
-// import Dashboard from './components/Dashboard'
+import Login from './components/Login'
+import Dashboard from './components/Dashboard'
 import RTSnackbar from './components/extras/RTSnackbar'
 import LoaderOverlay from './components/extras/LoaderOverlay'
 
 import { checkAuth } from './store-redux/actions'
-import asyncComp from './utils/asyncComp'
 
-const AsyncLogin = asyncComp(() => import('./components/Login'), 'login')
-const AsyncDash = asyncComp(() => import('./components/Dashboard'), 'dashboard')
+// import asyncComp from './utils/asyncComp'
 
+// const AsyncLogin = asyncComp(() => import('./components/Login'), 'login')
+// const AsyncDash = asyncComp(() => import('./components/Dashboard'), 'dashboard')
 
 class MainApp extends Component{
   state = {
     dashboard : null,
     login : null
   }
+
+  // componentDidCatch(e, info) {
+  //   console.log('On components/index.jsx')
+  //   console.log(e)
+  //   console.log(info)
+  // }
 
   async componentWillMount() {
     // TODO : send the username stored in LocalStorage
@@ -36,10 +42,10 @@ class MainApp extends Component{
         <React.Fragment>
           {
             this.props.isAuth
-            ? <AsyncDash />
-            : <AsyncLogin />
-            // ?  <Dashboard />
-            // : <Login />
+            // ? <AsyncDash />
+            // : <AsyncLogin />
+            ?  <Dashboard />
+            : <Login />
           }
           <LoaderOverlay />
           <RTSnackbar />

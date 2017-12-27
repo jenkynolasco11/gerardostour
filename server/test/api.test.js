@@ -88,7 +88,7 @@ describe('API => ', () => {
 
   before(async () => {
     try {
-      srv = await app()
+      srv = await app(8001)
       await createMeta(true)
 
       agent = chai.request.agent(srv)
@@ -587,6 +587,21 @@ describe('API => ', () => {
 
               done()
             })
+        })
+    })
+
+    it('Should update a ticket', done => {
+      agent
+        .put('/api/v1/ticket/3/modify')
+        .send({ status : 'USED' })
+        .end((err, res) => {
+          const { body } = res
+
+          commonExpects(res, 200, true, 'object', '')
+          expect(body.data).to.haveOwnProperty('ticketId')
+          expect(body.data.ticketId).to.be.eql(3)
+
+          done()
         })
     })
 

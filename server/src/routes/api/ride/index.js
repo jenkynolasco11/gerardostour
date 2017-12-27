@@ -147,9 +147,10 @@ rideRouter.put('/:id/modify', async ctx => {
 
     return ctx.body = { ok : false, data : null, message : 'There is no ride assigned to that id' }
   } catch(e) {
-    // console.log(e)
-    return ctx.body = { ok : false, data : null, message : 'Error retrieving ride' }
+    console.log(e)
   }
+
+  return ctx.body = { ok : false, data : null, message : 'Error retrieving ride' }
 })
 
 // Retrieve Ride
@@ -168,6 +169,7 @@ rideRouter.get('/:id', async ctx => {
   } catch(e) {
     console.log(e)
   }
+
   return ctx.body = { ok : false, data : null, message : 'Error retrieving ride' }
 })
 

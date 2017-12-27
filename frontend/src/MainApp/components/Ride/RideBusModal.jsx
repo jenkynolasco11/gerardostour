@@ -1,6 +1,6 @@
 import React, { Component } from 'react'
 import { CardTitle } from 'react-toolbox/lib/card'
-import { ListCheckbox, ListItem, ListDivider } from 'react-toolbox/lib/list'
+import { ListCheckbox, /*ListItem,*/ ListDivider } from 'react-toolbox/lib/list'
 import Dropdown from 'react-toolbox/lib/dropdown/Dropdown'
 import Dialog from 'react-toolbox/lib/dialog/Dialog'
 import axios from 'axios'

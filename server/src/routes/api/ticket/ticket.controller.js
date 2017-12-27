@@ -77,7 +77,7 @@ export const getTicketData = async tckt => {
 
     const data = {
       id : tckt.id,
-      _id : tckt._id,
+      // _id : tckt._id,
       willDrop : tckt.willDrop,
       willPick : tckt.willPick,
       luggage : tckt.luggage,
@@ -86,8 +86,8 @@ export const getTicketData = async tckt => {
       to : tckt.to,
       pickUpAddress : filterDoc(pickAdd),
       dropOffAddress : filterDoc(dropAdd),
-      time : details.time,
-      date : details.date,
+      time : tckt.time,
+      date : tckt.date,
       person : {
         firstname : person.firstname,
         lastname : person.lastname,
@@ -96,7 +96,7 @@ export const getTicketData = async tckt => {
       }
     }
 
-    return data//.filter(Boolean)
+    return data //.filter(Boolean)
   } catch (e) {
     console.log(e)
     console.log('... @ src/routes/api/ticket/ticket.controller.js')
@@ -221,6 +221,22 @@ export const saveTickets = async data => {
   }
 
   // This means that something happened
+  return null
+}
+
+export const updateTicket = async (id, data) => {
+  try {
+    const tckt = await Ticket.findOneAndUpdate({ id }, data, { new : true })
+
+    if(tckt) {
+      const details = await TicketDetail.findByIdAndUpdate(tckt.details, data, { new : true })
+
+      if(details) return Number(id)
+    }
+  } catch (e) {
+    console.log(e)
+  }
+
   return null
 }
 

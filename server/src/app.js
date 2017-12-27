@@ -22,7 +22,7 @@ import './passport'
 global.Promise = bluebird.Promise
 mongoose.Promise = bluebird.Promise
 
-const server = async done => {
+const server = async (port, done) => {
   try {
     await mongoose.connect(config.DBURI, { useMongoClient : true })
     await createMeta(false)
@@ -66,7 +66,7 @@ const server = async done => {
       .use(routes)
       .use(error404)
 
-    const PORT = (process.env.PORT || config.PORT)
+    const PORT = (port || process.env.PORT || config.PORT)
 
     const srvr = await app.listen(PORT)
     console.log(`Started server at ${ PORT }`)

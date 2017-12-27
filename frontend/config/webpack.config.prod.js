@@ -174,6 +174,7 @@ module.exports = {
                     loader: require.resolve('style-loader'),
                     options: {
                       hmr: false,
+                      localIdentName: '[name]--[local]--[hash:base64:8]'
                     },
                   },
                   use: [

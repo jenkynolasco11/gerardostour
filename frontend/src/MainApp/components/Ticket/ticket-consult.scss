@@ -1,19 +1,34 @@
 .ticket-consult {
-  // height : 100vh;
+  padding : 0 30px 0 12px;
+  // overflow : hidden;
   display : flex;
-  justify-content : center;
 
-  @media (max-width : 1280px) {
-    flex-flow : column wrap;
-    // .table-content {
-    //   // font-size : 0.8em !important;
-    //   // transform : scale(0.5);
-    // }
+  @media (max-width : 1024px){
+    flex-flow : column nowrap;
   }
 
-  // width : 100vw;
+  &-table {
+    display : flex;
+    flex-flow : column nowrap;
+    flex : 3;
+
+    @media (max-width : 1024px ) {
+      margin-bottom : 22px;
+    }
+
+    .address-location {
+      display : flex;
+      // display : block;
+      flex-flow : column nowrap;
+    }
+  }
 
   .ticket-settings {
-    margin-left : 4px;
+    flex : 1;
+    align-self : baseline;
+
+    @media (min-width : 1024px){
+      margin-left : 10px;
+    }
   }
 }

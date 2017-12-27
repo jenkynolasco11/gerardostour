@@ -96,7 +96,7 @@ const ReviewTrip = props => {
           ripple={ false }
           leftIcon={ <TiHome/> }
           caption={ from }
-          legend="Going From"
+          legend="From"
         />
         <ListItem
           ripple={ false }
@@ -155,10 +155,10 @@ const ReviewPayment = props => {
     dropOffFee = getExtraPrice(prices[ to ], dropOffAddress.zipcode)
   }
 
-  const totalAmoutCaption = `Total Amount : ${ totalAmount }`
-  let feesCaption = `${ fee } (${ ticketMany } tickets x ${ prices.default }) `
+  const totalAmoutCaption = `Total Amount : $${ parseFloat(totalAmount).toFixed(2) }`
+  let feesCaption = `$${ parseFloat(fee).toFixed(2) } (${ ticketMany } tickets x ${ prices.default }) `
   feesCaption += `${ willPick ? willDrop ? ` + ${ pickUpFee } Pick Up + ${ dropOffFee } Drop Off fees` : ` + ${ pickUpFee } Pick Up fee` : willDrop ? ` + ${ dropOffFee } Drop off fee` : '' }`
-  let extraFeesCaption = `${ extraFee } (${ luggage } extra luggage x ${ luggagePrice })`
+  let extraFeesCaption = `$${ parseFloat(extraFee).toFixed(2) } (${ luggage } extra luggage x ${ luggagePrice })`
 
   return (
     <List className="review-payment">
@@ -190,8 +190,18 @@ const ReviewActions = props => {
     <List className="review-actions">
       <p> Proceed with the payment? </p>
       <CardActions>
-        <Button raised icon={ <MdThumbDown /> } onClick={ props.onCancel } label="Cancel" />
-        <Button raised type="submit" icon={ <MdThumbUp /> } label="Accept" />
+        <Button
+          // raised
+          icon={ <MdThumbDown /> }
+          onClick={ props.onCancel }
+          label="Cancel"
+        />
+        <Button
+          // raised
+          type="submit"
+          icon={ <MdThumbUp /> }
+          label="Accept"
+        />
       </CardActions>
     </List>
   )

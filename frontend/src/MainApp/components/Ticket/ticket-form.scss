@@ -1,31 +1,75 @@
+@import '../../styles/scss/globals.scss';
+
 .ticket-form {
   padding : 10px 10px 20px;
+  height : 90vh;
+  width : 60vw;
+
+  &-top {
+    display : flex;
+    justify-content : space-between;
+
+    :last-child {
+      margin-right : 40px;
+    }
+  }
+
+  // @media(max-width : 100px) {
+  //   width : 90vw !important;
+  // }
+
+  @media (max-width : 1024px){
+    width : 90vw !important;
+  }
 
   &-address {
+    .address-trip-info {
+      display : flex;
+      
+      li {
+        flex : 1;
+      }
+    }
+
     .address-dropdown {
       .list {
-
         display : flex;
         align-items : center;
-      }
 
-      p {
-        // background : red;
-        text-align : right;
-        width : 90px;
-        margin : 0 20px;
-      }
+        li {
+          flex : 1;
+          @include alignCenter;
 
+          p {
+            width : 60px;
+            text-align : right;
+            margin-right : 10px;
+          }
+
+          [data-react-toolbox=input], [data-react-toolbox=dropdown] {
+            width : 160px;
+
+            @media (max-width : 860px) {
+              width : 140px;
+            }
+          }
+        }
+      }
     }
 
     .address-pick-drop {
       display : block;
+      // [data-react-toolbox=input], [data-react-toolbox=autocomplete] {
+      //   @media (max-width : 860px) {
+      //     padding : 10px 30px;
+      //   }
+      // }
     }
   }
 
-  &-payment {
-    width : 200px;
-  }
+  // &-payment {
+  //   // width : 200px;
+  // }
 
   &-review {
     display : block;
@@ -33,30 +77,14 @@
     .review-trip {
       display : block;
       .list {
-        // display : inline-block;
         display : flex;
 
         li > span {
-          // span:first-child {
-          //   background : red;
-          // }
-
           span + span > span  {
             background : white;
             width : 100px;
           }
         }
-
-        // li {
-        //   // display : flex;
-        //   // & > span:first-of-type {
-        //     // background : red;
-        //     color : white;
-        //   // }
-        //   span {
-        //     // flex : 1;
-        //   }
-        // }
       }
     }
 
@@ -66,12 +94,8 @@
 
       div {
         display : inline-block;
-        // &:not(.small-caption) {
-        //   padding : 0 10px;
-        // }
 
         .small-caption {
-          // background : red;
           text-align : right;
           width : 156px;
         }

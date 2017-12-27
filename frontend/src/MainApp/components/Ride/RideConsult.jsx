@@ -6,15 +6,15 @@ import CustomTable from '../extras/CustomizedTable'
 import RideSettings from './RideSettings'
 import RideForm from './RideForm'
 
+import { ListDivider, ListItem, List } from 'react-toolbox/lib/list'
+import { CardTitle } from 'react-toolbox/lib/card'
+
 import { retrieveRides, assignBusToRides } from '../../store-redux/actions'
 import { formatDate, formatHour } from '../../utils'
 
 import './ride-consult.scss'
-import { ListDivider, ListItem, List } from 'react-toolbox/lib/list'
-import { CardTitle } from 'react-toolbox/lib/card'
 
 const formatData = data => {
-  /* format data */
   return data.map(item => {
     const { time, date } = item
     
@@ -83,7 +83,7 @@ class Ride extends Component {
     this._onChange = this._onChange.bind(this)
     this._onSort = this._onSort.bind(this)
   }
-
+//#region Private functions
   _onAssignBus(bus) {
     const { selected, sortBy, sortOrder, skip, limit } = this.state
     const { rides } = this.props
@@ -100,8 +100,7 @@ class Ride extends Component {
       future : true,
     }
 
-    this.props.assignBus(bus, selectedRides, query)
-    return this._clearSelected()
+    return this.props.assignBus(bus, selectedRides, query)
   }
 
   _getStatus() {
@@ -124,17 +123,16 @@ class Ride extends Component {
   }
 
   _requestRides() {
-    const { skip, limit, sortBy, sortOrder } = this.state
+    const { skip : oldSkip, limit, sortBy, sortOrder } = this.state
     const { /*onTheWay, finished, assigned, pending,*/ future } = this.props
 
-    const newSkip = skip * limit
+    const skip = oldSkip * limit
     
     const status = this._getStatus()
 
     const sort = `${ sortBy } ${ sortOrder }`
 
-    this.props.queryRides({ skip : newSkip, status, sort, future, limit })
-    return this._clearSelected()
+    return this.props.queryRides({ skip, status, sort, future, limit })
   }
 
   _onChange(val, name) {
@@ -146,11 +144,11 @@ class Ride extends Component {
   }
 
   _clearSelected() {
-    this.setState({ selected : [] })
+    return this.setState({ selected : [] })
   }
 
-  _onPaginate(skip) {
-    this.setState({ skip : skip.selected, selected : [] }, this._requestRides)
+  _onPaginate({ selected : skip }) {
+    this.setState({ skip, selected : [] }, this._requestRides)
   }
 
   _onSort(nextSortBy) {
@@ -176,29 +174,33 @@ class Ride extends Component {
 
     this.setState({ [ which ] : willShow, rideToModify })
   }
+//#endregion
 
+//#region Lifecycle functions
   componentWillMount() {
     return this._requestRides()
   }
 
-  componentWillReceiveProps(nextProps) {
-    const { count } = nextProps
+  // componentWillReceiveProps(nextProps) {
+  //   const { count } = nextProps
 
-    this.setState({ count })
-  }
+  //   this.setState({ count })
+  //   // return this._clearSelected()
+  // }
+//#endregion
 
   render() {
     const {
       skip,
       limit,
-      count,
+      // count,
       selected,
       showForm,
       rideToModify,
       showBusForm
     } = this.state
 
-    const { rides } = this.props
+    const { rides, count } = this.props
     const data = formatData(rides)
 
     return (
@@ -216,11 +218,10 @@ class Ride extends Component {
           headerProps={ tableData.headers }
           template={ <DetailTemplate /> }
         />
-        <RideSettings {...{ 
-            selected, 
-            requestRides : this._requestRides,
-            showForm : this._showForm,
-          }} 
+        <RideSettings 
+          selected={ selected }
+          requestRides={ this._requestRides }
+          showForm={ this._showForm }
         />
         <RideForm
           active={ showForm }

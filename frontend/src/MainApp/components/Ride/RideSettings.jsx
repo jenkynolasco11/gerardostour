@@ -1,11 +1,11 @@
 import React from 'react'
 import { connect } from 'react-redux'
 
-import { List, ListDivider, ListCheckbox, ListItem, ListSubHeader } from 'react-toolbox/lib/list'
+import { List, ListDivider, ListCheckbox, ListItem } from 'react-toolbox/lib/list'
 import { Card, /*CardActions, /*CardMedia,*/ CardTitle } from 'react-toolbox/lib/card'
 import { MdDirectionsBus, MdBuild, MdAdd, MdPublish } from 'react-icons/lib/md'
 
-import { setQueryOption } from '../../store-redux/actions'
+import { setRideQueryOption } from '../../store-redux/actions'
 
 const RideSettings = props => {
   const { 
@@ -128,7 +128,7 @@ const RideSettings = props => {
 }
 
 const mapDispatchToProps = dispatch => ({
-  onChange : (val, name) => dispatch(setQueryOption({ [ name ] : val })),
+  onChange : (val, name) => dispatch(setRideQueryOption({ [ name ] : val })),
   // submitData : data => dispatch(submitRideData(data))
 })
 

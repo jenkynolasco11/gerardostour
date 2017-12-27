@@ -1,7 +1,7 @@
 import Router from 'koa-router'
 
-import { Ticket, Receipt, Ride } from '../../../models'
-import { getTicketData, reformatTicket, saveTickets, getTicketReceipt } from './ticket.controller'
+import { Ticket, Ride } from '../../../models'
+import { getTicketData, reformatTicket, saveTickets, getTicketReceipt, updateTicket } from './ticket.controller'
 
 const ticketRouter = new Router({ prefix : 'ticket' })
 
@@ -39,6 +39,23 @@ ticketRouter.post('/save', reformatTicket, async ctx => {
   }
 
   return ctx.body = { ok : false, data : null, message : 'Error trying to save your ticket.' }
+})
+
+ticketRouter.put('/:id/modify', async ctx => {
+  const { id } = ctx.params
+  const { body } = ctx.request
+
+  try {
+    const data = await updateTicket(id, body)
+
+    if(data) return ctx.body = { ok : true, data : { ticketId : data }, message : '' }
+
+    return ctx.body = { ok : false, data : null, message : 'Couldn\'t update the ticket. Contact your system administrator.' }
+  } catch (e) {
+    console.log(e)
+  }
+
+  return ctx.body = { ok : false, data : null, message : 'Error trying to update ticket.' }
 })
 
 /*
@@ -151,23 +168,21 @@ ticketRouter.put('/delete', async ctx => {
 
 // Return all tickets that are not USED nor NULL
 ticketRouter.get('/all', async ctx => {
+// [ 'USED', 'REDEEMED', 'NULL', 'NEW', 'DELETED' ]
   const {
-    nonstatus = 'NULL,USED,DELETED',
-    status = 'NEW',
+    // status = 'NULL,USED,DELETED',
+    status = 'NEW,REDEEMED',
     sort = 'id -1',
     limit = 10,
     skip = 0,
     unassigned = true
   } = ctx.query
 
-  const nonlist = [].concat(nonstatus.split(','))
+  // const nonlist = [].concat(nonstatus.split(','))
   const list = [].concat(status.split(','))
-  const conditions = {
-    $and : [
-      { status : { $in : list }},
-      { status : { $nin : nonlist }}
-    ]
-  }
+
+  const conditions = { status : { $in : list }}
+
   const [ srt, asc ] = sort.split(' ')
   const sortCondition = { [ srt ] : asc }
 

@@ -2,15 +2,12 @@ export const formatHour = t => `${ ('00' + (t % 12 ? (t % 12) + 1 : 1)).slice(-2
 
 export const formatDate = d => {
   const date = new Date(d)
-  // console.log(d)
-  // console.log(date)
 
   const day = `00${ date.getDate() }`.slice(-2)
   const month = `00${ date.getMonth() + 1 }`.slice(-2)
   const year = date.getFullYear()
 
   const newDate = `${ day }-${ month }-${ year }`
-  // console.log(newDate)
 
   return newDate
 }

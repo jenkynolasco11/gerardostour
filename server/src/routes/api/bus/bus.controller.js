@@ -18,21 +18,23 @@ export const getBusData = async bus => {
 
   try {
     const { seats, luggage } = await BusDetail.findOne({ bus : _id })
-    const { person, position } = await User.findById(user)
-    const { firstname, lastname, phoneNumber } = await Person.findById(person)
 
     const data = {
       id,
       name,
-      driver : {
-        firstname,
-        lastname,
-        phoneNumber,
-        position,
-      },
+      driver : 'none',
       status,
       seats,
       luggage
+    }
+
+    if(user) {
+      const { person, position } = await User.findById(user)
+      const { firstname, lastname, phoneNumber } = await Person.findById(person)
+
+      const driver = { firstname, lastname, phoneNumber, position }
+
+      data.driver = driver
     }
 
     return data
@@ -91,7 +93,7 @@ export const updateBus = async (buss, body) => {
   const { _id, __v, createdAt, modifiedAt, id, ...busx } = buss.toObject()
 
   const data = { ...busx, ...body }
-  
+
   try {
     // console.log(data)
     bus = await Bus.findByIdAndUpdate(_id, data, { new : true })

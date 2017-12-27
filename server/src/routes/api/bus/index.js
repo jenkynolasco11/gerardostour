@@ -10,6 +10,7 @@ busRouter.get('/all', async ctx => {
   const {
     // limit = 10,
     // skip = 0,
+    assigned = 'true',
     status,
   } = ctx.query
 
@@ -17,6 +18,8 @@ busRouter.get('/all', async ctx => {
 
   const list = [].concat(statusExt ? statusExt.split(',') : '')
   const conditions = { status : { $in : list }}
+
+  if(assigned === 'true') conditions.user = { $ne : null }
 
   try {
     const busses = await Bus

@@ -5,6 +5,12 @@ const asyncComp = (importComp, name) => class AsyncComponent extends Component{
     component : null
   }
 
+  // componentDidCatch(e, info) {
+  //   console.log('On Bruh!')
+  //   console.log(e)
+  //   console.log(info)
+  // }
+
   async componentWillMount() {
     if(name) console.log(`About to mount ${ name }`)
 

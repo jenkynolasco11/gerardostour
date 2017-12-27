@@ -1,17 +1,10 @@
 {
   "links" : [
     {
-      "header" : "Consultas",
+      "header" : "Sections",
       "items" : [
-        { "name" : "Viajes", "route" : "/ride/consult" },
-        { "name" : "Tickets", "route" : "/ticket/consult" }
-      ]
-    },
-    {
-      "header" : "Crear",
-      "items" : [
-        { "name" : "Viaje", "route" : "/ride/create-modify" },
-        { "name" : "Ticket", "route" : "/ticket/create-modify" }
+        { "name" : "Rides", "route" : "/ride" },
+        { "name" : "Tickets", "route" : "/ticket" }
       ]
     }
   ]

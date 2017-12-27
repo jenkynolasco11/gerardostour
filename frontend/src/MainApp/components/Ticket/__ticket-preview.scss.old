@@ -1,0 +1,19 @@
+// .ticket-review {
+//   display : block;
+
+//   .ticket-review-title {
+//     display : flex;
+//     justify-content : space-around;
+//     align-items : center;
+
+//     // padding-top : 20px;
+//     // padding-bottom : 14px;
+//   }
+//   .ticket-review-details {
+//     display : block;
+//   }
+
+//   .ticket-review-person {
+//     display : block;
+//   }
+// }

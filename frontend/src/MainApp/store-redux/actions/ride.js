@@ -13,9 +13,9 @@ import { url } from '../../config/config-values.json'
 
 /*export */ const setSelectedRides = payload => ({ type : 'SELECTED_RIDES', payload })
 
-/*export */ const setQueryOption = payload => ({ type : 'SET_OPTION_RIDES', payload })
+/*export */ const setRideQueryOption = payload => ({ type : 'SET_OPTION_RIDES', payload })
 
-/*export */ const clearRides = payload => ({ type : 'CLEAR_RIDES', payload })
+// /*export */ const clearRides = payload => ({ type : 'CLEAR_RIDES', payload })
 
 
 // ///////////////////////
@@ -91,6 +91,6 @@ export default {
   retrieveRides,
   submitRideData,
   setSelectedRides,
-  setQueryOption,
+  setRideQueryOption,
   assignBusToRides
 }

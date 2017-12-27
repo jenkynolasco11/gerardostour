@@ -2,12 +2,19 @@ import App from './app'
 import Auth from './auth'
 // import Meta from './meta'
 import Ride from './ride'
+import Ticket from './ticket'
 
 export const {
   logUserIn,
   logUserOut,
   checkAuth,
 } = Auth
+
+export const {
+  retrieveTickets,
+  submitTicketData,
+  setTicketQueryOption
+} = Ticket
 
 // export const {
 //   snackBarMessage
@@ -28,7 +35,7 @@ export const {
 export const {
   retrieveRides,
   setSelectedRides,
-  setQueryOption,
+  setRideQueryOption,
   submitRideData,
   assignBusToRides
 } = Ride
@@ -36,5 +43,7 @@ export const {
 export default {
   // ...Meta,
   ...App,
-  ...Ride
+  ...Ride,
+  ...Auth,
+  ...Ticket,
 }
