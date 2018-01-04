@@ -80,6 +80,7 @@ mongoose.connect(config.DBURI, { useMongoClient : true }, async () => {
   const payType = [ 'CASH', 'CARD' ]
   const routes = [ 'NY', 'PA' ]
   const rideStatus = [ 'FINISHED', 'PENDING', 'ASSIGNED', 'ON-THE-WAY', 'CANCELLED' ]
+  const issuedList = [ 'WEBSITE', 'LOCAL' ]
 
   const usersLimit = 50
   const addLen = addresses.length
@@ -263,6 +264,7 @@ mongoose.connect(config.DBURI, { useMongoClient : true }, async () => {
       drop,
       date,
       time,
+      issued,
       // fee,
       // extraFee
     } = ticketData
@@ -274,6 +276,7 @@ mongoose.connect(config.DBURI, { useMongoClient : true }, async () => {
         pickUpAddress : pick,
         dropOffAddress : drop,
         redeemedCount : 0,
+        issued
         // fee,
         // extraFee
       }).save()
@@ -557,8 +560,8 @@ mongoose.connect(config.DBURI, { useMongoClient : true }, async () => {
                           ? Address.aggregate([{ $sample : { size : 1 }}, projection ])
                           : null
                         )
-
-              // console.log(time, date)
+              
+              const issued = issuedList[ genRand(issuedList.length) ]
 
               const ticket = await createTicket({
                 id : i + 1,
@@ -573,6 +576,7 @@ mongoose.connect(config.DBURI, { useMongoClient : true }, async () => {
                 drop : willDrop ? drop[ 0 ] : null,
                 date,
                 time,
+                issued
               })
 
               return ticket

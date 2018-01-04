@@ -426,6 +426,22 @@ describe('API => ', () => {
         })
     })
 
+    it('Should query by date and hour', done => {
+      agent
+        .get(`/api/v1/ride/date/${ data.ride.date.getTime() }/hour/${ data.ride.time }`)
+        .end((err, res) => {
+          const { body } = res
+          commonExpects(res, 200, true, 'object', '')
+
+          expect(body.data).to.haveOwnProperty('rides')
+          expect(body.data.rides).to.be.of.length(1)
+          expect(body.data.rides[ 0 ].id).to.be.eql(1)
+          expect(body.data.rides[ 0 ].time).to.be.eql(data.ride.time)
+
+          done()
+        })
+    })
+
     it('Should cancel a ride', done => {
       agent
         .put(`/api/v1/ride/${ rideId }/modify`)

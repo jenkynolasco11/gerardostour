@@ -111,18 +111,18 @@ ticketRouter.get('/date/:d1/:d2?', async ctx => {
 /** Not assigned yet */
 // Assign ride to ticket
 ticketRouter.put('/modify/ride', async ctx => {
-  const { ticketIds, rideId } = ctx.request.body
-
-  // const tickts = JSON.parse(ticketIds)
+  const { tickets, ride } = ctx.request.body
 
   try {
-    const rid = await Ride.findById(rideId, { _id : 1 })
+    const rid = await Ride.findOne({ id : ride }, { _id : 1 })
 
     if(!rid) return ctx.body = { ok : false, data : null, message : 'There is no ride assigned to this id.' }
 
-    await Promise.all(
-      tickts.map( tcktId => Ticket.findByIdAndUpdate(tcktId, { ride : rid }))
+    const objs = await Promise.all(
+      tickets.map( tcktId => Ticket.findOneAndUpdate({ id : tcktId }, { ride : rid._id }, { new : true }))
     )
+
+    console.log(objs)
 
     return ctx.body = { ok : true, data : null, message : '' }
   } catch (e) {
@@ -203,7 +203,7 @@ ticketRouter.get('/all', async ctx => {
       const data = await Promise.all(tickets.map(getTicketData))
 
       const count = await Ticket.count(conditions)
-
+      // console.log(JSON.stringify(data, null, 3))
       return ctx.body = { ok : true, data : { tickets : data, count }, message : '' }
     }
 

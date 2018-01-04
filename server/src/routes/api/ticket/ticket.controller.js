@@ -17,10 +17,27 @@ const eraseData = async objects => {
 // Middleware for webhook data
 export const reformatTicket = (ctx, next) => {
   const { body } = ctx.request
-  // console.log(body)
 
+  // console.log(body)
   // If its local, return. No need to reformat data structure
   if(body._isLocal) return next()
+  // {
+  //   const { person, payment, time, date, ...rest } = body
+  //   const { type, ...restPayment } = payment
+
+  //   const newBody = {
+  //     ...rest,
+  //     ...person,
+  //     ...restPayment,
+  //     paymentType : type,
+  //     departureTime : time,
+  //     departureDate : date,
+  //   }
+
+  //   ctx.request.body = newBody
+
+  //   return next()
+  // }
 
   const newBody = {
     frm : body.desde,
@@ -58,6 +75,7 @@ export const reformatTicket = (ctx, next) => {
     status : 'NEW',
     fee : parseFloat(body.precio_primera_ruta),
     extraFee : parseFloat(body.precio_segunda_ruta),
+    issued : 'WEBSITE',
   }
 
   ctx.request.body = newBody
@@ -116,19 +134,25 @@ export const saveTicket = async body => {
     status = 'NEW',
     departureDate,
     departureTime,
+    issued,
   } = data
 
   let details = null
   let tckt = null
 
   try {
+    // console.log(JSON.stringify(body, null, 3))
+
     const date = new Date(new Date(departureDate).setHours(0,0,0,0))
     const time = Number(departureTime)
+
+    // console.log(date, time)
 
     details = await new TicketDetail({
       pickUpAddress : pickUp,
       dropOffAddress : dropOff,
       redeemedCount : 0,
+      issued : issued ? issued : 'LOCAL',
     }).save()
 
     // TODO: Make sure that the data inserted is sanitized, or it'll break!!!
@@ -152,7 +176,7 @@ export const saveTicket = async body => {
   } catch(e) {
     // Oh snap! Some shit happened... rolling back.... again...
     await eraseData({ ticketDetails : details, ticket : tckt })
-    
+
     console.log(e)
     console.log('... @ src/routes/api/ticket/ticket.controller.js')
   }
@@ -185,6 +209,8 @@ export const saveTickets = async data => {
     dropOff = drpff
     receipt = rcpt
 
+    // console.log(person, pickUp, dropOff, receipt)
+
     const willDrop = data.willDrop === 'true'
     const willPick = data.willPick === 'true'
 
@@ -192,6 +218,8 @@ export const saveTickets = async data => {
       throw new Error('Shit happened... Rolling back everything!')
 
     const lastTicket = meta.lastTicketId
+
+    // console.log(data)
 
     for(let i = 0; i < howMany; i++)
       promises.push(saveTicket({
@@ -205,6 +233,7 @@ export const saveTickets = async data => {
 
     const tickets = await Promise.all(promises)
 
+    // console.log(howMany)
     // update meta
     meta.lastTicketId += Number(howMany)
     meta.lastReceiptId += 1

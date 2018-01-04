@@ -4,6 +4,7 @@ import mongoose, { Schema } from 'mongoose'
 
 const routes = [ 'NY', 'PA' ]
 const status = [ 'USED', 'REDEEMED', 'NULL', 'NEW', 'DELETED' ]
+const issuedList = [ 'WEBSITE', 'LOCAL' ]
 
 const TicketSchema = new Schema({
   id : { type : Number, required : true, unique : { index : true }},
@@ -26,6 +27,7 @@ const TicketDetailsSchema = new Schema({
   pickUpAddress : { type : Schema.Types.ObjectId, ref : 'address', index : true },
   dropOffAddress : { type : Schema.Types.ObjectId, ref : 'address', index : true },
   redeemedCount : { type : Number, default : 0 },
+  issued : { type : String, enum : issuedList, required : true, default : 'LOCAL' },
   createdAt : { type : Date, default : Date.now },
   modifiedAt : { type : Date, default : Date.now },
 })

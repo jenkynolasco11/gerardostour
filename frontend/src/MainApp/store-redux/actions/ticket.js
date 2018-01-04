@@ -1,6 +1,6 @@
 import axios from 'axios'
 
-import { showLoader } from './app'
+import { showLoader, showSnackBarWithMessage } from './app'
 // import { showSnackBarWithMessage } from './app'
 import { url } from '../../config/config-values.json'
 
@@ -43,7 +43,31 @@ export const retrieveTickets = query => async dispatch => {
   return dispatch(showLoader(false))
 }
 
-export const submitTicketData = data => async dispatch => {
+export const submitTicketData = body => async dispatch => {
+    // console.log(body)
+  //   
+    try {
+      dispatch(showLoader(true))
+
+      const { person, payment, time, date, ...rest } = body
+      const { type, ...restPayment } = payment
+      
+      const postdata = {
+        ...rest,
+        ...person,
+        ...restPayment,
+        paymentType : type
+      }
+
+      const { data } = await axios.post(`${ url }/ticket/save`, postdata)
+
+      if(data.ok) dispatch(showSnackBarWithMessage('Saved successfuly!'))
+      else dispatch(showSnackBarWithMessage(`Couldn't save your ticket... => ${ data.message }`))
+    } catch (e) {
+      console.log(e)
+    }
+
+    return dispatch(showLoader(false))
 
   // const { id, bus, routeTo, routeFrom, time, date, status } = data
 
@@ -65,6 +89,21 @@ export const submitTicketData = data => async dispatch => {
   // }
 
   // return dispatch(showLoader(false))
+}
+
+export const assignTicketsToRide = (tickets, ride) => async dispatch => {
+  try {
+    dispatch(showLoader(true))
+
+    const { data } = await axios.put(`${ url }/ticket/modify/ride`, { tickets, ride })
+
+    if(data.ok) dispatch(showSnackBarWithMessage('Saved successfuly!'))
+    else dispatch(showSnackBarWithMessage(`Couldn't modify the tickets... => ${ data.message }`))
+  } catch (e) {
+    console.log(e)
+  }
+
+  return dispatch(showLoader(false))
 }
 
 // export const assignBusToRides = (bus, rides = [], query) => async dispatch => {
@@ -91,6 +130,7 @@ export default {
   retrieveTickets,
   submitTicketData,
   setTicketQueryOption,
+  assignTicketsToRide
   // retrieveRides,
   // submitRideData,
   // setSelectedRides,

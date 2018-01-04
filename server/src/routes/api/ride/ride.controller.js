@@ -104,11 +104,11 @@ export const createRide = async data => {
 
 export const updateRide = async (rid, body) => {
   try {
-    const { _id, __v, createdAt, modifiedAt, id, bus, ...ride } = rid.toObject()
+    const { _id, __v, createdAt, modifiedAt, status, id, bus, ...ride } = rid.toObject()
     
     const bs = await Bus.findOne({ id : body.bus })
 
-    const data = { ...ride, ...body, bus : ( bs ? bs._id : null ) }
+    const data = { ...ride, ...body, bus : ( bs ? bs._id : null ), status : ( bs ? 'ASSIGNED' : status ) }
 
     const rde = await Ride.findOneAndUpdate({ id }, data)
     const details = await RideDetail.findOneAndUpdate({ ride : _id }, data)

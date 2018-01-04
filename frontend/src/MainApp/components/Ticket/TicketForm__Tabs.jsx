@@ -3,10 +3,10 @@ import { Tabs, Tab } from 'react-toolbox/lib/tabs'
 // import { Card } from 'react-toolbox/lib/card'
 import { MdPerson, MdContentPaste, MdDirectionsBus, MdAttachMoney } from 'react-icons/lib/md'
 
-import TicketPersonal from './TicketPersonal'
-import TicketPayment from './TicketPayment'
-import TicketAddress from './TicketAddress'
-import TicketReview from './TicketReview'
+import TicketPersonal from './TicketForm__Personal'
+import TicketPayment from './TicketForm__Payment'
+import TicketReview from './TicketForm__Review'
+import TicketTrip from './TicketForm__Trip'
 
 class TicketTabs extends Component{
   constructor(props) {
@@ -37,13 +37,13 @@ class TicketTabs extends Component{
       <Tabs fixed index={ this.state.index } onChange={ this.onTabChange }>
         <Tab icon={ <MdPerson /> } label="Personal Info"> 
           <TicketPersonal { ...this.props } />
-          </Tab>
+        </Tab>
         <Tab
           // disabled={ tab2Disable }
           icon={ <MdDirectionsBus /> }
           label="Trip Info"
         >
-          <TicketAddress { ...this.props } />
+          <TicketTrip { ...this.props } />
         </Tab>
         <Tab
           disabled={ /*tab3Disable*/ isModify }

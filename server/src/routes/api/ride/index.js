@@ -65,47 +65,50 @@ rideRouter.post('/save', async ctx => {
 
     return ctx.body = { ok : false, data : null, message : 'Couldn\'t save route in DB' }
   } catch (e) {
-    return ctx.body = { ok : false, data : null, message : 'Error saving ride in DB' }
+    console.log(e)
   }
+
+  return ctx.body = { ok : false, data : null, message : 'Error saving ride in DB' }
 })
 
-/** Not assigned **/
 // Retrieve rides on date and hour.
 // Note: If hour is -1, retrieve all rides on that date
 rideRouter.get('/date/:date/hour/:hour', async ctx => {
   const { date, hour } = ctx.params
 
-  const time = parseInt(hour)
   const dateX = parseInt(date)
-
-  if(typeof dateX !== 'number') return ctx.body = { ok : false, data : null, message : 'Incorrect Date format' }
 
   const date1 = new Date(dateX)
   const date2 = new Date(dateX).setDate(date1.getDate() + 1)
 
-  const conditions = { date : { $gte : date1, $lte : new Date(date2) }}
+  const conditions = { date : { $gte : date1, $lt : new Date(date2) }}
 
-  if(time >= 0 && time < 24) conditions.time = time
+  if(hour >= 0 && hour < 24) conditions.time = hour
+
+  // This is debatable
+  conditions.bus = { $ne : null }
 
   try {
+    // console.log(conditions)
     const rides = await Ride.find(conditions)
-    
+
+    // console.log(await Ride.find({}))
+
     if(rides.length) {
       const data = await Promise.all(rides.map(getRideData))
 
-      return ctx.body = { ok : true, data : data.filter(Boolean), message : '' }
+      return ctx.body = { ok : true, data : { rides : data }, message : '' }
     }
+
+    return ctx.body = { ok : false, data : null, message : 'There are no rides for this date' }
   } catch (e) {
     console.log(e)
-
-    return ctx.body = { ok : false, data : null, message : 'Error retrieving rides' }
   }
 
-  return ctx.body = { ok : false, data : null, message : 'There are no rides for this date' }
+  return ctx.body = { ok : false, data : null, message : 'Error retrieving rides' }
 })
 
-/* not assigned */
-// Assign bus to ride
+// Assigns bus to ride
 rideRouter.put('/assign-bus', async ctx => {
   const { bus, rides = [] } = ctx.request.body
 
@@ -153,7 +156,7 @@ rideRouter.put('/:id/modify', async ctx => {
   return ctx.body = { ok : false, data : null, message : 'Error retrieving ride' }
 })
 
-// Retrieve Ride
+// Retrieves Ride
 rideRouter.get('/:id', async ctx => {
   const { id } = ctx.params
   try {

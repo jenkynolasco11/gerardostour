@@ -8,14 +8,14 @@ export const getMinDate = () => {
   return date
 }
 
-export const dropDownData = data => {
-  const { id, ...rest } = data
+// export const dropDownData = data => {
+//   const { id, ...rest } = data
 
-  return {
-    ...rest,
-    value : id
-  }
-}
+//   return {
+//     ...rest,
+//     value : id
+//   }
+// }
 
 export const FormatBusItem = bus => (
   <div className="bus-item">

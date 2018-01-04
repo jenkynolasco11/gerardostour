@@ -13,7 +13,8 @@ export const {
 export const {
   retrieveTickets,
   submitTicketData,
-  setTicketQueryOption
+  setTicketQueryOption,
+  assignTicketsToRide
 } = Ticket
 
 // export const {

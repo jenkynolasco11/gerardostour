@@ -100,7 +100,8 @@ class Ride extends Component {
       future : true,
     }
 
-    return this.props.assignBus(bus, selectedRides, query)
+    this.props.assignBus(bus, selectedRides, query)
+    return this._requestRides()
   }
 
   _getStatus() {
@@ -132,6 +133,7 @@ class Ride extends Component {
 
     const sort = `${ sortBy } ${ sortOrder }`
 
+    this.setState({ selected : [] })
     return this.props.queryRides({ skip, status, sort, future, limit })
   }
 
@@ -148,7 +150,7 @@ class Ride extends Component {
   }
 
   _onPaginate({ selected : skip }) {
-    this.setState({ skip, selected : [] }, this._requestRides)
+    this.setState({ skip/*, selected : []*/ }, this._requestRides)
   }
 
   _onSort(nextSortBy) {
@@ -159,20 +161,23 @@ class Ride extends Component {
 
     sortBy = nextSortBy
 
-    this.setState({ sortBy, sortOrder, selected : [] }, this._requestRides)
+    this.setState({ sortBy, sortOrder/*, selected : []*/ }, this._requestRides)
   }
 
   _showForm(which, willShow) {
     let rideToModify = null
     const { selected } = this.state
-    
+
+    // console.log(selected)
+
     // 'if' opens the form, 'else' closes it
     if(which === 'showForm' && willShow && selected.length === 1) {
       const { rides } = this.props
       rideToModify = rides[ selected[ 0 ] ]
-    } else setTimeout(this._requestRides, 100)
 
-    this.setState({ [ which ] : willShow, rideToModify })
+    } // else setTimeout(this._requestRides, 100)
+
+    return this.setState({ [ which ] : willShow, rideToModify })
   }
 //#endregion
 
@@ -225,7 +230,7 @@ class Ride extends Component {
         />
         <RideForm
           active={ showForm }
-          closeForm={ this._showForm }
+          closeForm={ () => this._showForm('showForm', false) }
           ride={ rideToModify }
           onSubmitData={ this._requestRides }
         />

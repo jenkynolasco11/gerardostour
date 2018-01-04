@@ -1,3 +1,6 @@
+import React from 'react'
+// import { formatDate, formatHour } from '../../utils'
+
 export const getExtraPrice = (obj, zip) => {
   if(!zip) return 0
   const len = obj.length
@@ -32,6 +35,8 @@ export const verifyCard = number => {
 }
 
 export const formatTicketData = ticket => {
+  // console.log(ticket)
+
   const { person, pickUpAddress, dropOffAddress } = ticket
 
   const date = new Date(new Date(ticket.date).setHours(0,0,0,0))
@@ -68,6 +73,7 @@ export const formatTicketData = ticket => {
 }
 
 export const reformatTicketData = tickt => {
+  // console.log(tickt)
   return {
     id : tickt.id,
     isLocal : true,
@@ -94,3 +100,27 @@ export const reformatTicketData = tickt => {
     extraFee : parseFloat(tickt.extraFee),
   }
 }
+
+export const FormatRideItem = ride => (
+  <div className="ride-item">
+    <div className="">
+      <p>
+        <em><strong>From :</strong>{`${ ride.routeFrom }`}</em>
+        <em><strong>To :</strong>{`${ ride.routeTo }`}</em>
+      </p>
+    </div>
+    {/*
+      TODO : edit dropdown rides for assignment on tickets
+    */}
+    <div className="">
+    {
+      //*
+      ride.bus &&
+      <React.Fragment>
+        <p><strong>Bus :</strong> { `${ ride.bus.name }` }</p>
+      </React.Fragment>
+      //*/
+    }
+    </div>
+  </div>
+)

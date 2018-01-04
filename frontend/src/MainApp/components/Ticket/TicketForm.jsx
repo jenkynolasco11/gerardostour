@@ -1,13 +1,15 @@
-import React, { Component, ReactFragment } from 'react'
+import React, { Component } from 'react'
 import { connect } from 'react-redux'
 import Dialog from 'react-toolbox/lib/dialog/Dialog'
 import FontIcon from 'react-toolbox/lib/font_icon/FontIcon'
 // import { MdClose } from 'react-icons/lib/md'
-import axios from 'axios'
 
-import TicketTabs from './TicketTabs'
-import configData, { url } from '../../config/config-values.json'
+// import axios from 'axios'
+
+import TicketTabs from './TicketForm__Tabs'
+import configData from '../../config/config-values.json'
 import { /*formatTicketData, reformatTicketData,*/ getExtraPrice } from './utils'
+import { submitTicketData } from '../../store-redux/actions'
 
 import './ticket-form.scss'
 
@@ -27,8 +29,8 @@ const defaultState = {
   },
 
   // Address Form Fields
-  date : new Date(new Date().setHours(0,0,0,0)),
-  time : 3,
+  departureDate : new Date(new Date().setHours(0,0,0,0)),
+  departureTime : 3,
   willPick : false,
   willDrop : false,
   pickUpAddress : {
@@ -43,7 +45,7 @@ const defaultState = {
     state : '',
     zipcode : '',
   },
-  from : 'NY',
+  frm : 'NY',
   to : 'PA',
   /////////
 
@@ -63,16 +65,16 @@ const defaultState = {
   
   /////////////////
 
-  ticketMany : 1,
+  howMany : 1,
   luggage : 0,
   ///////////
   status : 'NEW',
   redeemedCount : 0,
 }
-/*
+//*
 const myInfo  = {
   id : '',
-  title : 'Create',
+  // title : 'Create',
 
   // Person Form Fields
   person : {
@@ -83,12 +85,12 @@ const myInfo  = {
   },
 
   // Address Form Fields
-  date : new Date(new Date('2018-05-11').setHours(0,0,0,0)),
-  time : 11,
+  departureDate : new Date(new Date('2018-11-11').setHours(0,0,0,0)),
+  departureTime : 11,
   willPick : true,
   willDrop : true,
   pickUpAddress : {
-    street : '116  Sherman Ave',
+    street : '116 Sherman Ave',
     city : 'New York',
     state : 'NY',
     zipcode : '10128'
@@ -99,7 +101,7 @@ const myInfo  = {
     state : 'NY',
     zipcode : '10025',
   },
-  from : 'NY',
+  frm : 'NY',
   to : 'NY',
   /////////
 
@@ -107,26 +109,27 @@ const myInfo  = {
   payment : {
     type : 'CARD',
     isCard : true,
-    totalAmount : 54.54,
     cardLastDigits : '4242',
     cardNumber : '4242424242424242',
     expirationDate : '0120',
     cvc : '123',
   },
   // Per Ticket Information
-  extraFee : 50.5,
-  fee : 4.04,
+  extraFee : 0.0,
+  fee : 0.0,
+  totalAmount : 0.0,
   /////////////////
 
   // Ticket Information
   // ticketNumber : 0,
-  ticketMany : 4,
+  howMany : 4,
   luggage : 3,
   ///////////
 }
-*/
-const checkValidation = state => {
+// */
 
+// TODO : Make a validation function to validate every field in the form
+const checkValidation = state => {
   for(const key in state) {
     switch(key) {
       case 'person':
@@ -138,7 +141,11 @@ const checkValidation = state => {
       case 'willDrop':
         if(state.willlDrop && !checkValidation(state.dropOffAddress)) return false
         break
+      // case 'payment':
+      //   if(state.payment.isCard && )
+      //   break
       default:
+
         break
     }
   }
@@ -152,7 +159,7 @@ class TicketForm extends Component {
 
     this.state = {
       ...defaultState,
-      // ...myInfo
+      ...myInfo
     }
 
     this._onChange = this._onChange.bind(this)
@@ -164,7 +171,12 @@ class TicketForm extends Component {
   async _onSubmit(e) {
     e.preventDefault()
 
-    // 1985
+    const data = { ...this.state }
+
+    await this.props.submitTicket(data)
+
+    this.props.onSubmitData()
+    return this.props.closeForm()
   }
 
   _calculateFees(ticket = {}) {
@@ -172,9 +184,9 @@ class TicketForm extends Component {
 
     let {
       to,
-      from,
+      frm,
       luggage,
-      ticketMany,
+      howMany,
       // extraFee,
       // fee,
       // totalAmount,
@@ -188,31 +200,24 @@ class TicketForm extends Component {
 
     let totalAmount = 0
     let extraFee = 0
-    let fee = prices.default
+    let fee = 0 // prices.default
+    let pickFee = 0
+    let dropFee = 0
+    let luggageFee = 0
 
-    if(willPick) {
-      const extra = getExtraPrice(prices[ from ], pickUpAddress.zipcode)
-      // console.log(extra)
-      fee += extra
-      extraFee += extra
-    }
+    if(willPick) pickFee += getExtraPrice(prices[ frm ], pickUpAddress.zipcode)
 
-    if(willDrop) {
-      const extra = getExtraPrice(prices[ to ], dropOffAddress.zipcode)
-      // console.log(extra)
-      fee += extra
-      extraFee += extra
-    }
+    if(willDrop) dropFee += getExtraPrice(prices[ to ], dropOffAddress.zipcode)
 
-    // console.log(luggagePrice)
-    fee = parseFloat(ticketMany * fee)
+    fee += parseFloat(howMany * prices.default)
+    luggageFee += (luggagePrice * luggage)
 
-    totalAmount += parseFloat(fee + (luggagePrice * luggage))
-    extraFee += parseFloat(luggagePrice * luggage)
+    totalAmount += parseFloat(fee + luggageFee + pickFee + dropFee)
+    extraFee += parseFloat(luggageFee + pickFee + dropFee)
 
-    console.log(extraFee, fee, totalAmount )
+    const fees = { totalAmount, fee, extraFee }
 
-    return { totalAmount, fee, extraFee }
+    return fees
   }
 
   _onCancel() {
@@ -228,7 +233,7 @@ class TicketForm extends Component {
       person,
       pickUpAddress,
       dropOffAddress,
-      // ticketMany
+      // howMany
     } = state
 
     let {
@@ -264,13 +269,14 @@ class TicketForm extends Component {
         // state.fee = fees.fee
         // if(extraLuggage > 0) state.extraFee = extraLuggage * fees.extraFee
 
-        // paymentType.totalAmount = state.ticketMany * (state.fee + state.extraFee)
+        // paymentType.totalAmount = state.howMany * (state.fee + state.extraFee)
         break
       default :
         break
     }
 
-    const fees = this._calculateFees(/*to, luggage, ticketMany*/)
+    // const fees = this._calculateFees(/*to, luggage, howMany*/)
+    // console.log(...fees)
 
     return this.setState({
       ...state,
@@ -281,11 +287,18 @@ class TicketForm extends Component {
       payment : { ...payment },
       to,
       luggage,
-      ...fees
+      // ...fees
+    }, () => {
+      const fees = this._calculateFees()
+
+      return this.setState({ ...fees })
     })
   }
 
   componentWillMount() {
+    // Check this out later
+    return this.setState({ ...this._calculateFees() })
+  /*
     const { ticket = {} } = this.props
 
     if(ticket) {
@@ -296,7 +309,11 @@ class TicketForm extends Component {
       setTimeout(async () => {
         try {
           const { data } = await axios.get(`${ url }/ticket/${ ticket.id }/receipt`)
-          console.log(data)
+          
+            // TODO : 
+            // Took this away cuz I don't want to modify tickets.
+            // I will delete the receipt, then create a new one
+          
 
         } catch (e) {
           console.log(e)
@@ -307,8 +324,10 @@ class TicketForm extends Component {
     const fees = this._calculateFees(ticket)
     
     return this.setState({ ...ticket, ...fees })
+    // */
+
     // const { state } = this.props.location
-    // let { to, luggage, ticketMany } = this.state
+    // let { to, luggage, howMany } = this.state
 
     // const params = this._calculateFees()
     // let ticketData = null
@@ -341,7 +360,7 @@ class TicketForm extends Component {
   }
 
   render() {
-    console.log(this.state)
+    // console.log(this.state)
 
     return (
       <form onSubmit={ this._onSubmit }>
@@ -377,4 +396,8 @@ const Form = props => (
   </Dialog>
 )
 
-export default connect(null)(Form)
+const mapDispatchToProps = dispatch => ({
+  submitTicket : data => dispatch(submitTicketData(data))
+})
+
+export default connect(null, mapDispatchToProps)(Form)

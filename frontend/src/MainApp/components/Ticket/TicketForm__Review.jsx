@@ -31,16 +31,18 @@ const ReviewPersonal = props => {
   const {
     firstname,
     lastname,
-    phoneNumber,
-    email
+    phoneNumber,// = 'No number provided yet',
+    email,// = 'No email provided yet'
   } = props
+
+  const fullName = `${ firstname } ${ lastname }`
 
   return (
     <List className="review-personal">
       <ListItem
         ripple={ false }
         leftIcon={ <MdPerson /> }
-        caption={ `${ firstname } ${ lastname }` }
+        caption={ fullName }
         legend="Person Name"
       />
       <ListItem
@@ -65,10 +67,10 @@ const ReviewPersonal = props => {
 
 const ReviewTrip = props => {
   const {
-    date,
-    time,
+    departureDate,
+    departureTime,
     to,
-    from,
+    frm,
     willDrop,
     willPick,
     pickUpAddress,
@@ -81,13 +83,13 @@ const ReviewTrip = props => {
         <ListItem
           ripple={ false }
           leftIcon={ <MdEventAvailable /> }
-          caption={ formatDate(date) }
+          caption={ formatDate(departureDate) }
           legend="Date"
         />
         <ListItem
           ripple={ false }
           leftIcon={ <MdTimer /> }
-          caption={ formatHour(time) }
+          caption={ formatHour(departureTime) }
           legend="Departure Time"
         />
       </List>
@@ -95,7 +97,7 @@ const ReviewTrip = props => {
         <ListItem
           ripple={ false }
           leftIcon={ <TiHome/> }
-          caption={ from }
+          caption={ frm }
           legend="From"
         />
         <ListItem
@@ -129,13 +131,13 @@ const ReviewTrip = props => {
 
 const ReviewPayment = props => {
   const {
-    ticketMany,
+    howMany,
     to,
     luggage,
     fee,
     extraFee,
     totalAmount,
-    from,
+    frm,
     willDrop,
     willPick,
     pickUpAddress,
@@ -148,17 +150,17 @@ const ReviewPayment = props => {
   let pickUpFee = 0
 
   if(willPick) {
-    pickUpFee = getExtraPrice(prices[ from ], pickUpAddress.zipcode)
+    pickUpFee = getExtraPrice(prices[ frm ], pickUpAddress.zipcode)
   }
 
   if(willDrop) {
     dropOffFee = getExtraPrice(prices[ to ], dropOffAddress.zipcode)
   }
 
-  const totalAmoutCaption = `Total Amount : $${ parseFloat(totalAmount).toFixed(2) }`
-  let feesCaption = `$${ parseFloat(fee).toFixed(2) } (${ ticketMany } tickets x ${ prices.default }) `
-  feesCaption += `${ willPick ? willDrop ? ` + ${ pickUpFee } Pick Up + ${ dropOffFee } Drop Off fees` : ` + ${ pickUpFee } Pick Up fee` : willDrop ? ` + ${ dropOffFee } Drop off fee` : '' }`
-  let extraFeesCaption = `$${ parseFloat(extraFee).toFixed(2) } (${ luggage } extra luggage x ${ luggagePrice })`
+  const totalAmoutCaption = `Total Amount: $${ parseFloat(totalAmount).toFixed(2) }`
+  let feesCaption = `$${ parseFloat(fee).toFixed(2) } (${ howMany } tickets x ${ prices.default }) `
+  let extraFeesCaption = `$${ parseFloat(extraFee).toFixed(2) } (${ luggage } extra luggage x ${ parseFloat(luggagePrice).toFixed(2) })`
+  let extraCaption = `${ willPick ? willDrop ? ` $${ parseFloat(pickUpFee).toFixed(2) } Pick Up + $${ parseFloat(dropOffFee).toFixed(2) } Drop Off fees` : ` + $${ parseFloat(pickUpFee).toFixed(2) } Pick Up fee` : willDrop ? ` + $${ parseFloat(dropOffFee).toFixed(2) } Drop off fee` : '' }`
 
   return (
     <List className="review-payment">
@@ -179,6 +181,11 @@ const ReviewPayment = props => {
           ripple={ false }
           itemContent={ <div><div className="small-caption">Extra Fee:</div> { extraFeesCaption }</div> }
           // caption={  }
+        />
+        <ListItem
+          className="review-fee"
+          ripple={ false }
+          itemContent={ <div><div className="small-caption">Drop/Pick fees:</div>{ extraCaption }</div> }
         />
       </List>
     </List>

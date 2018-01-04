@@ -6,10 +6,11 @@ import { /*Card, CardActions, CardMedia,*/ CardTitle } from 'react-toolbox/lib/c
 
 import TicketSettings from './TicketSettings'
 import TicketForm from './TicketForm'
+import TicketRideModal from './TicketRideModal'
 import CustomTable from '../extras/CustomizedTable'
 
 import { formatDate, formatHour, formatPhone } from '../../utils'
-import { retrieveTickets } from '../../store-redux/actions'
+import { retrieveTickets, assignTicketsToRide } from '../../store-redux/actions'
 
 import './ticket-consult.scss'
 
@@ -34,7 +35,7 @@ const formatData = data => {
       willDrop : willDrop ? 'YES' : 'NO' ,
       willPick : willPick ? 'YES' : 'NO' ,
       to,
-      from,
+      frm : from,
       time : formatHour(time),
       date : formatDate(date),
       status,
@@ -56,14 +57,20 @@ const tableData = {
   ] 
 }
 
-const TicketTemplate = props => (
+const TicketTemplate = props => {
+  
+  // console.log(props)
+
+  return (
   <List className="detail-template">
     <CardTitle title="Ticket Details" />
     <ListDivider />
-    <ListItem ripple={ false } selectable={ false } caption={ `From :  ${ props.from }` } />
+    <ListItem ripple={ false } selectable={ false } caption={ `From :  ${ props.frm }` } />
     <ListItem ripple={ false } selectable={ false } caption={ `To :  ${ props.to }` } />
-    <ListItem ripple={ false } selectable={ false } caption={ `Will Pick? ${ props.willPick }` } />
-    <ListItem ripple={ false } selectable={ false } caption={ `Will Drop? ${ props.willDrop }` } />
+    {/*
+      <ListItem ripple={ false } selectable={ false } caption={ `Will Pick? ${ props.willPick }` } />
+      <ListItem ripple={ false } selectable={ false } caption={ `Will Drop? ${ props.willDrop }` } />
+    */}
     <List className="address-location">
       {
         props.willPick === 'YES' &&
@@ -83,31 +90,49 @@ const TicketTemplate = props => (
       }
     </List>
   </List>
-)
+)}
 
 class TicketConsult extends Component {
   constructor(props) {
     super(props)
-      this.state = {
-        limit : 20,
-        skip : 0,
-        sortBy : 'date',
-        sortOrder : -1,
-        selected : [],
-        showForm : false,
-        ticketToModify : null,
-      }
+
+    this.state = {
+      limit : 20,
+      skip : 0,
+      sortBy : 'date',
+      sortOrder : -1,
+      selected : [],
+      showForm : false,
+      showRidesModal : false,
+      ticketToModify : null,
+    }
 
     this._requestTickets = this._requestTickets.bind(this)
     this._clearSelected = this._clearSelected.bind(this)
     this._onRowSelected = this._onRowSelected.bind(this)
+    this._onAssignRide = this._onAssignRide.bind(this)
     this._onPaginate = this._onPaginate.bind(this)
     this._getStatus = this._getStatus.bind(this)
     this._showForm = this._showForm.bind(this)
     this._onChange = this._onChange.bind(this)
     this._onSort = this._onSort.bind(this)
   }
+
 //#region Private functions
+  _onAssignRide(ride) {
+    const { selected } = this.state
+    const { tickets } = this.props
+
+    const selectedTickets = tickets
+                          .filter((_, i) => selected.includes(i))
+                          .map(x => x.id)
+    // console.log(ride)
+    // console.log(selected)
+    // console.log(selectedTickets)
+
+    this.props.assignRide(selectedTickets, ride)
+    return this._requestTickets()
+  }
 
   _getStatus() {
     const { used, redeemed, tnull, tnew, deleted } = this.props
@@ -138,6 +163,7 @@ class TicketConsult extends Component {
 
     const sort = `${ sortBy } ${ sortOrder }`
 
+    this.setState({ selected : [] })
     return this.props.queryTickets({ skip, status, sort, limit, unassigned : true })
   }
 
@@ -168,21 +194,24 @@ class TicketConsult extends Component {
     this.setState({ sortBy, sortOrder, selected : [] }, this._requestTickets)
   }
 
-  _showForm(willShow) {
-    let ticketToModify = null
-    const { selected } = this.state
+  _showForm(which, willShow) {
+    // let ticketToModify = null
+    // const { selected } = this.state
 
-    if(willShow && selected.length === 1) {
-      const { tickets } = this.props
-      ticketToModify = tickets[ selected[ 0 ] ]
-    } else setTimeout(this._requestTickets, 100)
+    // if(willShow && selected.length === 1) {
+    //   const { tickets } = this.props
+    //   ticketToModify = tickets[ selected[ 0 ] ]
+    // } else setTimeout(this._requestTickets, 100)
+    
+    if(!willShow) this._requestTickets()
 
-    return this.setState({ showForm : willShow, ticketToModify })
+    return this.setState({ [ which ] : willShow, /*ticketToModify*/ })
   }
 //#endregion
 
 //#region Lifecycle
   componentWillMount() {
+    // console.log(this.props.tickets)
     return this._requestTickets()
   }
 
@@ -193,6 +222,7 @@ class TicketConsult extends Component {
       limit,
       selected,
       showForm,
+      showRidesModal,
       ticketToModify
     } = this.state
 
@@ -216,14 +246,20 @@ class TicketConsult extends Component {
         />
         <TicketSettings
           selected={ selected }
-          showForm={ () => this._showForm(true) }
+          // showForm={ () => this._showForm('showForm', true) }
+          showForm={ this._showForm }
           requestTickets={ this._requestTickets }
         />
         <TicketForm
           active={ showForm }
-          closeForm={ () => this._showForm(false) }
+          closeForm={ () => this._showForm('showForm', false) }
           ticket={ ticketToModify }
           onSubmitData={ this._requestTickets }
+        />
+        <TicketRideModal
+          active={ showRidesModal }
+          onDialogClose={ () => this._showForm('showRidesModal', false) }
+          onAccept={ this._onAssignRide }
         />
       </div>
     )
@@ -231,7 +267,9 @@ class TicketConsult extends Component {
 }
 
 const mapDispatchToProps = dispatch => ({
-  queryTickets : args => dispatch(retrieveTickets(args))
+  queryTickets : args => dispatch(retrieveTickets(args)),
+  assignRide : (tickets, ride) => dispatch(assignTicketsToRide(tickets, ride))
+  // submitTicket : data => dispatch(submitTicketData(data)),
 })
 
 const mapStateToProps = state => {

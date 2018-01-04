@@ -13,7 +13,8 @@ import Button from 'react-toolbox/lib/button/Button'
 import { submitRideData } from '../../store-redux/actions'
 import configData, { url } from '../../config/config-values.json'
 
-import { FormatBusItem, dropDownData, getMinDate } from './utils'
+import { FormatBusItem, getMinDate } from './utils'
+import { dropDownData } from '../../utils'
 import './ride-form.scss'
 
 import theme from './ride.theme.scss'
@@ -47,8 +48,9 @@ class RideForm extends Component {
     const { id, bus, routeTo, routeFrom, time, date, status } = this.state
 
     await this.props.submitData({ id, bus, routeTo, routeFrom, time, date, status })
+
     this.props.onSubmitData()
-    this.props.closeForm('showForm', false)
+    return this.props.closeForm()
   }
 
   async componentWillMount() {
@@ -133,7 +135,7 @@ class RideForm extends Component {
           auto={ true }
         />
         <CardActions className="ticket-form_actions">
-          <Button type="button" label="Cancel" onClick={ () => closeForm('showForm', false) }/>
+          <Button type="button" label="Cancel" onClick={ () => closeForm() }/>
           <Button type="submit" label="Save"/>
         </CardActions>
       </form>

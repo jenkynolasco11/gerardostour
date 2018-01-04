@@ -27,7 +27,7 @@ const Title = props => ([
 ])
 
 const TimeInfo = props => {
-  const { date, time } = props
+  const { departureDate, departureTime } = props
 
   return (
     <List className="address-trip-info time" theme={ theme.listItem }>
@@ -36,7 +36,7 @@ const TimeInfo = props => {
           autoOk
           icon={ <MdEventAvailable /> }
           minDate={ getMinDate() }
-          value={ date }
+          value={ departureDate }
           onChange={ val => props.onChange(val, 'date') }
         />
       </ListItem>
@@ -48,7 +48,7 @@ const TimeInfo = props => {
           allowBlank={ false }
           label="Departure Time"
           source={ configData.times }
-          value={ time }
+          value={ departureTime }
           onChange={ val => props.onChange(val, 'time') }
         />
       </ListItem>
@@ -57,7 +57,7 @@ const TimeInfo = props => {
 }
 
 const TripInfo = props => {
-  const { ticketMany, luggage, to, from, isModify } = props
+  const { howMany, luggage, to, frm, isModify } = props
 
   return (
     <List className="address-dropdown">
@@ -71,9 +71,9 @@ const TripInfo = props => {
             type="number"
             label="Tickets"
             hint="How Many?"
-            value={ ticketMany }
+            value={ howMany }
             disabled={ isModify }
-            onChange={ val => props.onChange(val, 'ticketMany') }
+            onChange={ val => props.onChange(val, 'howMany') }
           />
         </ListItem>
         <ListItem ripple={ false }>
@@ -100,8 +100,8 @@ const TripInfo = props => {
             disabled={ isModify }
             // template={ typeTemplate }
             source={ configData.routes }
-            value={ from }
-            onChange={ val => props.onChange(val, 'from') }
+            value={ frm }
+            onChange={ val => props.onChange(val, 'frm') }
           />
         </ListItem>
         <ListItem ripple={ false }>
@@ -238,11 +238,11 @@ class TicketAddress extends Component {
   // //   const extraFee = null
 
   // //   /*    
-  // // const feesTotal = parseFloat(ticketMany * prices.fee).toFixed(2)
+  // // const feesTotal = parseFloat(howMany * prices.fee).toFixed(2)
   // // const extraTotal = parseFloat(extraLuggage * prices.extraFee).toFixed(2)
 
   // // const totalAmoutCaption = `Total Amount : ${ parseFloat(Number(feesTotal) + Number(extraTotal)).toFixed(2) }`
-  // // const feesCaption = `${ feesTotal } (${ ticketMany } tickets x ${ parseFloat(prices.fee).toFixed(2) }) `
+  // // const feesCaption = `${ feesTotal } (${ howMany } tickets x ${ parseFloat(prices.fee).toFixed(2) }) `
   // // const extraFeesCaption = `${ extraTotal } (${ extraLuggage } extra luggage x ${ parseFloat(prices.extraFee).toFixed(2) })`
   // //    */
   // //   this.setState({ extraFee, fee })

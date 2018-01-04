@@ -23,6 +23,14 @@ export const onlyNumber = val => {
   return ''
 }
 
+export const dropDownData = data => {
+  const { id, ...rest } = data
+
+  return {
+    ...rest,
+    value : id
+  }
+}
 // export const dropDownData = data => {
 //   const { id, ...rest } = data
 

@@ -1,14 +1,17 @@
 import React, { Component } from 'react'
-import { CardTitle } from 'react-toolbox/lib/card'
+import Button from 'react-toolbox/lib/button/Button'
+import { CardTitle, CardActions } from 'react-toolbox/lib/card'
 import { ListCheckbox, /*ListItem,*/ ListDivider } from 'react-toolbox/lib/list'
 import Dropdown from 'react-toolbox/lib/dropdown/Dropdown'
 import Dialog from 'react-toolbox/lib/dialog/Dialog'
 import axios from 'axios'
 
-import { FormatBusItem, dropDownData } from './utils'
+import { dropDownData } from '../../utils'
+import { FormatBusItem } from './utils'
+import { url } from '../../config/config-values.json'
 import './ride-modal.scss'
 
-import { url } from '../../config/config-values.json'
+import theme from './ride.theme.scss'
 
 class RideBusModal extends Component {
   constructor(props) {
@@ -31,7 +34,7 @@ class RideBusModal extends Component {
 
   onAccept() {
     this.props.onAccept(this.state.selected)
-    this.props.onDialogClose()
+    this.props.onDialogClose(true)
   }
 
   async makeRequest() {
@@ -54,24 +57,20 @@ class RideBusModal extends Component {
   }
 
   async componentWillMount() {
-    this.makeRequest()
+    return this.makeRequest()
   }
 
   render() {
     const { active, onDialogClose } = this.props
     const { busses, damaged, selected } = this.state
 
-    const actions = [
-      { label : 'Cancel', onClick : onDialogClose },
-      { label : 'Assign', onClick : this.onAccept }
-    ]
-
     return (
       <Dialog
-        className="ride-modal"
-        actions={ actions }
+        className="ride-modal dialog"
+        // actions={ actions }
         onEscKeyDown={ onDialogClose }
         active={ active }
+        theme={ theme }
       >
         <div>
           <CardTitle title="Assign Bus" />
@@ -88,9 +87,13 @@ class RideBusModal extends Component {
           />
           <ListCheckbox
             checked={ damaged }
-            onChange={ e => this.setState({ damaged : e }, () => this.makeRequest()) }
+            onChange={ e => this.setState({ damaged : e }, this.makeRequest) }
             caption="Show Damaged?"
           />
+          <CardActions className="ride-bus-modal_actions">
+            <Button type="button" label="Cancel" onClick={ onDialogClose } />
+            <Button type="button" label="Assign" onClick={ this.onAccept } />
+          </CardActions>
         </div>
       </Dialog>
     )

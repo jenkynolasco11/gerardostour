@@ -50,7 +50,7 @@ export const submitRideData = data => async dispatch => {
   try {
     dispatch(showLoader(true))
 
-    const body = { bus, routeTo, routeFrom, time, date, status : status !== 'PENDING' ? status : 'ASSIGNED' }
+    const body = { bus, routeTo, routeFrom, time, date, status }
 
     let data = null
     
