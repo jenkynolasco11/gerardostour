@@ -1,4 +1,5 @@
 import React from 'react'
+import { bindActionCreators } from 'redux'
 import { connect } from 'react-redux'
 
 import { List, ListDivider, ListCheckbox, ListItem } from 'react-toolbox/lib/list'
@@ -18,6 +19,7 @@ const RideSettings = props => {
     future,
     requestRides,
     showForm,
+    dispatchToBus
   } = props
 
   const onChecked = (val, name) => {
@@ -68,7 +70,7 @@ const RideSettings = props => {
         avatar={ <MdPublish /> }
         caption="Dispatch to Bus"
         onClick={ e => console.log('Clicked on dispatch!') }
-        disabled={ true }
+        disabled={ selected.length === 1 }
         selectable
       />
       <List>
@@ -127,10 +129,10 @@ const RideSettings = props => {
   )
 }
 
-const mapDispatchToProps = dispatch => ({
-  onChange : (val, name) => dispatch(setRideQueryOption({ [ name ] : val })),
+const mapDispatchToProps = dispatch => bindActionCreators({
+  onChange : (val, name) => setRideQueryOption({ [ name ] : val }),
   // submitData : data => dispatch(submitRideData(data))
-})
+}, dispatch)
 
 const mapStateToProps = state => {
   const { pending, finished, assigned, onTheWay, future } = state.ride.searchOptions

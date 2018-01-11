@@ -1,10 +1,11 @@
 import axios from 'axios'
 
+import { AUTH_SUCCESS, LOG_USER_OUT } from '../constants'
 import { url } from '../../config/config-values.json'
 
-/*export */const authSuccess = payload => ({ type : 'AUTH_SUCCESS', payload })
+/*export */const authSuccess = payload => ({ type : AUTH_SUCCESS, payload })
 
-/*export */const userLogOut = payload => ({ type : 'LOG_USER_OUT', payload })
+/*export */const userLogOut = payload => ({ type : LOG_USER_OUT, payload })
 
 // Thunks
 export const logUserIn = (username, password) => async dispatch => {

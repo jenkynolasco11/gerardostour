@@ -1,4 +1,5 @@
 import React, { Component } from 'react'
+import { bindActionCreators } from 'redux'
 import { connect } from 'react-redux'
 import axios from 'axios'
 
@@ -154,8 +155,8 @@ const Form = props => (
   </Dialog>
 )
 
-const mapDispatchToProps = dispatch => ({
-  submitData : data => dispatch(submitRideData(data))
-})
+const mapDispatchToProps = dispatch => bindActionCreators({
+  submitData : data => submitRideData(data)
+}, dispatch)
 
 export default connect(null, mapDispatchToProps)(Form)//(withRouter(Form))

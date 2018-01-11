@@ -1,15 +1,18 @@
 import { combineReducers } from 'redux'
 
-import { default as routes } from './routes'
-import { user } from './auth'
-import { appInfo } from './appInfo'
-import { meta } from './appMeta'
+import { ride } from './ride'
+import { auth } from './auth'
+import { app } from './app'
+import { settings } from './settings'
+// import { meta } from './appMeta'
 
 const allReducers = combineReducers({
-  routes,
-  user,
-  appInfo,
-  meta,
+  settings,
+  ride,
+  // routes,
+  auth,
+  app,
+  // meta,
 })
 
 export default allReducers

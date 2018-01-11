@@ -1,71 +1,57 @@
-import React, { Component } from 'react'
-import { View, BackHandler } from 'react-native'
-
+import React, { PureComponent as Component } from 'react'
 import { bindActionCreators } from 'redux'
 import { connect } from 'react-redux'
+import { BackHandler } from 'react-native'
 
-import {
-  requestLogout,
-  // requestAppInfo,
-  // setAvailability
-} from '../../store/actions'
-import { Actions } from 'react-native-router-flux'
-
-import Header from './Header'
-import Body from './Body'
-
+import socketConnect from '../../utils/socket'
+import MainScreen from './MainScreen'
 import styles from './styles'
 
-class MainScreen extends Component {
-  constructor(props){
-    super(props)
+import { requestRides, requestLogout, setActiveStatusTo } from '../../store/actions'
+
+class MainComponent extends Component {
+  socket = null
+  handleBackBtn = () => true
+
+  componentWillMount() {
+    const { bus, user } = this.props
+
+    this.socket = socketConnect({ bus, user })
+
+    BackHandler.addEventListener('hardwareBackPress', this.handleBackBtn)
   }
 
-  componentDidMount() {
-    // BackHandler.addEventListener('hardwareBackPress', () => true)
+  componentWillUnmount() {
+    if(this.socket) this.socket.destroy()
+
+    BackHandler.removeEventListener('hardwareBackPress', this.handleBackBtn)
   }
 
   render() {
-    const {
-      id,
-      name,
-      requestLogout
-    } = this.props
-
-    const headProps = {
-      id, name, logOut : requestLogout
-    }
-
-    const bodyProps = {
-      onPress : (id, passengers) => {
-        console.log(id, passengers)
-        Actions.push('ride', { id, passengers })
-        // console.log(id, name)
-      }
-    }
-
     return (
-      <View style={ [ styles.container ] }>
-        <Header {...headProps} />
-        <Body {...bodyProps} />
-      </View>
+      <MainScreen { ...this.props } />
+      // <Stack initial hideNavBar>
+      //   <Scene key="main" initial component={ MainScreen }/>
+      // </Stack>
     )
   }
 }
 
-const mapStateToProps = state => ({
-  available : state.appInfo.isAvailable,
-  auth : state.user.isAuth,
-  id : state.user.id,
-  name : state.user.user,
-  from : state.appInfo.from,
-  to : state.appInfo.to
-})
+const mapStateToProps = state => {
+  const { auth, ride } = state
+
+  return {
+    bus : auth.bus,
+    user : auth.user,
+    rides : ride.rides,
+    active : auth.isActive,
+  }
+}
 
 const mapDispatchToProps = dispatch => bindActionCreators({
-  requestLogout,
-  // requestAppInfo,
-  // setAvailability,
+  logout : () => requestLogout(),
+  setActive : (bus, status) => setActiveStatusTo(bus, status),
+  fetchRides : bus => requestRides(bus),
 }, dispatch)
 
-export default connect( mapStateToProps, mapDispatchToProps )(MainScreen)
+export default connect(mapStateToProps, mapDispatchToProps)(MainComponent)

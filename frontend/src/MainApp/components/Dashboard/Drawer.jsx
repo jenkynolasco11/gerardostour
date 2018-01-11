@@ -1,10 +1,7 @@
-import React, { Component } from 'react'
-import { connect } from 'react-redux'
+import React from 'react'
 import { Link } from 'react-router-dom'
 import NavDrawer from 'react-toolbox/lib/layout/NavDrawer'
 import { List, ListItem, ListDivider, ListSubHeader } from 'react-toolbox/lib/list'
-
-import { toggleDrawer } from '../../store-redux/actions'
 
 import linkList from './links-list.json'
 
@@ -24,34 +21,20 @@ const SubList = props => (
   </List>
 )
 
-class DrawerComponent extends Component{
-  render() {
-    const { isDrawerOpen, onOverlayClick } = this.props
+const DrawerComponent = props => {
+  const { isDrawerOpen, onOverlayClick } = props
 
-    return (
-      <NavDrawer active={ isDrawerOpen } onOverlayClick={ onOverlayClick } permanentAt="lg" scrollY>
-        {
-          links.map((link, i) => (
-            // <ListItem></ListItem>
-            <SubList key={i} { ...{ ...link, onOverlayClick }} />
-          ))
-        }
-      </NavDrawer>
-    )
-  }
+  return (
+    <NavDrawer active={ isDrawerOpen } onOverlayClick={ onOverlayClick } permanentAt="lg" scrollY>
+      {
+        links.map((link, i) => (
+          <SubList key={i} { ...{ ...link, onOverlayClick }} />
+        ))
+      }
+    </NavDrawer>
+  )
 }
 
-const mapDispatchToProps = dispatch => ({
-  //
-  onOverlayClick : () => dispatch(toggleDrawer(false))
-})
-
-const mapStateToProps = state => {
-  const { isDrawerOpen } = state.app
-
-  return { isDrawerOpen }
-}
-
-export default connect(mapStateToProps, mapDispatchToProps)(DrawerComponent)
+export default DrawerComponent
 
 // TODO : USE DROPDOWN ON THIS ONE, INSTEAD OF THE USUAL LINK IN LISTITEM

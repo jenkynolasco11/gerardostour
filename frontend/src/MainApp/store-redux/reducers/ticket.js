@@ -1,3 +1,5 @@
+import { ADD_TICKETS, ADD_TICKETS_COUNT, SET_TICKETS_OPTION } from '../constants'
+
 const defaultState = {
   tickets : [],
   count : 0,
@@ -14,16 +16,16 @@ const defaultState = {
 // [ 'USED', 'REDEEMED', 'NULL', 'NEW', 'DELETED' ]
 export const ticket = (state = defaultState, { type, payload }) => {
   switch (type) {
-    case 'SET_OPTION_TICKET' :
+    case SET_TICKETS_OPTION :
       return { ...state, searchOptions : { ...state.searchOptions, ...payload }}
-    case 'SELECTED_TICKETS' :
-      return { ...state, selectedTickets : [].concat(payload) }
-    case 'ADD_COUNT' :
+    // case 'SELECTED_TICKETS' :
+    //   return { ...state, selectedTickets : [].concat(payload) }
+    case ADD_TICKETS_COUNT :
       return { ...state, count : payload }
-    case 'ADD_TICKETS' :
+    case ADD_TICKETS :
       return { ...state, tickets : [].concat(payload) }
-    case 'CLEAR_TICKETS' :
-      return { ...state, tickets : [] }
+    // case 'CLEAR_TICKETS' :
+    //   return { ...state, tickets : [] }
     default :
       return state
   }

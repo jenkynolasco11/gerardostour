@@ -1,53 +1,24 @@
 import React, { Component } from 'react'
-
 import { connect } from 'react-redux'
-import { Modal, Router, Scene, ActionConst } from 'react-native-router-flux'
+import { Router, Scene, Stack, ActionConst } from 'react-native-router-flux'
 
 import Main from '../main'
 import Auth from '../auth'
-import Passenger from '../passenger'
-import Ride from '../rideinfo'
+import Ride from '../ride'
 
-const RouterWithRedux = connect()(Router)
+const { REPLACE, PUSH } = ActionConst
+const RouterWithRedux = connect(null)(Router)
 
-const MainScreen = props => (
+const Landing = props => (
   <RouterWithRedux>
-    {/*<Scene key='modal' component={ Modal }>*/}
-    <Scene key='root' hideNavBar>
-      <Scene 
-        key='auth' 
-        initial
-        type={ ActionConst.REPLACE } 
-        component={ Auth }
-      />
-      <Scene 
-        // initial
-        key='app'
-        type={ ActionConst.REPLACE }
-        hideNavBar
-      > 
-        <Scene 
-          key='main'
-          panHandlers={null}
-          // hideNavBar
-          init
-          component={ Main }
-        />
-        <Scene 
-          key='ride'
-          // navigationBarStyle={{ backgroundColor : '#accecd' }}
-          // navTransparent
-          component={ Ride }
-          direction='vertical'
-        />
-        <Scene
-          key='passenger'
-          component={ Passenger }
-        />
+    <Stack key="root" hideNavBar>
+      <Scene key="login" type={ REPLACE } component={ Auth } initial/>
+      <Scene key="app" type={ REPLACE } panHandlers={ null } hideNavBar>
+        <Scene key="main" component={ Main } initial/>
+        <Scene key="ride" component={ Ride } type={ PUSH }/>
       </Scene>
-    </Scene>
-    {/*</Scene>*/}
+    </Stack>
   </RouterWithRedux>
 )
 
-export default MainScreen
+export default Landing

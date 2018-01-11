@@ -1,132 +1,76 @@
-import React, { Component } from 'react'
+import React, { PureComponent as Component } from 'react'
 import { bindActionCreators } from 'redux'
 import { connect } from 'react-redux'
-import {
-  View,
-  Text,
-  Keyboard,
-  Animated,
-  Easing,
-  Modal,
-} from 'react-native'
+import { View, Container, Text } from 'native-base'
+import { StatusBar } from 'react-native'
 
-import { requestLogin, clearMeta } from '../../store/actions'
+import { requestLogin } from '../../store/actions'
 
 import styles from './styles'
 import Inputs from './Inputs'
 
 class Auth extends Component{
-  user = 'jenky'
-  pass = 'lllll'
+  state = {
+    user : 'nolasco',
+    pass : 'nolasco',
+  }
 
   constructor(props) {
     super(props)
 
-    this.state = {
-      opacity : new Animated.Value(0)
-    }
-
-    this._onUsernameChange = this._onUsernameChange.bind(this)
-    this._onPasswordChange = this._onPasswordChange.bind(this)
-    this._checkInputs = this._checkInputs.bind(this)
-    this._clearMessage = this._clearMessage.bind(this)
+    this._onSubmit = this._onSubmit.bind(this)
+    this._onChange = this._onChange.bind(this)
   }
 
-  _clearMessage() {
-    if(this.props.cantAuth)  this.props.cantAuthenticate({ cantAuth : false })
+  _onChange(val, name) {
+    return this.setState({ [ name ] : val })
   }
 
-  _onUsernameChange(user) {
-    this.user = user
-    this._clearMessage()
-  }
+  _onSubmit() {
+    const { user, pass } = this.state
 
-  _onPasswordChange(pass) {
-    this.pass = pass
-    this._clearMessage()
-  }
-
-  _checkInputs() {
-    const userdata = {
-      user : this.user,
-      pass : this.pass
-    }
-
-    this.props.requestLogin(userdata)
-    Keyboard.dismiss()
-  }
-
-  componentDidMount() {
-    const { opacity } = this.state
-
-    Animated.timing(opacity, {
-      toValue : 1,
-      delay : 200,
-      duration : 500,
-      easing : Easing.linear
-    }).start()
-
-    // Keyboard.addListener('keyboardWillShow', this._extraHeight)
-    // Keyboard.addListener('keyboardWillHide', this._remomveExtraHeight)
-
-    // const { scale } = this.state
-
-    // scale.addListener(({value}) => this._value = value)
-
-    // const scaleIn = () => {
-    // Animated.timing(scale, {
-    //   easing : Easing.in,
-    //   duration : 1000,
-    //   toValue : 2
-    // }).start()
-      // }).start(() => {
-      //   console.log`it shrinks`
-      //   return Animated.timing(scale, {
-      //     easing : Easing.in,
-      //     duration : 1000,
-      //     toValue : 1
-      //   }).start(() => scaleIn())
-      // })
-    // }
-
-    // scaleIn()
+    return this.props.login(user, pass)
   }
 
   render() {
-    // if(this.props.auth) console.log('it works')
-    // console.log(this.props)
+    const { user, pass } = this.state
+    const { disabled, isAuth } = this.props
+
+    console.log('isAuth has been set to -> ' + isAuth + '.... Auth/index.js')
+    
     return (
-      <View style={ [styles.login ] }>
-        <Inputs
-          onUsernameChange={this._onUsernameChange}
-          onPasswordChange={this._onPasswordChange}
-          shouldDisable={false}
-          checkInputs={this._checkInputs}
-          opacity={this.state.opacity}
-        />
-        <Text style={ styles.trademark }>{`Created by Jenky Nolasco @ ${ new Date().getFullYear() }`}</Text>
-        {
-          this.props.cantAuth
-           ? <Text style={styles.error}> Can't Authenticate. Please, try later. </Text>
-           : this.props.badAuth
-           ? <Text style={styles.error}> Bad username or Password. Try Again. </Text>
-           : <View/>
-        }
-      </View>
+      <Container style={ styles.login }>
+        { !isAuth && <StatusBar hidden /> }
+        <View style={ styles.content }>
+          <Inputs
+            {...{
+              user,
+              pass,
+              disabled,
+              onSubmit : this._onSubmit,
+              onChange : this._onChange
+            }}
+          />
+          <Text style={ styles.createdBy }>
+            Created by Jenky Nolasco
+          </Text>
+        </View>
+      </Container>
     )
   }
 }
 
-const mapStateToProps = state => ({
-  user : state.user,
-  cantAuth : state.meta.cantAuth,
-  badAuth : state.meta.badAuth,
-})
+const mapStateToProps = state => {
+  const { auth } = state
+
+  return {
+    disabled : auth.disableLoginBtn,
+    isAuth : auth.isAuth
+  }
+}
 
 const mapDispatchToProps = dispatch => bindActionCreators({
-  requestLogin,
-  clearMeta
+  login: (user, pass) => requestLogin({ user, pass })
 }, dispatch)
 
-export default connect( mapStateToProps, mapDispatchToProps )(Auth)
-// export default Auth
+export default connect(mapStateToProps, mapDispatchToProps)(Auth)

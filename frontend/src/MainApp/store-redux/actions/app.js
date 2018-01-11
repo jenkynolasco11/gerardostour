@@ -1,7 +1,8 @@
+import { SHOW_LOADER, SHOW_SNACKBAR, TOGGLE_DRAWER  } from '../constants'
 // ///////////////////////
 // App
 // ///////////////////////
-export const toggleDrawer = payload => ({ type : 'TOGGLE_DRAWER', payload })
+export const toggleDrawer = payload => ({ type : TOGGLE_DRAWER, payload })
 
 // export const loginSuccess = payload => ({ type : 'LOGIN_SUCCESS', payload })
 
@@ -13,9 +14,9 @@ export const toggleDrawer = payload => ({ type : 'TOGGLE_DRAWER', payload })
 
 // export const savingStatus = payload => ({ type : 'SAVING_DATA', payload })
 
-export const showSnackBar = payload => ({ type : 'SHOW_SNACKBAR', payload })
+export const showSnackBar = payload => ({ type : SHOW_SNACKBAR, payload })
 
-export const showLoader = payload => ({ type : 'SHOW_LOADER', payload })
+export const showLoader = payload => ({ type : SHOW_LOADER, payload })
 
 
 // ///////////////////////

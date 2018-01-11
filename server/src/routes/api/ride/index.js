@@ -63,11 +63,9 @@ rideRouter.get('/all/:bus', async ctx => {
     const bs = await Bus.findOne({ id : bus }, { _id : 1 })
 
     const conditions = { bus : bs._id }
-    const sortCondition = { date : 1, time : 1 }
 
     const rides = await Ride.aggregate([
       { $match : conditions },
-      // { $sort : sortCondition },
       { 
         $group : {
           _id : {
@@ -78,10 +76,7 @@ rideRouter.get('/all/:bus', async ctx => {
           body : { $push : '$$ROOT' }
         }
       },
-      // { $sort : { '_id.year' : 1, '_id.month' : 1, '_id.date' : 1 }}    
     ])
-
-    // console.log(rides)
 
     if(rides.length) {
       const data = await Promise.all(filterAggregate(rides, getRideData, 'asc'))

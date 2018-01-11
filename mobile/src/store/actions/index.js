@@ -1,139 +1,135 @@
-import { Actions, ActionConst } from 'react-native-router-flux'
-import { BASEURL, TIMEOUT } from '../../../config'
-//////////////////// ACTIONS //////////////////////
+import Auth from './auth'
+import App from './app'
+import Ride from './ride'
 
-// Payload : { user : String, id : Number }
-export const login = payload => ({ type: 'LOGIN', payload })
+export const { 
+  requestLogin,
+  requestLogout,
+  disableLoginButton,
+  logUserIn,
+  logUserOut,
+  setActiveStatusTo
+} = Auth
 
-// Payload : {}
-export const logout = payload => ({ type: 'LOGOUT', payload })
+export const {
+  // showMessage,
+  showSpinner
+} = App
 
-// Payload : { to : String, from : String }
-export const nextTrip = payload => ({ type: 'NEXT_TRIP', payload })
+export const {
+  addRides,
+  removeRides,
+  requestRides
+} = Ride
 
-// Payload : { confirmed : boolean}
-export const confirmTrip = payload => ({ type: 'CONFIRM_TRIP', payload })
-
-// Payload : { cantAuth : boolean }
-export const cantAuthenticate = payload => ({ type: 'CANT_AUTH_META', payload })
-
-// Payload : { badAuth : boolean }
-export const badAuthentication = payload => ({ type: 'BAD_AUTH_META', payload })
-
-// Payload : {}
-export const clearMeta = payload => ({ type: 'CLEAR_META', payload })
-
-// // Payload : { id : Number }
-// export const isAvailable = payload => ({ type: 'IS_AVAILABLE', payload })
-
-// // Payload : { id : Number }
-// export const cancelAvailable = payload => ({ type: 'CANCEL_AVAILABLE', payload })
-
-// Payload : { isAvailable : boolean }
-export const makeAvailable = payload => ({ type: 'MAKE_AVAILABLE', payload })
-
-////////////////////// THUNKS ///////////////////
-
-// Thunk => userInfo : { user: String, pass: String }
-export const requestLogin = userInfo => {
-  return async dispatch => {
-    const method = 'POST'
-
-    // TODO : Add security here
-    const body = new FormData()
-    body.append('user', userInfo.user)
-    body.append('pass', userInfo.pass)
-
-    const options = { method, body/*, headers */}
-    const url = `${BASEURL}/auth/login`
-
-    try{
-      const conditions = [timeout(TIMEOUT), fetch(url, options)]
-      const res = await Promise.race(conditions)
-      // const res = await fetch(url, options)
-      const data = await res.json()
-      
-      if(data.isAuth) {
-        dispatch(clearMeta())
-        //Actions.push()
-        Actions.app()
-
-        return dispatch(login(data))
-      }
-      return dispatch(badAuthentication({ badAuth : true}))
-
-    } catch(e) {
-      console.log(`Something happened while authenticating: ${e}`)
-      dispatch(cantAuthenticate({ cantAuth : true }))
-      return dispatch(logout())
-    }
-  }
+export default {
+  ...Auth,
+  ...App,
+  ...Ride
 }
+// import { Actions, ActionConst } from 'react-native-router-flux'
+// import { BASEURL, TIMEOUT } from '../../../config'
+// //////////////////// ACTIONS //////////////////////
 
-// Thunk => { id : Number }
-export const requestLogout = id => {
-  return async dispatch => {
-    try {
-      if(checkAuth(id)) {
-        const options = { method : 'GET'}
-        const res = await fetch(`${BASEURL}/auth/logout/${id}`, options)
-        const data = await res.json()
+// // Payload : { user : String, id : Number }
+// export const login = payload => ({ type: 'LOGIN', payload })
 
-        if(data.ok) {
-          // TODO : Fix this later
-          dispatch(logout())
-          Actions.reset('auth')
-        }
-      }
-    } catch (e) {
-      //
-    }
-    dispatch(clearMeta())
-  }
-}
+// // Payload : {}
+// export const logout = payload => ({ type: 'LOGOUT', payload })
 
-// Thunk => { id : Number, action : String }
-export const setAvailability = (id, action) => {
-  const route = (action === 'cancel')
-            ? 'no-'
-            : ''
+// // Payload : { to : String, from : String }
+// export const nextTrip = payload => ({ type: 'NEXT_TRIP', payload })
 
-  return async dispatch => {
-    try {
-      if(checkAuth(id)) {
-        const options = { method : 'GET' }
-        const res = await fetch(`${BASEURL}/user/${route}available`, options)
-        const data = await res.json()
+// // Payload : { confirmed : boolean}
+// export const confirmTrip = payload => ({ type: 'CONFIRM_TRIP', payload })
 
-        return dispatch(makeAvailable({ isAvailable : data.ok }))
-      }
-    } catch(e) {
-      console.log(e)
+// // Payload : { cantAuth : boolean }
+// export const cantAuthenticate = payload => ({ type: 'CANT_AUTH_META', payload })
 
-      // TODO : Check this out later
-      return dispatch(makeAvailable({ isAvailable : false }))
-    }
-  }
-}
+// // Payload : { badAuth : boolean }
+// export const badAuthentication = payload => ({ type: 'BAD_AUTH_META', payload })
 
-// Checks if user is authenticated in server
-const checkAuth = async id => {
-  try {
-    let res = await fetch(`${BASEURL}/auth/${id}`)
-    let data = await res.json()
+// // Payload : {}
+// export const clearMeta = payload => ({ type: 'CLEAR_META', payload })
 
-    return data.ok || false
-  } catch (e) {
-    // console.log(e)
+// // // Payload : { id : Number }
+// // export const isAvailable = payload => ({ type: 'IS_AVAILABLE', payload })
 
-    return false
-  }
-}
+// // // Payload : { id : Number }
+// // export const cancelAvailable = payload => ({ type: 'CANCEL_AVAILABLE', payload })
 
-const timeout = time => {
-  return new Promise((_, rej) => {
-    setTimeout(() => {
-      return rej('timed out')
-    }, time)
-  })
-}
+// // Payload : { isAvailable : boolean }
+// export const makeAvailable = payload => ({ type: 'MAKE_AVAILABLE', payload })
+
+// ////////////////////// THUNKS ///////////////////
+
+// // Thunk => userInfo : { user: String, pass: String }
+
+
+// // Thunk => { id : Number }
+// export const requestLogout = id => {
+//   return async dispatch => {
+//     try {
+//       if(checkAuth(id)) {
+//         const options = { method : 'GET'}
+//         const res = await fetch(`${BASEURL}/auth/logout/${id}`, options)
+//         const data = await res.json()
+
+//         if(data.ok) {
+//           // TODO : Fix this later
+//           dispatch(logout())
+//           Actions.reset('auth')
+//         }
+//       }
+//     } catch (e) {
+//       //
+//     }
+//     dispatch(clearMeta())
+//   }
+// }
+
+// // Thunk => { id : Number, action : String }
+// export const setAvailability = (id, action) => {
+//   const route = (action === 'cancel')
+//             ? 'no-'
+//             : ''
+
+//   return async dispatch => {
+//     try {
+//       if(checkAuth(id)) {
+//         const options = { method : 'GET' }
+//         const res = await fetch(`${BASEURL}/user/${route}available`, options)
+//         const data = await res.json()
+
+//         return dispatch(makeAvailable({ isAvailable : data.ok }))
+//       }
+//     } catch(e) {
+//       console.log(e)
+
+//       // TODO : Check this out later
+//       return dispatch(makeAvailable({ isAvailable : false }))
+//     }
+//   }
+// }
+
+// // Checks if user is authenticated in server
+// const checkAuth = async id => {
+//   try {
+//     let res = await fetch(`${BASEURL}/auth/${id}`)
+//     let data = await res.json()
+
+//     return data.ok || false
+//   } catch (e) {
+//     // console.log(e)
+
+//     return false
+//   }
+// }
+
+// const timeout = time => {
+//   return new Promise((_, rej) => {
+//     setTimeout(() => {
+//       return rej('timed out')
+//     }, time)
+//   })
+// }

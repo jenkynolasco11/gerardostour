@@ -81,11 +81,6 @@ export const getTicketData = async tckt => {
     const dropAdd = drop ? filterDoc(drop._doc) : 'none'
     const pkg = tckt.isPackage ? filterDoc(pack._doc) : null
 
-    console.log('-------------------------------')
-    console.log(pickAdd)
-    console.log(dropAdd)
-    // console.log(pkg)
-
     const data = {
       id : tckt.id,
       // _id : tckt._id,
@@ -110,9 +105,7 @@ export const getTicketData = async tckt => {
 
     }
 
-    // console.log(data)
-
-    return data //.filter(Boolean)
+    return data
   } catch (e) {
     console.log(e)
     console.log('... @ src/routes/api/ticket/ticket.controller.js')

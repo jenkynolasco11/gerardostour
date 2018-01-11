@@ -1,4 +1,5 @@
 import React, { Component } from 'react'
+import { bindActionCreators } from 'redux'
 import { connect } from 'react-redux'
 
 import RideBusModal from './RideBusModal'
@@ -73,6 +74,7 @@ class Ride extends Component {
       rideToModify : null,
     }
 
+    this._dispatchToBus = this._dispatchToBus.bind(this)
     this._onRowSelected = this._onRowSelected.bind(this)
     this._clearSelected = this._clearSelected.bind(this)
     this._requestRides = this._requestRides.bind(this)
@@ -179,6 +181,13 @@ class Ride extends Component {
 
     return this.setState({ [ which ] : willShow, rideToModify })
   }
+
+  _dispatchToBus(bus) {
+    const { selected } = this.state
+
+    console.log(bus, selected)
+
+  }
 //#endregion
 
 //#region Lifecycle functions
@@ -227,6 +236,7 @@ class Ride extends Component {
           selected={ selected }
           requestRides={ this._requestRides }
           showForm={ this._showForm }
+          dispatchToBus={ this._dispatchToBus }
         />
         <RideForm
           active={ showForm }
@@ -260,10 +270,9 @@ const mapStateToProps = state => {
   }
 }
 
-const mapDispatchToProps = dispatch => ({
-  queryRides : args => dispatch(retrieveRides(args)),
-  assignBus : (bus, rides, query) => dispatch(assignBusToRides(bus, rides, query)),
-  // setSelected : rides => dispatch(setSelectedRides(rides))
-})
+const mapDispatchToProps = dispatch => bindActionCreators({
+  queryRides : args => retrieveRides(args),
+  assignBus : (bus, rides, query) => assignBusToRides(bus, rides, query),
+}, dispatch)
 
 export default connect(mapStateToProps, mapDispatchToProps)(Ride)

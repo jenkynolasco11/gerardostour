@@ -1,4 +1,5 @@
 import React, { Component } from 'react'
+import { bindActionCreators } from 'redux'
 import { connect } from 'react-redux'
 import { Input } from 'react-toolbox/lib/input'
 import { Card, CardTitle, CardActions } from 'react-toolbox/lib/card'
@@ -68,10 +69,8 @@ class Login extends Component{
 
 }
 
-const mapDispatchToProps = dispatch => {
-  return {
-    login : (username, password) => dispatch(logUserIn(username, password)),
-  }
-}
+const mapDispatchToProps = dispatch => bindActionCreators({
+    login : (username, password) => logUserIn(username, password),
+}, dispatch)
 
 export default connect(null,mapDispatchToProps)(Login)

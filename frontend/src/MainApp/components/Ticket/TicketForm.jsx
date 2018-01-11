@@ -1,4 +1,5 @@
 import React, { Component } from 'react'
+import { bindActionCreators } from 'redux'
 import { connect } from 'react-redux'
 import Dialog from 'react-toolbox/lib/dialog/Dialog'
 import FontIcon from 'react-toolbox/lib/font_icon/FontIcon'
@@ -396,8 +397,8 @@ const Form = props => (
   </Dialog>
 )
 
-const mapDispatchToProps = dispatch => ({
-  submitTicket : data => dispatch(submitTicketData(data))
-})
+const mapDispatchToProps = dispatch => bindActionCreators({
+  submitTicket : data => submitTicketData(data)
+}, dispatch)
 
 export default connect(null, mapDispatchToProps)(Form)

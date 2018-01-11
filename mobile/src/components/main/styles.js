@@ -1,82 +1,47 @@
-import { 
-  StyleSheet,
-  Dimensions
-} from 'react-native'
+import { StyleSheet, Dimensions, Platform, StatusBar } from 'react-native'
+
+import Store from '../../store'
 
 const { width, height } = Dimensions.get('window')
 
-const mainColor = '#accecd'
-const secondColor = '#458d8b'
+const { settings } = Store.getState()
+
+const offset = Platform.OS === 'ios' ? 20 : StatusBar.currentHeight
+// const mainColor = '#accecd'
+// const secondColor = '#458d8b'
 
 const styles = StyleSheet.create({
   container : {
     flex : 1,
-    backgroundColor : mainColor,
     paddingTop : 30,
   },
   header : {
-    height : height * 0.07,
-    // width : width,
-    flexDirection : 'row',
-    shadowOffset : { width : 0, height : 4},
-    shadowOpacity : 0.06,
-    shadowColor : 'black',
+    // backgroundColor : settings.color3,
+    // ...Platform.select({
+    //   ios : {
+    //     shadowOffset : { height : 0, width : 0 },
+    //     shadowOpacity : 0,
+    //   }
+    // }),
+    borderBottomWidth : 0,
   },
-  headerContent : {
-    height : height * 0.07,
-    flex : 1,
-    justifyContent : 'center',
-    alignItems : 'center',
-  },
-  greeting : {
-    fontSize : 18,
-    color : '#fcfcfc'
-  },
-  logout : {
-    marginLeft : 10,
-    width : width * 0.25,
-    height : height * 0.06,
-    backgroundColor : '#3563eb',
-    borderRadius : 2,
-    justifyContent : 'center',
-    alignItems : 'center'
-  },
-  logoutText : { 
-    color : 'white',
-    fontSize : 14
-  },
-  body : {
-    // marginTop : height * 0.07
-  },
-  listItem : {
-    backgroundColor : 'transparent',
-    justifyContent : 'center',
-    alignItems : 'center',
-    paddingTop : 10,
-    paddingBottom : 10,
-    borderBottomColor : '#aaa',
-    borderBottomWidth : 1,
-  },
-  listItemText : {
-    color : '#fcfcfc'
-  },
-  separator : {
-    backgroundColor : '#f3f3f3',
-    marginTop : 3,
-    marginBottom : 3,
-    flex : 1,
-  },
-  errorText : {
-    textAlign : 'center',
-    color : 'red'
-  },
-  messageBox : {
-    paddingTop : 40,
-    flex : 1,
-    backgroundColor : 'transparent',
-    // justifyContent : 'center',
-    alignItems : 'center',
-  }
+  footer : { borderTopWidth : 0 },
+  activeButton : { width : 144 },
+  // Color themes
+  color1 : { backgroundColor : settings.color1 },
+  color2 : { backgroundColor : settings.color2 },
+  color3 : { backgroundColor : settings.color3 },
+  color4 : { backgroundColor : settings.color4 },
+  color5 : { backgroundColor : settings.color5 },
+  textWhite : { color : 'white'},
+  textInactive : { color : 'gray' },
+  textColor1 : { color : settings.textColor1 },
+  textColor2 : { color : settings.textColor2 },
+  textColor3 : { color : settings.textColor3 },
+  textColor4 : { color : settings.textColor4 },
+  textColor5 : { color : settings.textColor5 },
 })
+
+// export const statusBarColor = settings.color3
 
 export default styles

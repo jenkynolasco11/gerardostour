@@ -1,37 +1,68 @@
 import React from 'react'
-import {
-  View,
-  Text,
-  TouchableOpacity
-} from 'react-native'
+import { Header, Left, Body, Right, Button, Icon, Text } from 'native-base'
+import { connect } from 'react-redux'
+
+import { requestLogout, setActiveStatusTo, requestRides } from '../../store/actions'
+import { showActionSheet } from '../../utils'
 
 import styles from './styles'
 
-const LogoutButton = props => (
-  <TouchableOpacity
-    onPress={() => { props.logOut(props.id) }}
-    activeOpacity={ 0.6 }
-  >
-    <View style={ styles.logout }>
-      <Text style={ styles.logoutText }>{ 'Logout' }</Text>
-    </View>
-  </TouchableOpacity>
-)
+const BUTTONS = ['Log out', 'Cancel']
+const onPress = logout => {
+  return showActionSheet(BUTTONS, { 0 : logout })
+}
 
-const HeaderContent = props => (
-  <View style={ styles.headerContent }>
-    <Text style={ styles.greeting }>{ `Hi, ${props.name}` }</Text>
-    {/* <LogoutButton {...props} /> */}
-  </View>
-)
+const HeaderComponent = props => {
+  const { active, setActive, bus,/* fetchRides,*/ logout } = props
 
-const Header = props => (
-  <View style={ [styles.header] }>
-    <View style={{ flex : 1, justifyContent : 'center' }}>
-      <LogoutButton {...props}/>
-    </View>
-    <HeaderContent {...props}/>
-  </View>
-)
+  return (
+    <Header
+      iosBarStyle="light-content"
+      androidStatusBarColor="white"
+      noShadow
+      style={[ styles.header, styles.color3 ]}
+    >
+    
+      <Left> 
+        {/*
+          active &&
+          <Button
+            transparent
+            style={ styles.color3 }
+            onPress={ () => fetchRides(bus) }
+          >
+            <Icon name="cloud-download" style={ styles.textWhite } />
+          </Button>
+        */}
+      </Left>
+      <Body>
+        <Button
+          style={[ active ? styles.color5 : styles.color2, styles.activeButton ]}
+          active={ active }
+          onPress={ () => setActive(bus, !active) }
+        >
+          <Icon name="power" style={ active ? styles.textWhite : styles.textColor5 }/>
+          <Text>{ active ? 'Active' : 'Inactive' }</Text>
+        </Button>
+      </Body>
+      <Right>
+        <Button transparent onPress={ () => onPress(logout) }>
+          <Icon name="log-out" style={ styles.textColor5 }/>
+        </Button>
+      </Right>
+    </Header>
+  )
+}
 
-export default Header
+// const mapDispatchToProps = dispatch => ({
+//   logout : () => dispatch(requestLogout()),
+//   setActive : (bus, status) => dispatch(setActiveStatusTo(bus, status)),
+// })
+
+// const mapStateToProps = state => {
+//   const { auth } = state
+
+//   return { active : auth.isActive, bus : auth.bus }
+// }
+
+export default HeaderComponent // connect(mapStateToProps, mapDispatchToProps)(HeaderComponent)

@@ -1,47 +1,31 @@
-import React from 'react'
-import {
-  View,
-  StatusBar
-} from 'react-native'
+import React, { PureComponent as Component } from 'react'
+import { View, StatusBar } from 'react-native'
+import { Container, Root, Toast } from 'native-base'
 
 import { Router, Scene } from 'react-native-router-flux'
 import { connect, Provider } from 'react-redux'
-import { createStore, applyMiddleware, compose } from 'redux'
-import thunk from 'redux-thunk'
-import logger from 'redux-logger'
-import promise from 'redux-promise'
 
 import Landing from './components/landing'
 
-import reducer from './store'
+import store from './store'
 
-const RouterWithRedux = connect()(Router)
+class App extends Component {
+  componentWillUnmount() {
+    // TODO : Check this out! 
+    // Supposedly bug fix for toast
+    // Toast.toastInstance = null
+  }
 
-const middlewares = [ thunk,/*, promise, /* logger has to be last*//* logger*/ ]
-
-const store = createStore(
-  reducer,
-  compose(
-    applyMiddleware(...middlewares),
-    // devTools({
-    //   name : Platform.OS,
-    //   hostname : 'localhost',
-    //   port : 5678
-    // })
-  )
-)
-
-const MainScene = () => (
-  <View style={{ flex : 1 }}>
-    <StatusBar barStyle={ 'light-content' }/>
-    <Landing />
-  </View> 
-)
-
-const App = () => (
-  <Provider store={ store }>
-    <MainScene />
-  </Provider>
-)
+  render() {
+    return (
+      <Provider store={ store }>
+        <Root>
+          <StatusBar barStyle="light-content"/>
+          <Landing />
+        </Root>
+      </Provider>
+    )
+  }
+}
 
 export default App

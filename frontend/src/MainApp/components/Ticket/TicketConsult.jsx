@@ -1,4 +1,5 @@
 import React, { Component } from 'react'
+import { bindActionCreators } from 'redux'
 import { connect } from 'react-redux'
 
 import { List, ListDivider, /*ListCheckbox,*/ ListItem } from 'react-toolbox/lib/list'
@@ -266,11 +267,11 @@ class TicketConsult extends Component {
   }
 }
 
-const mapDispatchToProps = dispatch => ({
-  queryTickets : args => dispatch(retrieveTickets(args)),
-  assignRide : (tickets, ride) => dispatch(assignTicketsToRide(tickets, ride))
+const mapDispatchToProps = dispatch => bindActionCreators({
+  queryTickets : args => retrieveTickets(args),
+  assignRide : (tickets, ride) => assignTicketsToRide(tickets, ride)
   // submitTicket : data => dispatch(submitTicketData(data)),
-})
+}, dispatch)
 
 const mapStateToProps = state => {
   const { tickets, searchOptions, count } = state.ticket
