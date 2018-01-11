@@ -28,35 +28,59 @@ dejar---------
 fecha_creacion---------
 
 
-From app: {
-  frm : string (NY,PA,MA),
-  to : string (NY,PA,MA),
-  departureDate : date,
-  departureTime : int,
-  howMany : int,
-  luggage : int,
-  firstname : string,
-  lastname : string,
-  phoneNumber : string{10},
-  email : string,
-  willPick : ['checked' | 'unchecked'],
-  willDrop : ['checked' | 'unchecked'],
+Creating a ticket => 
+
+ticket {
+  // general info
+  isLocal : Boolean,
+  ticketQty : Number,
+  packageQty : Number,
+  
+  // Person details
+  firstname : String,
+  lastname : String,
+  phoneNumber : String{10},
+  email : String,
+
+  // Trip details
+  willPick : Boolean,
+  willDrop : Boolean,
   pickUpAddress : [{
-    street : string,
-    city : string,
-    state : string,
-    zipcode : string
+    street : String,
+    city : String,
+    state : String,
+    zipcode : String
   } | null ],
   dropOffAddress [{
-    street : string,
-    city : string,
-    state : string,
-    zipcode : string
+    street : String,
+    city : String,
+    state : String,
+    zipcode : String
   } | null ],
-  totalAmount : float,
-  cardBrand : string,
-  cardLastDigits : [ int | null ],
-  paymentType : [ 'CARD' | 'CASH' ],
-  fee : float,
-  extraFee : float,
+  frm : String (NY,PA),
+  to : String (NY,PA),
+  date : Date,
+  time : Number,
+
+  // Receipt details
+  fee : Number,
+  extraFee : Number,
+  totalAmount : Number,
+  luggageQty : Number,
+  cardBrand : String,
+  paymentType : String [ 'CARD' | 'CASH' ],
+  cardLastDigits : String [ Number | null ],
+
+  // Ticket details
+  isPackage : Boolean,
+  packageInfo : [ {
+    weight : number,
+    message : String,
+  } | null ]
+}
+
+
+// Info to take from tickets
+{
+
 }

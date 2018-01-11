@@ -4,6 +4,7 @@ import './user'
 import './ride'
 import './ticket'
 import './person'
+import './package'
 import './address'
 import './bus'
 import './receipt'
@@ -13,14 +14,15 @@ import { userDefault, passDefault } from '../config'
 
 export const Person = mongoose.model('person')
 export const User = mongoose.model('user')
+export const Package = mongoose.model('package')
 export const Ride = mongoose.model('ride')
-export const RideDetail = mongoose.model('rideDetail')
+export const RideDetail = mongoose.model('rideDetails')
 export const Ticket = mongoose.model('ticket')
-export const TicketDetail = mongoose.model('ticketDetail')
+export const TicketDetail = mongoose.model('ticketDetails')
 export const Address = mongoose.model('address')
 export const Bus = mongoose.model('bus')
 export const Receipt = mongoose.model('receipt')
-export const BusDetail = mongoose.model('busDetail')
+export const BusDetail = mongoose.model('busDetails')
 export const Meta = mongoose.model('meta')
 
 export const deleteAllCollections = async () => {
@@ -36,6 +38,7 @@ export const deleteAllCollections = async () => {
     await User.collection.remove({})
     await Bus.collection.remove({})
     await BusDetail.collection.remove({})
+    await Package.collection.remove({})
   } catch (e) {
     return false
   }
@@ -85,12 +88,12 @@ export const createMeta = async (clear) => {
     const meta = await Promise.resolve(Meta.findOne({}))
 
     if(!meta) {
-      // console.log(meta)
       const defaultMeta = {
-        lastTicketId : 1,
-        lastReceiptId : 1,
-        lastRideId : 1,
         lastBusId : 1,
+        lastRideId : 1,
+        lastTicketId : 1,
+        // lastPackageId : 1,
+        lastReceiptId : 1,
       }
 
       await Promise.resolve(new Meta(defaultMeta).save())
@@ -103,9 +106,8 @@ export const createMeta = async (clear) => {
 
 export default {
   deleteAllCollections,
-
-  // 
   Person,
+  Package,
   Ride,
   Ticket,
   TicketDetail,

@@ -2,6 +2,8 @@ import Router from 'koa-router'
 
 import { Ride, Bus } from '../../../models'
 import { getRideData, createRide, updateRide } from './ride.controller'
+import { sockets } from '../../../socket.io-server'
+import { filterDoc, filterAggregate } from '../../../utils'
 
 const rideRouter = new Router({ prefix : 'ride' })
 
@@ -44,6 +46,47 @@ rideRouter.get('/all', async ctx => {
       const count = await Ride.count(conditions)
 
       if(data.length) return ctx.body = { ok : true, data : { rides : data, count }, message : '' }
+    }
+
+    return ctx.body = { ok : false, data : null, message : 'No rides available' }
+  } catch (e) {
+    console.log(e)
+  }
+
+  return ctx.body = { ok : false, data : null, message : 'Error retrieving rides' }
+})
+
+rideRouter.get('/all/:bus', async ctx => {
+  const { bus } = ctx.params
+
+  try {
+    const bs = await Bus.findOne({ id : bus }, { _id : 1 })
+
+    const conditions = { bus : bs._id }
+    const sortCondition = { date : 1, time : 1 }
+
+    const rides = await Ride.aggregate([
+      { $match : conditions },
+      // { $sort : sortCondition },
+      { 
+        $group : {
+          _id : {
+            month : { $month : '$date' },
+            date : { $dayOfMonth : '$date' },
+            year : { $year : '$date' }
+        },
+          body : { $push : '$$ROOT' }
+        }
+      },
+      // { $sort : { '_id.year' : 1, '_id.month' : 1, '_id.date' : 1 }}    
+    ])
+
+    // console.log(rides)
+
+    if(rides.length) {
+      const data = await Promise.all(filterAggregate(rides, getRideData, 'asc'))
+
+      if(data.length) return ctx.body = { ok : true, data : { rides : data }, message : '' }
     }
 
     return ctx.body = { ok : false, data : null, message : 'No rides available' }
@@ -113,7 +156,7 @@ rideRouter.put('/assign-bus', async ctx => {
   const { bus, rides = [] } = ctx.request.body
 
   try {
-    const bs = await Bus.findOne({ id : bus })
+    const bs = await Bus.findOne({ id : bus }, { _id : 1 })
     const promises = []
 
     if(bs) {
@@ -142,6 +185,7 @@ rideRouter.put('/:id/modify', async ctx => {
   try {
     const rid = await Ride.findOne({ id })
 
+    // console.log(rid)
     if(rid) {
       const data = await updateRide(rid, body)
 
@@ -174,6 +218,33 @@ rideRouter.get('/:id', async ctx => {
   }
 
   return ctx.body = { ok : false, data : null, message : 'Error retrieving ride' }
+})
+
+rideRouter.get('/dispatch/:ride/:bus', async ctx => {
+  const { ride, bus } = ctx.params
+
+  if(sockets[ bus ]) {
+    try {
+      const { socket, user } = sockets[ bus ]
+
+      if(socket) {
+        // const bs = await Bus.findOne({ id : bus }, { active : 1, _id : 0 })
+        const rid = await Ride.findOne({ id : ride })
+        // console.log(socket.emit)
+        // console.log(socket.send)
+        // if(rid && bs.active) {
+        if(rid) {
+          console.log(`About to send data to socket ${ JSON.stringify(user) }`)
+          // console.log(filterDoc(rid._doc))
+          socket.emit('new ride', filterDoc(rid._doc))
+        }
+      }
+    } catch (e) {
+      console.log(e)
+    }
+  }
+
+  return ctx.body = 'ok'
 })
 
 export default rideRouter

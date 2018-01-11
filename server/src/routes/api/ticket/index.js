@@ -108,9 +108,8 @@ ticketRouter.get('/date/:d1/:d2?', async ctx => {
 })
 */
 
-/** Not assigned yet */
 // Assign ride to ticket
-ticketRouter.put('/modify/ride', async ctx => {
+ticketRouter.put('/assign/ride', async ctx => {
   const { tickets, ride } = ctx.request.body
 
   try {
@@ -121,8 +120,6 @@ ticketRouter.put('/modify/ride', async ctx => {
     const objs = await Promise.all(
       tickets.map( tcktId => Ticket.findOneAndUpdate({ id : tcktId }, { ride : rid._id }, { new : true }))
     )
-
-    console.log(objs)
 
     return ctx.body = { ok : true, data : null, message : '' }
   } catch (e) {
@@ -168,7 +165,7 @@ ticketRouter.put('/delete', async ctx => {
 
 // Return all tickets that are not USED nor NULL
 ticketRouter.get('/all', async ctx => {
-// [ 'USED', 'REDEEMED', 'NULL', 'NEW', 'DELETED' ]
+  // [ 'USED', 'REDEEMED', 'NULL', 'NEW', 'DELETED' ]
   const {
     // status = 'NULL,USED,DELETED',
     status = 'NEW,REDEEMED',
@@ -219,18 +216,18 @@ ticketRouter.get('/all', async ctx => {
 ticketRouter.get('/all/:ride', async ctx => {
   const { ride } = ctx.params
 
-  // if(/\D/.test(time)) return ctx.body = { ok : false, data : null, message : 'Not a valid time parameter' }
-
   try {
+    const rid = await Ride.findOne({ id : ride }, { _id : 1 })
+
     const tickets = await Ticket
-                          .find({ ride })
+                          .find({ ride : rid._id, status : { $ne : 'DELETED' }})
                           .sort({ id : -1 })
                           .exec()
 
     if(tickets.length) {
       const data = await Promise.all(tickets.map(getTicketData))
 
-      return ctx.body = { ok : true, data, message : '' }
+      return ctx.body = { ok : true, data : { tickets : data }, message : '' }
     }
 
     return ctx.body = { ok : false, data : null, message : 'There are no ticket for this ride' }
@@ -240,6 +237,8 @@ ticketRouter.get('/all/:ride', async ctx => {
 
   return ctx.body = { ok : false, data : null, message : 'Error retrieving the tickets for this ride' }
 })
+
+// ticketRouter.get('/all/by-address/:ride/', )
 // //////////////////////////////////////
 
 // Retrieve a ticket information
@@ -252,7 +251,7 @@ ticketRouter.get('/:id', async ctx => {
     if(tckt) {
       const ticketData = await getTicketData(tckt)
       
-      if(ticketData) return ctx.body = { ok : true, data : ticketData, message : '' }
+      if(ticketData) return ctx.body = { ok : true, data : { ticket : ticketData }, message : '' }
     }
 
     return ctx.body = { ok : false, data : null, message : 'Couldn\'t retrieve ticket. Either doesn\'t exist or we have a problem on the server' }

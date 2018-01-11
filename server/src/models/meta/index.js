@@ -2,6 +2,7 @@ import mongoose, { Schema } from 'mongoose'
 
 const MetaSchema = new Schema({
   lastReceiptId : { type : Number, default : 1 },
+  lastPackageId : { type : Number, default : 1 },
   lastTicketId : { type : Number, default : 1 },
   lastRideId : { type : Number, default : 1 },
   lastBusId : { type : Number, default : 1 },
@@ -10,6 +11,7 @@ const MetaSchema = new Schema({
 
 MetaSchema.pre('save', function(next) {
   this.modifiedAt = Date.now()
+
   next()
 })
 

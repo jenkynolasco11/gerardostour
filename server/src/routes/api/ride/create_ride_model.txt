@@ -6,3 +6,7 @@
   time : number,
   date : date,
 }
+
+* When ride is created, RideDetails is created as well
+
+Note: When adding tickets to ride, RideDetails should be modified

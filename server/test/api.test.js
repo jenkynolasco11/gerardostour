@@ -6,7 +6,7 @@ import chaiHttp from 'chai-http'
 
 import app from '../src/app'
 
-import { User, Bus, createMeta, deleteAllCollections } from '../src/models'
+import { User, Bus, Ride, createMeta, deleteAllCollections } from '../src/models'
 import { userDefault, passDefault } from '../src/config'
 
 chai.use(chaiHttp)
@@ -23,16 +23,17 @@ const data = {
     status : 'ACTIVE',
   },
   ticket : {
-    frm : 'NY',
-    to : 'PA',
-    departureDate : new Date(new Date().setHours(0,0,0,0)),
-    departureTime : 11,
-    howMany : 4,
-    luggage : 3,
+    isLocal : true,
+    ticketQty : 3,
+    // packageQty : 0,
+    
+    // Person details
     firstname : 'Jenky',
     lastname : 'Nolasco',
     phoneNumber : '3479742990',
     email : 'jenky.nolasco@gmail.com',
+
+    // Trip details
     willPick : true,
     willDrop : false,
     pickUpAddress : {
@@ -42,14 +43,33 @@ const data = {
       zipcode : 10034
     },
     dropOffAddress : null,
-    totalAmount : 134.15,
-    cardBrand : 'VISA',
-    cardLastDigits : '4242',
+    frm : 'NY',
+    to : 'PA',
+    date : Date.now(),
+    time : 11,
+
+    // Receipt details
+    totalAmount : 120,
+    luggageQty : 1,
     paymentType : 'CARD',
-    status : 'NEW',
-    fee : 100.15,
-    extraFee : 34,
-    _isLocal : true,
+    cardBrand : 'VISA',
+    cardLastDigits : '0442',
+    
+    // Ticket details
+    fee : 30,
+    extraFee : 15,
+  },
+  package : {
+    ticketQty : 2,
+    isPackage : true,
+    packageQty : 2,
+    packageInfo : {
+      weight : 10.0,
+      message : 'Handle with care',
+    },
+    extraFee : 0,
+    fee : 30,
+    totalAmount : 30,
   },
   bus : {
     name : 'Carlota',
@@ -59,8 +79,8 @@ const data = {
   },
   ride : {
     bus : null,
-    routeTo : 'NY',
-    routeFrom : 'PA',
+    to : 'NY',
+    frm : 'PA',
     status : 'PENDING',
     time : 3, // 4:00 AM
     date : new Date(new Date().setHours(0,0,0,0)),
@@ -227,8 +247,8 @@ describe('API => ', () => {
         .send({ status : 'DAMAGED' })
         .end((err, res) => {
           const { body } = res
-          // console.log(body)
           commonExpects(res, 200, true, 'object', '')
+
           expect(body.data).to.haveOwnProperty('bus')
           expect(body.data.bus.status).to.be.eql('DAMAGED')
 
@@ -315,8 +335,6 @@ describe('API => ', () => {
     })
   })
 
-  // TODO : WRITE MORE TESTS FOR RIDE
-  // TEST TO DO : QUERY BY DATE/HOUR
   describe('Rides', () => {
     let busId = null
     let rideId = null
@@ -341,6 +359,7 @@ describe('API => ', () => {
         .end((err, res) => {
           const { body } = res
           commonExpects(res, 200, true, 'object', '')
+
           expect(body.data).to.haveOwnProperty('ride')
           expect(body.data.ride).to.be.an('number')
 
@@ -362,9 +381,9 @@ describe('API => ', () => {
           expect(body.data.rides).to.be.length.lte(10)
 
           body.data.rides.forEach(ride => {
-            expect(ride).to.have.any.keys('id', 'bus', 'luggage', 'seatsOccupied', 'status', 'routeTo', 'routeFrom')
-            expect(ride.routeTo).not.to.be.empty
-            expect(ride.routeFrom).not.to.be.empty
+            expect(ride).to.have.any.keys('id', 'bus', 'luggage', 'seatsOccupied', 'status', 'to', 'frm')
+            expect(ride.to).not.to.be.empty
+            expect(ride.frm).not.to.be.empty
             if(ride.bus) expect(ride.bus).to.have.any.keys('name', 'id', 'status', 'seats', 'luggage')
           }) 
 
@@ -375,42 +394,21 @@ describe('API => ', () => {
         })
     })
 
-    it('Should query one ride', done => {
+    it('Should query one ride by id', done => {
       agent
         .get(`/api/v1/ride/${ rideId }`)
         .end((err, res) => {
           const { body } = res
           commonExpects(res, 200, true, 'object', '')
+
           expect(body.data).to.haveOwnProperty('ride')
-          expect(body.data.ride).to.have.any.keys('id', 'bus', 'luggage', 'seatsOccupied', 'status', 'routeTo', 'routeFrom')
-          expect(body.data.ride.routeTo).not.to.be.empty
-          expect(body.data.ride.routeFrom).not.to.be.empty
+          expect(body.data.ride).to.have.any.keys('id', 'bus', 'luggage', 'seatsOccupied', 'status', 'to', 'frm')
+          expect(body.data.ride.to).not.to.be.empty
+          expect(body.data.ride.frm).not.to.be.empty
 
           if(body.data.ride.bus) expect(body.data.ride.bus).to.have.any.keys('name', 'id', 'status', 'seats', 'luggage')
 
           done()
-        })
-    })
-
-    it('Should modify a ride', done => {
-      agent
-        .put(`/api/v1/ride/${ rideId }/modify`)
-        .send({ status : 'FINISHED' })
-        .end((err, res) => {
-          const { body } = res
-          commonExpects(res, 200, true, 'object', '')
-          
-          agent
-            .get(`/api/v1/ride/${ rideId }`)
-            .end((err, res) => {
-              const { body } = res
-              commonExpects(res, 200, true, 'object', '')
-              expect(body.data).to.haveOwnProperty('ride')
-              expect(body.data.ride).to.haveOwnProperty('status')
-              expect(body.data.ride.status).to.be.eql('FINISHED')
-
-              done()
-            })
         })
     })
 
@@ -423,6 +421,29 @@ describe('API => ', () => {
           commonExpects(res, 200, true, 'null', /Rides? assigned!/)
 
           done()
+        })
+    })
+    
+    it('Should modify a ride (Set to FINISHED)', done => {
+      agent
+        .put(`/api/v1/ride/${ rideId }/modify`)
+        .send({ status : 'FINISHED' })
+        .end((err, res) => {
+          const { body } = res
+          commonExpects(res, 200, true, 'object', '')
+          
+          agent
+            .get(`/api/v1/ride/${ rideId }`)
+            .end((err, res) => {
+              const { body } = res
+              commonExpects(res, 200, true, 'object', '')
+
+              expect(body.data).to.haveOwnProperty('ride')
+              expect(body.data.ride).to.haveOwnProperty('status')
+              expect(body.data.ride.status).to.be.eql('FINISHED')
+
+              done()
+            })
         })
     })
 
@@ -438,6 +459,30 @@ describe('API => ', () => {
           expect(body.data.rides[ 0 ].id).to.be.eql(1)
           expect(body.data.rides[ 0 ].time).to.be.eql(data.ride.time)
 
+          done()
+        })
+    })
+
+    it('Should query rides by bus', done => {
+      agent
+        .get(`/api/v1/ride/all/${ busId }`)
+        .end((err, res) => {
+          const { body } = res
+          
+          commonExpects(res, 200, true, 'object', '')
+          
+          expect(body.data).to.haveOwnProperty('rides')
+          const [ rid ] = body.data.rides
+
+          expect(rid).to.have.all.keys('id', 'results', 'datekey')
+          expect(rid.id).to.be.an('string')
+          expect(rid.datekey).to.be.an('string')
+          expect(rid.results).to.be.an('array')
+          expect(rid.results).to.be.lengthOf(1)
+          const [ result ] = rid.results
+
+          expect(result).to.have.all.keys('id', 'bus', 'ticketsCount', 'status', 'to', 'frm', 'time', 'date', 'seatsOccupied', 'luggage', 'addedAt')
+          
           done()
         })
     })
@@ -482,9 +527,9 @@ describe('API => ', () => {
               expect(body.data.rides).to.be.length.lte(10)
     
               body.data.rides.forEach(ride => {
-                expect(ride).to.have.any.keys('id', 'bus', 'luggage', 'seatsOccupied', 'status', 'routeTo', 'routeFrom')
-                expect(ride.routeTo).not.to.be.empty
-                expect(ride.routeFrom).not.to.be.empty
+                expect(ride).to.have.any.keys('id', 'bus', 'luggage', 'seatsOccupied', 'status', 'to', 'frm')
+                expect(ride.to).not.to.be.empty
+                expect(ride.frm).not.to.be.empty
                 expect(ride.status).not.to.be.eql('FINISHED').and.not.to.be.eql('CANCELLED')
                 if(ride.bus) expect(ride.bus).to.have.any.keys('name', 'id', 'status', 'seats', 'luggage')
               }) 
@@ -499,6 +544,21 @@ describe('API => ', () => {
   })
 
   describe('Tickets', () => {
+    let rideId = null
+
+    before(done => {
+      Ride
+        .findOne({}, { id : 1, _id : 0 })
+        .then(ride => {
+          rideId = ride.id
+
+          done()
+        })
+        .catch(e => {
+          console.log(e)
+        })
+    })
+
     it('Should create a ticket', done => {
       agent
         .post('/api/v1/ticket/save')
@@ -506,6 +566,26 @@ describe('API => ', () => {
         .end((err, res) => {
           const { body } = res
           commonExpects(res, 200, true, 'object', '')
+
+          expect(body.data).to.haveOwnProperty('tickets')
+          expect(body.data.tickets).to.be.an('array')
+
+          body.data.tickets.forEach(id => {
+            expect(id).to.be.an('number')
+          })
+
+          done()
+        })
+    })
+
+    it('Should create a ticket (Package)', done => {
+      agent
+        .post('/api/v1/ticket/save')
+        .send({ ...data.ticket, ...data.package })
+        .end((err, res) => {
+          const { body } = res
+          commonExpects(res, 200, true, 'object', '')
+
           expect(body.data).to.haveOwnProperty('tickets')
           expect(body.data.tickets).to.be.an('array')
 
@@ -519,16 +599,22 @@ describe('API => ', () => {
 
     it('Should query a ticket', done => {
       agent
-        .get('/api/v1/ticket/2')
+        .get('/api/v1/ticket/4')
         .end((err, res) => {
           const { body } = res
-
           commonExpects(res, 200, true, 'object', '')
-          expect(body.data).to.haveOwnProperty('id')
-          expect(body.data.id).to.be.eql(2)
-          expect(body.data).to.haveOwnProperty('person')
-          expect(body.data.person).to.haveOwnProperty('firstname')
-          expect(body.data.person.firstname).to.be.eql('Jenky')
+
+          expect(body.data).to.haveOwnProperty('ticket')
+          const { ticket } = body.data
+
+          expect(ticket).to.haveOwnProperty('id')
+          expect(ticket.id).to.be.eql(4)
+          expect(ticket).to.haveOwnProperty('person')
+          expect(ticket.person).to.haveOwnProperty('firstname')
+          expect(ticket.person.firstname).to.be.eql('Jenky')
+          expect(ticket).to.haveOwnProperty('isPackage')
+          expect(ticket.isPackage).to.be.true
+          expect(ticket.package).to.have.all.keys(['weight', 'message'])
 
           done()
         })
@@ -540,6 +626,7 @@ describe('API => ', () => {
         .end((err, res) => {
           const { body } = res
           commonExpects(res, 200, true, 'object', '')
+
           expect(body.data).to.haveOwnProperty('tickets')
           expect(body.data.tickets).to.be.an('array')
           expect(body.data.tickets).to.be.length.gte(4).and.length.lte(10)
@@ -563,17 +650,16 @@ describe('API => ', () => {
         .end((err, res) => {
           const { body } = res
           commonExpects(res, 200, true, 'object', '')
+          
           expect(body.data).to.haveOwnProperty('receipt')
-          expect(body.data.receipt).to.have.any.keys('fee', 'extraFee', 'ticketsIssued')
-          expect(body.data.receipt.ticketsIssued).to.be.an('array')
-          expect(body.data.receipt.ticketsIssued).to.include.members([1,2,3,4])
+          expect(body.data.receipt).to.have.any.keys(['paymentType', 'totalAmount', 'cardBrand', 'packageQty', 'luggageQty'])
+          expect(body.data.receipt.tickets).to.be.an('array')
+          expect(body.data.receipt.tickets).to.include.members([1,2,3])
           if(body.data.receipt.paymentType === 'CARD') {
             expect(body.data.receipt.cardBrand).to.be.an('string').of.length.gte(4)
             expect(body.data.receipt.cardLastDigits).to.be.an('number')
           }
-          expect(body.data.receipt.fee).to.be.an('number')
-          expect(body.data.receipt.extraFee).to.be.an('number')
-
+          
           done()
         })
     })
@@ -581,7 +667,7 @@ describe('API => ', () => {
     it('Should update status of 2 tickets', done => {
       agent
         .put('/api/v1/ticket/modify/status')
-        .send({ ticketIds : [ 1, 4 ], status : 'REDEEMED' })
+        .send({ ticketIds : [ 1, 3 ], status : 'REDEEMED' })
         .end((err, res) => {
           const { body } = res
           commonExpects(res, 200, true, 'null', '')
@@ -591,6 +677,7 @@ describe('API => ', () => {
             .end((err, res) => {
               const { body } = res
               commonExpects(res, 200, true, 'object', '')
+
               expect(body.data).to.haveOwnProperty('tickets')
               expect(body.data.tickets).to.be.an('array')
               expect(body.data.tickets).to.be.lengthOf(2)
@@ -603,6 +690,42 @@ describe('API => ', () => {
 
               done()
             })
+        })
+    })
+
+    it('Should assign a ride', done => {
+      agent
+        .put('/api/v1/ticket/assign/ride')
+        .send({ tickets : [ 1, 2, 3, 4, 5 ], ride : rideId })
+        .end((err, res) => {
+          const { body } = res
+          commonExpects(res, 200, true, 'null', '')
+
+          done()
+        })
+    })
+
+    it('Should query tickets assigned to ride', done => {
+      agent
+        .get(`/api/v1/ticket/all/${ rideId }`)
+        .end((err, res) => {
+          const { body } = res
+          commonExpects(res, 200, true, 'object', '')
+
+          expect(body.data).to.haveOwnProperty('tickets')
+          expect(body.data.tickets).to.be.an('array')
+          expect(body.data.tickets).to.be.length.gte(5).and.length.lte(10)
+          expect(body.data.tickets).to.have.any.keys([0,1,2,3,4])
+
+          body.data.tickets.forEach(ticket => {
+            expect(ticket).to.deep.include.any.keys('id', '_id', 'person.firstname', 'person.email', 'status', 'to', 'from', 'person')
+            expect(ticket).to.haveOwnProperty('willPick')
+            if(ticket.willPick) expect(ticket.pickUpAddress).to.be.an('object')
+            expect(ticket).to.haveOwnProperty('willDrop')
+            if(ticket.willDrop) expect(ticket.dropOffAddress).to.be.an('object')
+          })
+
+          done()
         })
     })
 
@@ -631,12 +754,6 @@ describe('API => ', () => {
 
           done()
         })
-    })
-
-    after(async () => {
-      // await deleteAllCollections()
-
-      srv.close()
     })
   })
 

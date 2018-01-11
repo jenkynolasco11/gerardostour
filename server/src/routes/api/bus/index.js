@@ -103,4 +103,26 @@ busRouter.put('/:id/modify', async ctx => {
   return ctx.body = { ok : false, data : null, message : 'Error modifying bus.' }
 })
 
+busRouter.get('/set-status/:id/:status', async ctx => {
+  const { id, status } = ctx.params
+
+  const active = status === 'ACTIVE'
+
+  try {
+    const bus = await Bus.findOne({ id })
+
+    if(bus) {
+      const data = await updateBus(bus, { active })
+
+      if(data) return ctx.body = { ok : true, data : { bus : data }, message : '' }
+    }
+
+    return ctx.body = { ok : false, data : null, message : `Couldn't set bus to ${ active }` }
+  } catch (e) {
+    console.log(e)
+  }
+
+  return ctx.body = { ok : false, data : null, message : 'Error modifying bus.' }
+})
+
 export default busRouter

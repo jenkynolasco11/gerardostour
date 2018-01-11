@@ -1,4 +1,5 @@
 import Koa from 'koa'
+import http from 'http'
 import logger from 'koa-logger'
 import bodyparser from 'koa-body'
 import Pug from 'koa-pug'
@@ -11,6 +12,7 @@ import bluebird from 'bluebird'
 import passport from 'koa-passport'
 import cors from 'koa2-cors'
 
+import { socketServer } from './socket.io-server'
 import config from './config'
 import routes from './routes'
 import error404 from './routes/404'
@@ -68,8 +70,12 @@ const server = async (port, done) => {
 
     const PORT = (port || process.env.PORT || config.PORT)
 
-    const srvr = await app.listen(PORT)
+    const application = http.createServer(app.callback())
+    const srvr = await application.listen(PORT)
+
     console.log(`Started server at ${ PORT }`)
+
+    socketServer(application)
 
     if(done) done()
 

@@ -1,71 +1,17 @@
-import { Meta, Ride, RideDetail, Bus, BusDetail } from '../../../models'
+import { Meta, Ride, RideDetail, Bus, BusDetail, Ticket } from '../../../models'
 
-export const getRideData = async ride => {
-  try {
-    const { id, bus, routeTo, routeFrom, status, time, date } = ride
-
-    let buss = null
-    let busDetails = null
-    let seatsUsed = null
-    let luggageUsed = null
-
-    const { seatsOccupied, luggage } = await RideDetail.findOne({ ride : ride._id })
-
-    if(bus) {
-      buss = await Bus.findById(bus)
-      busDetails = await BusDetail.findOne({ bus })
-
-      luggageUsed = parseInt(busDetails.luggage) - parseInt(luggage)
-      seatsUsed = parseInt(busDetails.seats) - parseInt(seatsOccupied)
-
-      // const seat = parseInt(busDetails.seats) - parseInt(seatsOccupied)
-      // const lug = parseInt(busDetails.luggage) - parseInt(luggage)
-      // seatsUsed = seat < 0 ? 0 : seat
-      // luggageUsed = lug < 0 ? 0 : lug
-    } else {
-      luggageUsed = luggage
-      seatsUsed = seatsOccupied
-    }
-
-    const data = {
-      id,
-      bus : bus ? {
-        id : buss.id,
-        // alias : buss.alias,
-        name : buss.name,
-        status : buss.status,
-        seats : busDetails.seats,
-        luggage : busDetails.luggage,
-      } : null,
-      status,
-      routeTo,
-      routeFrom,
-      time, // : nTime,
-      date, // : nDate,
-      seatsUsed,
-      luggageUsed,
-    }
-
-    // TODO : CHECK THIS OUT LATER
-    return data
-  } catch (e) {
-    console.log(e)
-    // process.exit()
-  }
-
-  return null
-}
+import { filterDoc } from '../../../utils'
 
 export const createRide = async data => {
   const {
     bus = null,
-    routeTo,
-    routeFrom,
+    to,
+    frm,
     status = 'PENDING',
     time,
     date,
     luggage = 0,
-    seatsOccupied = 0
+    seatsOccupied = 0,
   } = data
 
   let tempBus = null
@@ -78,13 +24,14 @@ export const createRide = async data => {
     const rid = await new Ride({
       id : meta.lastRideId,
       bus : bus ? tempBus._id : null,
-      routeTo,
-      routeFrom,
+      to,
+      frm,
       status,
       time : parseInt(time),
       date : new Date(new Date(date).setHours(0,0,0,0)),
     }).save()
 
+    // Not sure if I should leave this with await
     const details = await new RideDetail({
       ride : rid._id,
       seatsOccupied,
@@ -92,7 +39,7 @@ export const createRide = async data => {
     }).save()
 
     meta.lastRideId += 1
-    await meta.save()
+    meta.save()
 
     return rid.id
   } catch (e) {
@@ -104,18 +51,79 @@ export const createRide = async data => {
 
 export const updateRide = async (rid, body) => {
   try {
-    const { _id, __v, createdAt, modifiedAt, status, id, bus, ...ride } = rid.toObject()
-    
-    const bs = await Bus.findOne({ id : body.bus })
+    const { _id, status, id, bus, ...ride } = filterDoc(rid._doc)
+    // const { _id, __v, createdAt, modifiedAt, status, id, bus, ...ride } = rid.toObject()
 
-    const data = { ...ride, ...body, bus : ( bs ? bs._id : null ), status : ( bs ? 'ASSIGNED' : status ) }
+    const stts = bus
+                  ? status === 'PENDING'
+                  ? 'ASSIGNED'
+                  : status 
+                  : 'PENDING'
 
-    const rde = await Ride.findOneAndUpdate({ id }, data)
+    const data = { ...ride, bus, status : stts, ...body }
+
+    const rde = await Ride.findOneAndUpdate({ id }, data, { new : true })
     const details = await RideDetail.findOneAndUpdate({ ride : _id }, data)
 
     return id
   } catch (e) {
     console.log(e)
+  }
+
+  return null
+}
+
+export const getRideData = async ride => {
+  try {
+    const { _id, id, bus, to, frm, status, time, date } = ride
+
+    let buss = null
+    let busDetails = null
+
+    const { seatsOccupied, luggage } = await RideDetail.findOne({ ride : _id })
+
+    const ticketsCount = await Ticket.count({ ride : _id })
+
+    if(bus) {
+      buss = await Bus.findById(bus)
+      busDetails = await BusDetail.findOne({ bus })
+
+      // luggageUsed = parseInt(busDetails.luggage) - parseInt(luggage)
+      // seatsUsed = parseInt(busDetails.seats) - parseInt(seatsOccupied)
+    // } else {
+    //   luggageUsed = luggage
+    //   seatsUsed = seatsOccupied
+    }
+
+    const busData = bus 
+                    ? 
+                    {
+                      id : buss.id,
+                      name : buss.name,
+                      status : buss.status,
+                      seats : busDetails.seats,
+                      luggage : busDetails.luggage,
+                    } 
+                    : null
+
+    const data = {
+      id,
+      bus : busData,
+      ticketsCount,
+      status,
+      to,
+      frm,
+      time,
+      date,
+      seatsOccupied,
+      luggage,
+    }
+
+    // TODO : CHECK THIS OUT LATER
+    return data
+  } catch (e) {
+    console.log(e)
+    // process.exit()
   }
 
   return null

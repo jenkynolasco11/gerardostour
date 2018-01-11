@@ -11,7 +11,7 @@ export const DBURI = `mongodb://${ user }:${ pass }@ds137826.mlab.com:37826/${ d
 export const KEY = 'THIS IS MY KEY'
 export const SESSIONID = session
 export const KEYS = ['asdbkjqnwe', 'akhdasjdkajhkasjdn']
-export const ALLOWED_USERS = [ 'SUPERUSER', /*'DISPATCHER', 'MANAGER', */ ]
+export const ALLOWED_USERS = [ 'SUPERUSER', 'DISPATCHER', 'MANAGER' ]
 
 export default {
   PORT,
