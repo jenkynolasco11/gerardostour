@@ -8,3 +8,6 @@ bundle.js
 styles/css
 
 appTest.js
+
+*-error
+*-lock
