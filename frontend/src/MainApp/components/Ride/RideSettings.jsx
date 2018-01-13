@@ -19,7 +19,7 @@ const RideSettings = props => {
     future,
     requestRides,
     showForm,
-    dispatchToBus
+    // dispatchToBus
   } = props
 
   const onChecked = (val, name) => {
@@ -78,29 +78,29 @@ const RideSettings = props => {
         <ListDivider />
         <ListCheckbox
           legend="Those rides waiting to be dispatched"
-          inset={ true }
+          inset
           caption="Pending rides"
           checked={ pending }
           onChange={ val => onChecked(val, 'pending') }
-          disabled={ true }
+          disabled
         />
         <ListCheckbox
           legend="Haven't been assigned to a bus"
-          inset={ true }
+          inset
           caption="Assigned rides"
           checked={ assigned }
           onChange={ val => onChecked(val, 'assigned') }
         />
         <ListCheckbox
           legend="Those that are on their way"
-          inset={ true }
+          inset
           caption="On the way rides"
           checked={ onTheWay }
           onChange={ val => onChecked(val, 'onTheWay') }
         />
         <ListCheckbox
           legend="Those rides that have finished for the day"
-          inset={ true }
+          inset
           caption="Finished rides"
           checked={ finished }
           onChange={ val => onChecked(val, 'finished') }
@@ -115,12 +115,12 @@ const RideSettings = props => {
               <ListDivider/>
               <ListCheckbox
                 legend="Those rides that have finished for the day"
-                inset={ true }
+                inset
                 caption="Past rides"
                 checked={ future }
                 onChange={ val => onChecked(val, 'future') }
                 // Come here later....
-                disabled={ true }
+                disabled
               />
           </List>
         }
@@ -131,13 +131,11 @@ const RideSettings = props => {
 
 const mapDispatchToProps = dispatch => bindActionCreators({
   onChange : (val, name) => setRideQueryOption({ [ name ] : val }),
-  // submitData : data => dispatch(submitRideData(data))
 }, dispatch)
 
 const mapStateToProps = state => {
-  const { pending, finished, assigned, onTheWay, future } = state.ride.searchOptions
 
-  return { pending, finished, assigned, onTheWay, future }
+  return { ...state.ride.searchOptions }
 }
 
 export default connect(mapStateToProps, mapDispatchToProps)(RideSettings)

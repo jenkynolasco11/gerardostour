@@ -46,12 +46,10 @@ export const retrieveRides = query => async dispatch => {
 
 export const submitRideData = data => async dispatch => {
 
-  const { id, bus, routeTo, routeFrom, time, date, status } = data
+  const { id, ...body } = data
 
   try {
     dispatch(showLoader(true))
-
-    const body = { bus, routeTo, routeFrom, time, date, status }
 
     let data = null
     

@@ -11,12 +11,14 @@ const defaultState = {
     tnull : false,
     used : false,
     tnew : true,
+    isPackage : false,
   }
 }
 // [ 'USED', 'REDEEMED', 'NULL', 'NEW', 'DELETED' ]
 export const ticket = (state = defaultState, { type, payload }) => {
   switch (type) {
     case SET_TICKETS_OPTION :
+      console.log(payload)
       return { ...state, searchOptions : { ...state.searchOptions, ...payload }}
     // case 'SELECTED_TICKETS' :
     //   return { ...state, selectedTickets : [].concat(payload) }

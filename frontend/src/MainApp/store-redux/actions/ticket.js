@@ -23,12 +23,12 @@ import { url } from '../../config/config-values.json'
 // Thunks
 // ///////////////////////
 export const retrieveTickets = query => async dispatch => {
-  const { skip, limit, sort, status, unassigned } = query
+  const { skip, limit, sort, status, unassigned, isPackage } = query
 
   try {
     dispatch(showLoader(true))
 
-    const { data } = await axios.get(`${ url }/ticket/all?skip=${ skip }&limit=${ limit }&sort=${ sort }&status=${ status }&unassigned=${ unassigned }`)
+    const { data } = await axios.get(`${ url }/ticket/all?skip=${ skip }&limit=${ limit }&sort=${ sort }&status=${ status }&unassigned=${ unassigned }&onlypackage=${ isPackage }`)
 
     if(data.ok) {
       const { count, tickets } = data.data
@@ -45,19 +45,16 @@ export const retrieveTickets = query => async dispatch => {
 }
 
 export const submitTicketData = body => async dispatch => {
-    // console.log(body)
-  //   
     try {
       dispatch(showLoader(true))
 
-      const { person, payment, time, date, ...rest } = body
-      const { type, ...restPayment } = payment
-      
+      const { person, payment, packageInfo, ...rest } = body
+            
       const postdata = {
         ...rest,
         ...person,
-        ...restPayment,
-        paymentType : type
+        ...packageInfo,
+        ...payment,
       }
 
       const { data } = await axios.post(`${ url }/ticket/save`, postdata)

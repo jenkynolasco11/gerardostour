@@ -17,12 +17,12 @@ import './ride-consult.scss'
 
 const formatData = data => {
   return data.map(item => {
-    const { time, date } = item
-    
+    const { time, date, status } = item
+
     return {
       ...item,
       time : formatHour(time),
-      date : formatDate(date)
+      date : formatDate(date),
     }
   })
 }
@@ -30,27 +30,34 @@ const formatData = data => {
 const tableData = {
   headers : [
     { value : "id", label : "Ride ID", flex : 1 },
-    { value : "routeFrom", label : "From", flex : 1 },
-    { value : "routeTo", label : "To", flex : 1 },
-    { value : "status", label : "Status", flex : 1 },
+    { value : "frm", label : "From", flex : 1 },
+    { value : "to", label : "To", flex : 1 },
+    // { value : "status", label : "Status", flex : 1 },
     { value : "time", label : "Time", flex : 2 },
     { value : "date", label : "Date", flex : 2 },
-  ]
+  ],
+  colors : {
+    'PENDING' : 'red',
+    'ASSIGNED' : 'orange',
+    'ON-THE-WAY' : 'cyan',
+    'FINISHED' : 'lightgreen'
+  },
+  colorsPropToMatch : 'status'
 }
 
 const DetailTemplate = props => (
   <List className="detail-template">
     <CardTitle title="Ride Details" />
     <ListDivider />
-    <ListItem ripple={ false } selectable={ false } caption={ `Seats Available: ${ props.seatsUsed }` } />
-    <ListItem ripple={ false } selectable={ false } caption={ `Luggage Available: ${ props.luggageUsed }` } />
+    <ListItem ripple={ false } selectable={ false } caption={ `Seats Used: ${ props.seatsOccupied }` } />
+    <ListItem ripple={ false } selectable={ false } caption={ `Luggage: ${ props.luggage }` } />
     {
       props.bus &&
       <List className="detail-template bus-items">
         <CardTitle title="Bus Details" />
         <ListDivider />
+        <ListItem ripple={ false } selectable={ false } caption={ `Tickets Assigned: ${ props.ticketsCount }` } />
         <ListItem ripple={ false } selectable={ false } caption={ `Bus Name: ${ props.bus.name }` } />
-        <ListItem ripple={ false } selectable={ false } caption={ `Status: ${ props.bus.status }` }/>
         <ListItem ripple={ false } selectable={ false } caption={ `Seats: ${ props.bus.seats }` } />
         <ListItem ripple={ false } selectable={ false } caption={ `Luggage: ${ props.bus.luggage }` } />
       </List>
@@ -85,7 +92,7 @@ class Ride extends Component {
     this._onChange = this._onChange.bind(this)
     this._onSort = this._onSort.bind(this)
   }
-//#region Private functions
+  //#region Private functions
   _onAssignBus(bus) {
     const { selected, sortBy, sortOrder, skip, limit } = this.state
     const { rides } = this.props
@@ -186,11 +193,10 @@ class Ride extends Component {
     const { selected } = this.state
 
     console.log(bus, selected)
-
   }
 //#endregion
 
-//#region Lifecycle functions
+  //#region Lifecycle functions
   componentWillMount() {
     return this._requestRides()
   }
@@ -229,8 +235,10 @@ class Ride extends Component {
           skip={ skip }
           limit={ limit }
           total={ count }
-          headerProps={ tableData.headers }
           template={ <DetailTemplate /> }
+          headerProps={ tableData.headers }
+          colorProps={ tableData.colors }
+          colorPropToMatch={ tableData.colorsPropToMatch }
         />
         <RideSettings 
           selected={ selected }
@@ -256,18 +264,8 @@ class Ride extends Component {
 
 const mapStateToProps = state => {
   const { rides, count, /*selectedRides,*/ searchOptions } = state.ride
-  const { onTheWay, finished, assigned, pending, future } = searchOptions
 
-  return {
-    rides,
-    count,
-    onTheWay,
-    finished,
-    assigned,
-    pending,
-    future
-    // selected : selectedRides
-  }
+  return { rides, count, ...searchOptions }
 }
 
 const mapDispatchToProps = dispatch => bindActionCreators({

@@ -22,13 +22,16 @@ const formatData = data => {
       willDrop,
       willPick,
       status,
-      from,
+      frm,
       to,
       time,
       date,
       person,
       dropOffAddress,
-      pickUpAddress
+      pickUpAddress,
+      receipt,
+      pkg,
+      isPackage
     } = item
 
     return {
@@ -36,14 +39,17 @@ const formatData = data => {
       willDrop : willDrop ? 'YES' : 'NO' ,
       willPick : willPick ? 'YES' : 'NO' ,
       to,
-      frm : from,
+      frm,
       time : formatHour(time),
       date : formatDate(date),
       status,
       person : `${ person.firstname } ${ person.lastname }`,
       phoneNumber : formatPhone(person.phoneNumber),
       dropOffAddress,
-      pickUpAddress
+      pickUpAddress,
+      receipt,
+      isPackage,
+      pkg
     }
   })
 }
@@ -51,11 +57,16 @@ const formatData = data => {
 const tableData = {
   headers : [
     { value : 'id', label : 'Ticket ID', flex : 1 },
+    // { value : 'receipt', label : 'Receipt #', flex : 1 },
     { value : 'person', label : 'Name', flex : 2 },
     { value : 'time', label : 'Time', flex : 1 },
     { value : 'date', label : 'Date', flex : 2 },
     { value : 'phoneNumber', label : 'Phone Number', flex : 2 },
-  ] 
+  ] ,
+  colors : {
+    'true' : 'orange',
+  },
+  colorsPropToMatch : 'isPackage'
 }
 
 const TicketTemplate = props => {
@@ -119,7 +130,7 @@ class TicketConsult extends Component {
     this._onSort = this._onSort.bind(this)
   }
 
-//#region Private functions
+  //#region Private functions
   _onAssignRide(ride) {
     const { selected } = this.state
     const { tickets } = this.props
@@ -157,6 +168,7 @@ class TicketConsult extends Component {
 
   _requestTickets() {
     const { skip : oldSkip, limit, sortBy, sortOrder } = this.state
+    const { isPackage } = this.props
 
     const skip = oldSkip * limit
 
@@ -165,7 +177,7 @@ class TicketConsult extends Component {
     const sort = `${ sortBy } ${ sortOrder }`
 
     this.setState({ selected : [] })
-    return this.props.queryTickets({ skip, status, sort, limit, unassigned : true })
+    return this.props.queryTickets({ skip, status, sort, limit, unassigned : false, isPackage })
   }
 
   _onChange(val, name) {
@@ -210,7 +222,7 @@ class TicketConsult extends Component {
   }
 //#endregion
 
-//#region Lifecycle
+  //#region Lifecycle
   componentWillMount() {
     // console.log(this.props.tickets)
     return this._requestTickets()
@@ -244,10 +256,11 @@ class TicketConsult extends Component {
           total={ count }
           headerProps={ tableData.headers }
           template={ <TicketTemplate /> }
+          colorProps={ tableData.colors }
+          colorPropToMatch={ tableData.colorsPropToMatch }
         />
         <TicketSettings
           selected={ selected }
-          // showForm={ () => this._showForm('showForm', true) }
           showForm={ this._showForm }
           requestTickets={ this._requestTickets }
         />
@@ -275,9 +288,19 @@ const mapDispatchToProps = dispatch => bindActionCreators({
 
 const mapStateToProps = state => {
   const { tickets, searchOptions, count } = state.ticket
-  const { used, redeemed, tnull, tnew, deleted, unassigned } = searchOptions
+  const { used, redeemed, tnull, tnew, deleted, unassigned, isPackage } = searchOptions
 
-  return { tickets, used, redeemed, tnull, tnew, deleted, unassigned, count }
+  return {
+    isPackage,
+    tickets,
+    used,
+    redeemed,
+    tnull,
+    tnew,
+    deleted,
+    unassigned,
+    count
+  }
 }
 
 export default connect(mapStateToProps, mapDispatchToProps)(TicketConsult)

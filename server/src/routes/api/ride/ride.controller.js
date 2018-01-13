@@ -88,7 +88,7 @@ export const getRideData = async ride => {
       buss = await Bus.findById(bus)
       busDetails = await BusDetail.findOne({ bus })
 
-      // luggageUsed = parseInt(busDetails.luggage) - parseInt(luggage)
+      // luggageUsed { = parseInt(busDetails.luggage) - parseInt(luggage)
       // seatsUsed = parseInt(busDetails.seats) - parseInt(seatsOccupied)
     // } else {
     //   luggageUsed = luggage
@@ -101,8 +101,8 @@ export const getRideData = async ride => {
                       id : buss.id,
                       name : buss.name,
                       status : buss.status,
-                      seats : busDetails.seats,
-                      luggage : busDetails.luggage,
+                      seats : busDetails.seatQty,
+                      luggage : busDetails.luggageQty,
                     } 
                     : null
 
@@ -110,7 +110,7 @@ export const getRideData = async ride => {
       id,
       bus : busData,
       ticketsCount,
-      status,
+      status, // : status === 'ON-THE-WAY' ? status.split('-').join(' ') : status,
       to,
       frm,
       time,

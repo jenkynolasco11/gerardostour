@@ -5,6 +5,7 @@ const PackageSchema = new Schema({
   // person : { type : Schema.Types.ObjectId, ref : 'person' },
   weight : { type : Number, default : 0 },
   message : String,
+  fee : { type : Number, default : 0 },
   createdAt : { type : Date, default : Date.now },
 })
 

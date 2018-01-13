@@ -20,13 +20,20 @@ class TicketTabs extends Component{
     }
 
     this.onTabChange = this.onTabChange.bind(this)
+    this.onTabNext = this.onTabNext.bind(this)
     // this._willEnableAddressTab = this._willEnableAddressTab.bind(this)
     // this._willEnablePaymentTab = this._willEnablePaymentTab.bind(this)
     // this._onAllowTab = this._onAllowTab.bind(this)
   }
 
   onTabChange(index) {
-    this.setState({ index })
+    return this.setState({ index })
+  }
+
+  onTabNext(next=1) {
+    const { index } = this.state
+
+    return this.setState({ index : index + next })
   }
 
   render() {
@@ -36,28 +43,28 @@ class TicketTabs extends Component{
     return (
       <Tabs fixed index={ this.state.index } onChange={ this.onTabChange }>
         <Tab icon={ <MdPerson /> } label="Personal Info"> 
-          <TicketPersonal { ...this.props } />
+          <TicketPersonal { ...this.props } onTabNext={ this.onTabNext }/>
         </Tab>
         <Tab
           // disabled={ tab2Disable }
           icon={ <MdDirectionsBus /> }
           label="Trip Info"
         >
-          <TicketTrip { ...this.props } />
+          <TicketTrip { ...this.props } onTabNext={ this.onTabNext }/>
         </Tab>
         <Tab
           disabled={ /*tab3Disable*/ isModify }
           icon={ <MdAttachMoney /> }
           label="Payment Info"
         >
-          <TicketPayment { ...this.props } />
+          <TicketPayment { ...this.props } onTabNext={ this.onTabNext }/>
         </Tab>
         <Tab
           // disabled={ /*tab4Disable*/ tab2Disable }
           icon={ <MdContentPaste /> }
           label="Review Info"
         >
-          <TicketReview { ...this.props } />
+          <TicketReview { ...this.props } onTabNext={ this.onTabNext }/>
         </Tab>
       </Tabs>
     )

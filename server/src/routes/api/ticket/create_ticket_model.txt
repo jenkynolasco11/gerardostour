@@ -28,59 +28,90 @@ dejar---------
 fecha_creacion---------
 
 
-Creating a ticket => 
+Creating a ticket =>
 
 ticket {
-  // general info
-  isLocal : Boolean,
-  ticketQty : Number,
-  packageQty : Number,
+  isLocal : true,
+  ticketQty : 3,
+  // packageQty : 0,
   
   // Person details
-  firstname : String,
-  lastname : String,
-  phoneNumber : String{10},
-  email : String,
+  firstname : 'Jenky',
+  lastname : 'Nolasco',
+  phoneNumber : '3479742990',
+  email : 'jenky.nolasco@gmail.com',
 
   // Trip details
-  willPick : Boolean,
-  willDrop : Boolean,
-  pickUpAddress : [{
-    street : String,
-    city : String,
-    state : String,
-    zipcode : String
-  } | null ],
-  dropOffAddress [{
-    street : String,
-    city : String,
-    state : String,
-    zipcode : String
-  } | null ],
-  frm : String (NY,PA),
-  to : String (NY,PA),
-  date : Date,
-  time : Number,
+  willPick : true,
+  willDrop : false,
+  pickUpAddress : {
+    street : '116 Sherman Ave',
+    city : 'New York',
+    state : 'NY',
+    zipcode : 10034
+  },
+  dropOffAddress : null,
+  frm : 'NY',
+  to : 'PA',
+  date : Date.now(),
+  time : 11,
 
   // Receipt details
-  fee : Number,
-  extraFee : Number,
-  totalAmount : Number,
-  luggageQty : Number,
-  cardBrand : String,
-  paymentType : String [ 'CARD' | 'CASH' ],
-  cardLastDigits : String [ Number | null ],
-
+  totalAmount : 120,
+  luggageQty : 1,
+  paymentType : 'CARD',
+  cardBrand : 'VISA',
+  cardLastDigits : '0442',
+  
   // Ticket details
-  isPackage : Boolean,
-  packageInfo : [ {
-    weight : number,
-    message : String,
-  } | null ]
+  fee : 30,
+  extraFee : 15,
+  
+  // package details
+  
+  isPackage : true,
+  packageInfo : {
+    weight : 10.0,
+    message : 'Handle with care',
+  },
 }
 
+Retrieving a ticket =>
+
+ticket {
+  id : number,
+  willDrop : boolean,
+  willPick : boolean,
+  receipt : number,
+  status : string,
+  frm : string,
+  to : string,
+  pickUpAddress : {
+    street : string,
+    city : string,
+    state : string,
+    zipcode : number
+  } | null,
+  dropOffAddress : {
+    street : string,
+    city : string,
+    state : string,
+    zipcode : number
+  } | null,
+  time : number,
+  date : number,
+  person : {
+    firstname : string,
+    lastname : string,
+    email : string,
+    phoneNumber : string
+  },
+  isPackage : boolean,
+  pkg : {
+    weight : number,
+    message : string
+  } | null
+}
 
 // Info to take from tickets
-{
-
-}
+{ }

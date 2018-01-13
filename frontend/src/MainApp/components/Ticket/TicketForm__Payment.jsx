@@ -13,7 +13,6 @@ const TicketPayment = props => {
     cardNumber,
     expirationDate,
     cvc,
-    // totalAmount,
   } = payment
 
   return (
@@ -25,60 +24,43 @@ const TicketPayment = props => {
         onChange={ val => props.onChange(val, 'payment', 'isCard') }
       />
       { 
-        isCard && [
-          <ListDivider key={ 1 } />,
-          <CardTitle key={ 2 } title="Card Information" />,
+        isCard &&
+        <React.Fragment>
+          <ListDivider />
+          <CardTitle title="Card Information" />
           <Input
-            key={ 3 }
             hint="Credit/Debit Card Number"
             label="Card Number"
             type="text"
             maxLength={ 16 }
-            onChange={ val => props.onChange(onlyNumber(val), 'payment', 'cardNumber') }
+            onChange={ val => props.onChange(onlyNumber(val, cardNumber), 'payment', 'cardNumber') }
             value={ cardNumber }
             icon={ <MdCreditCard /> }
             required
-          />,
+          />
           <Input
-            key={ 4 }
             hint="MMYY"
             label="Card Expiration Date"
             type="text"
             maxLength={ 4 }
-            onChange={ val => props.onChange(onlyNumber(val), 'payment', 'expirationDate') }
+            onChange={ val => props.onChange(onlyNumber(val, expirationDate), 'payment', 'expirationDate') }
             value={ expirationDate }
             icon={ <MdDateRange /> }
             required
-          />,
+          />
           <Input
-            key={ 5 }
             hint="000"
             label="CVC"
             type="text"
             maxLength={ 3 }
-            onChange={ val => props.onChange(onlyNumber(val), 'payment', 'cvc') }
+            onChange={ val => props.onChange(onlyNumber(val, cvc), 'payment', 'cvc') }
             value={ cvc }
             icon={ <MdLabelOutline /> }
             required
           />
-        ]
+        </React.Fragment>
       }
       <ListDivider />
-      {/*
-      <ListItem ripple={ false }>
-        <CardTitle title=" Total Amount:" />
-        <p> { parseFloat(totalAmount).toFixed(2) } </p>
-      </ListItem>
-      {/*
-        <ListItem ripple={ false }>
-          <CardTitle title="  Extra Fees:" />
-          <p> { parseFloat(extraFee).toFixed(2) } </p>
-        </ListItem>
-        <ListItem ripple={ false }>
-          <CardTitle title="Total Amount:" />
-          <p> { parseFloat(totalAmount).toFixed(2) } </p>
-        </ListItem>
-      */}
     </List>
   )
 }

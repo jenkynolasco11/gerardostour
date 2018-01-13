@@ -22,10 +22,12 @@ import configData from '../../config/config-values.json'
 import { formatDate, formatHour } from '../../utils'
 import { getExtraPrice } from './utils'
 
-const Title = prop => ([
-  <CardTitle key="1" title={ prop.title }/>,
-  <ListDivider key="2" />
-])
+const Title = prop => (
+  <React.Fragment>
+    <CardTitle title={ prop.title } />
+    <ListDivider />
+  </React.Fragment>
+)
 
 const ReviewPersonal = props => {
   const {
@@ -67,8 +69,8 @@ const ReviewPersonal = props => {
 
 const ReviewTrip = props => {
   const {
-    departureDate,
-    departureTime,
+    date,
+    time,
     to,
     frm,
     willDrop,
@@ -78,34 +80,38 @@ const ReviewTrip = props => {
   } = props
 
   return (
-    <List className="review-trip">
-      <List className="list">
-        <ListItem
-          ripple={ false }
-          leftIcon={ <MdEventAvailable /> }
-          caption={ formatDate(departureDate) }
-          legend="Date"
-        />
-        <ListItem
-          ripple={ false }
-          leftIcon={ <MdTimer /> }
-          caption={ formatHour(departureTime) }
-          legend="Departure Time"
-        />
+    <React.Fragment>
+      <List className="review-trip">
+        <List className="list">
+          <ListItem
+            ripple={ false }
+            leftIcon={ <MdEventAvailable /> }
+            caption={ formatDate(date) }
+            legend="Date"
+          />
+          <ListItem
+            ripple={ false }
+            leftIcon={ <MdTimer /> }
+            caption={ formatHour(time) }
+            legend="Departure Time"
+          />
+        </List>
       </List>
-      <List className="list">
-        <ListItem
-          ripple={ false }
-          leftIcon={ <TiHome/> }
-          caption={ frm }
-          legend="From"
-        />
-        <ListItem
-          ripple={ false }
-          leftIcon={ <FaRoad /> }
-          caption={ to }
-          legend="Going To"
-        />
+      <List className="review-trip">
+        <List className="list">
+          <ListItem
+            ripple={ false }
+            leftIcon={ <TiHome/> }
+            caption={ frm }
+            legend="From"
+          />
+          <ListItem
+            ripple={ false }
+            leftIcon={ <FaRoad /> }
+            caption={ to }
+            legend="Going To"
+          />
+        </List>
       </List>
       {
         willPick &&
@@ -125,15 +131,48 @@ const ReviewTrip = props => {
           legend="Pick Up Address"
         />
       }
+    </React.Fragment>
+  )
+}
+
+const ReviewPackage = props => {
+  const { hasPackage, packageInfo, packageQty } = props
+
+  if(!hasPackage) return null
+  
+  const { message, weight } = packageInfo
+
+  return (
+    <List>
+      <Title title="Package Information" />
+      <ListItem
+        ripple={ false }
+        // leftIcon={ <MdPersonPinCircle /> }
+        caption={ packageQty }
+        legend="Package Quantity"
+      />
+      <ListItem
+        ripple={ false }
+        // leftIcon={ <MdPersonPinCircle /> }
+        caption={ weight }
+        legend="Weight"
+      />
+      <ListItem
+        ripple={ false }
+        // leftIcon={ <MdPersonPinCircle /> }
+        caption={ message }
+        legend="Package message"
+      />
     </List>
   )
 }
 
 const ReviewPayment = props => {
   const {
-    howMany,
+    ticketQty,
+    packageQty,
+    luggageQty,
     to,
-    luggage,
     fee,
     extraFee,
     totalAmount,
@@ -141,10 +180,13 @@ const ReviewPayment = props => {
     willDrop,
     willPick,
     pickUpAddress,
-    dropOffAddress
+    dropOffAddress,
+    packageInfo
   } = props
 
   const { luggagePrice, prices } = configData
+
+  const packFee = packageInfo.fee
   
   let dropOffFee = 0
   let pickUpFee = 0
@@ -158,13 +200,20 @@ const ReviewPayment = props => {
   }
 
   const totalAmoutCaption = `Total Amount: $${ parseFloat(totalAmount).toFixed(2) }`
-  let feesCaption = `$${ parseFloat(fee).toFixed(2) } (${ howMany } tickets x ${ prices.default }) `
-  let extraFeesCaption = `$${ parseFloat(extraFee).toFixed(2) } (${ luggage } extra luggage x ${ parseFloat(luggagePrice).toFixed(2) })`
-  let extraCaption = `${ willPick ? willDrop ? ` $${ parseFloat(pickUpFee).toFixed(2) } Pick Up + $${ parseFloat(dropOffFee).toFixed(2) } Drop Off fees` : ` + $${ parseFloat(pickUpFee).toFixed(2) } Pick Up fee` : willDrop ? ` + $${ parseFloat(dropOffFee).toFixed(2) } Drop off fee` : '' }`
+  const feesCaption = `$${ parseFloat(fee).toFixed(2) } (${ ticketQty } tickets x ${ prices.default }) `
+  const extraFeesCaption = `$${ parseFloat(extraFee).toFixed(2) } (${ luggageQty } extra luggage x ${ parseFloat(luggagePrice).toFixed(2) })`
+  const extraCaption = willPick 
+                      ? willDrop 
+                      ? ` $${ parseFloat(pickUpFee).toFixed(2) } Pick Up + $${ parseFloat(dropOffFee).toFixed(2) } Drop Off fees` 
+                      : ` $${ parseFloat(pickUpFee).toFixed(2) } Pick Up fee` 
+                      : willDrop 
+                      ? ` $${ parseFloat(dropOffFee).toFixed(2) } Drop off fee` 
+                      : ''
+  const extraExtraCaption = ` $${ parseFloat(packFee).toFixed(2) } Package fee (${ packageQty } packages)`
 
   return (
-    <List className="review-payment">
-      <List className="list">
+    // <List className="review-payment">
+      <List className="review-payment list">
         <ListItem
           leftIcon={ <MdAttachMoney /> }
           ripple={ false }
@@ -187,8 +236,13 @@ const ReviewPayment = props => {
           ripple={ false }
           itemContent={ <div><div className="small-caption">Drop/Pick fees:</div>{ extraCaption }</div> }
         />
+        <ListItem
+          className="review-fee"
+          ripple={ false }
+          itemContent={ <div><div className="small-caption">Package fees:</div>{ extraExtraCaption }</div> }
+        />
       </List>
-    </List>
+    // </List>
   )
 }
 
@@ -221,6 +275,7 @@ const TicketReview = props => {
       <ReviewPersonal { ...props.person } />
       <Title title="Trip Information" />
       <ReviewTrip { ...props } />
+      <ReviewPackage { ...props }/>
       <Title title="Payment Information" />
       <ReviewPayment { ...props } />
       <ListDivider />

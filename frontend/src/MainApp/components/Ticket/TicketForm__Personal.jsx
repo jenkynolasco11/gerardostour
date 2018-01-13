@@ -12,7 +12,7 @@ const TicketPersonal = props => {
     <List className="ticket-form-personal">
       <CardTitle title="Personal Information" />
       <ListDivider />
-      <List >
+      <List>
         <Input
           type="text"
           label="First Name"

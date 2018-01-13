@@ -1,13 +1,18 @@
 import React, { Component } from 'react'
-// import { Ripple } from 'react-toolbox/lib/ripple'
+// import Ripple from 'react-toolbox/lib/ripple/Ripple'
 import FontIcon from 'react-toolbox/lib/font_icon/FontIcon'
 
 import Paginate from './Paginate'
+
+// const RippableIcon = Ripple({ spread : 2 })(FontIcon)
 
 const CheckMark = props => (
   <div className={ `checkmark${ props.isChecked ? ' checked' : '' }` } onClick={ props.onSelect }>
     <FontIcon value="check"/>
   </div>
+  // <div className={ `checkmark${ props.isChecked ? ' checked' : '' }` } onClick={ props.onSelect }>
+  //   <RippableIcon value="check"/>
+  // </div>
 )
 
 const TableHeader = props => (
@@ -40,9 +45,7 @@ const TableHeader = props => (
 )
 
 class TableRow extends Component {
-  state = {
-    isClosed : true
-  }
+  state = { isClosed : true }
 
   constructor(props) {
     super(props)
@@ -56,11 +59,21 @@ class TableRow extends Component {
     return this.setState({ isClosed : !isClosed })
   }
 
+  componentWillReceiveProps(/* props */) {
+    this.setState({ isClosed : true })
+  }
+
   render() {
-    const { selected, onSelectRow, item, headerProps, index, template } = this.props
+    const { selected, onSelectRow, item, headerProps, index, template, colorProps, colorPropToMatch } = this.props
     const { isClosed } = this.state
 
     const isSelected = selected.includes(index)
+    const colorSign = colorProps && colorPropToMatch 
+                      ? colorProps[ '' + item[colorPropToMatch] ] 
+                      ? colorProps[ '' + item[colorPropToMatch] ]
+                      : 'transparent'
+                      : null
+
 
     return (
       <div className={ `table-row${ isSelected ? ' selected' : '' }` }>
@@ -83,6 +96,10 @@ class TableRow extends Component {
               ))
             }
           </div>
+          {
+            colorSign &&
+            <span className="colormark" style={{ backgroundColor : colorSign }} />
+          }
         </div>
         <div className={ `table-row-content body${ isClosed ? ' closed' : '' }` }>
           {
@@ -96,36 +113,34 @@ class TableRow extends Component {
   }
 }
 
-const TableBody = props => {
-  const { total = 0, limit = 10, onPaginate, skip = 0 } = props
+class TableBody extends Component{
+  render() {
+    const { total = 0, limit = 10, onPaginate, skip = 0, data } = this.props
 
-  return (
-    <div className="table">
-      <TableHeader { ...props } />
-      <div className="table-body">
-        {
-          props.data &&
-          props.data.map(
-            (item, i) => <TableRow key={ i } index={ i } item={ item } { ...props }/> 
-          )
-        }
-        { 
-          props.data &&
-          props.data.length
-          ? null
-          : <div className="table-no-content"> There is no content available </div>
-        }
+    return (
+      <div className="table">
+        <TableHeader { ...this.props } />
+        <div className="table-body">
+          {
+            data &&
+            data.map(
+              (item, i) => <TableRow key={ i } index={ i } item={ item } { ...this.props }/> 
+            )
+          }
+          { 
+            data &&
+            data.length
+            ? null
+            : <div className="table-no-content"> There is no content available </div>
+          }
+        </div>
+        <Paginate {...{ total, limit, skip, onPaginate }} />
       </div>
-      <Paginate {...{ total, limit, skip, onPaginate }} />
-    </div>
-  )
+    )
+  }
 }
 
 class Table extends Component {
-  // state = {
-  //   selected : []
-  // }
-
   constructor(props) {
     super(props)
 

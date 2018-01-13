@@ -13,14 +13,10 @@ import { /*formatTicketData, reformatTicketData,*/ getExtraPrice } from './utils
 import { submitTicketData } from '../../store-redux/actions'
 
 import './ticket-form.scss'
-
+/*
 const defaultState = {
-  id : 0,
-  _isLocal : true,
-  // title : 'Create',
-  // isModify : false,
-  // showDialog : false,
-
+  isLocal : true,
+  
   // Person Form Fields
   person : {
     firstname : '',
@@ -30,8 +26,8 @@ const defaultState = {
   },
 
   // Address Form Fields
-  departureDate : new Date(new Date().setHours(0,0,0,0)),
-  departureTime : 3,
+  date : new Date(new Date().setHours(0,0,0,0)),
+  time : 3,
   willPick : false,
   willDrop : false,
   pickUpAddress : {
@@ -65,68 +61,129 @@ const defaultState = {
   totalAmount : 0,
   
   /////////////////
-
+  
   howMany : 1,
   luggage : 0,
   ///////////
   status : 'NEW',
   redeemedCount : 0,
 }
-//*
-const myInfo  = {
-  id : '',
-  // title : 'Create',
+*/
 
-  // Person Form Fields
+const defaultState = {
+  // general info
+    isLocal : true,
+    ticketQty : 1,
+    packageQty : 0,
+    
+    // Person details
+    person : {
+      firstname : '',
+      lastname : '',
+      phoneNumber : '',
+      email : '',
+    },
+  
+    // Trip details
+    willPick : false,
+    willDrop : false,
+    pickUpAddress : {
+      street : '',
+      city : '',
+      state : '',
+      zipcode : ''
+    },
+    dropOffAddress : {
+      street : '',
+      city : '',
+      state : '',
+      zipcode : ''
+    },
+    frm : 'NY',
+    to : 'PA',
+    date : new Date(new Date().setHours(0,0,0,0)),
+    time : 3,
+  
+    // Receipt details
+    payment : {
+      fee : 0,
+      extraFee : 0,
+      totalAmount : 0,
+      paymentType : 'CASH',
+      cardBrand : '',
+      cardLastDigits : '',
+    },
+  
+    luggageQty : 0,
+  
+    // Ticket details
+    hasPackage : false,
+    packageInfo : {
+      weight : 0,
+      message : '',
+      fee : 0
+    }
+}
+//*
+const myInfo = {
+  // general info
+  isLocal : true,
+  ticketQty : 3,
+  packageQty : 0,
+  luggageQty : 1,  
+  // Person details
   person : {
     firstname : 'Jenky',
     lastname : 'Nolasco',
-    email : 'jenky@nolasco.com',
     phoneNumber : '3479742990',
+    email : 'jenky.nolasco@gmail.com',
   },
 
-  // Address Form Fields
-  departureDate : new Date(new Date('2018-11-11').setHours(0,0,0,0)),
-  departureTime : 11,
+  // Trip details
   willPick : true,
-  willDrop : true,
+  willDrop : false,
   pickUpAddress : {
     street : '116 Sherman Ave',
     city : 'New York',
     state : 'NY',
-    zipcode : '10128'
-  }, 
+    zipcode : 10034
+  },
   dropOffAddress : {
-    street : '172 Smith Street',
-    city : 'Brooklyn',
-    state : 'NY',
-    zipcode : '10025',
+    street : '',
+    city : '',
+    state : '',
+    zipcode : ''
   },
   frm : 'NY',
-  to : 'NY',
-  /////////
+  to : 'PA',
+  date : new Date('2018-05-12'),
+  time : 13,
 
-  // Payment From Fields
+  // Receipt details
   payment : {
-    type : 'CARD',
-    isCard : true,
+    fee : 90,
+    extraFee : 15,
+    totalAmount : 105,
+    cardBrand : 'VISA',
+    paymentType : 'CARD',
     cardLastDigits : '4242',
-    cardNumber : '4242424242424242',
-    expirationDate : '0120',
-    cvc : '123',
-  },
-  // Per Ticket Information
-  extraFee : 0.0,
-  fee : 0.0,
-  totalAmount : 0.0,
-  /////////////////
 
-  // Ticket Information
-  // ticketNumber : 0,
-  howMany : 4,
-  luggage : 3,
-  ///////////
+    // App settings
+    expirationDate : '',
+    cvc : '',
+    isCard : false,
+    cardNumber : '',
+  },
+
+  // Ticket details
+  hasPackage : false,
+  packageInfo : {
+    weight : 0,
+    message : '',
+    fee : 0
+  }
 }
+
 // */
 
 // TODO : Make a validation function to validate every field in the form
@@ -155,13 +212,10 @@ const checkValidation = state => {
 }
 
 class TicketForm extends Component {
+  state = { ...defaultState, ...myInfo }
+
   constructor(props) {
     super(props)
-
-    this.state = {
-      ...defaultState,
-      ...myInfo
-    }
 
     this._onChange = this._onChange.bind(this)
     this._onSubmit = this._onSubmit.bind(this)
@@ -186,17 +240,17 @@ class TicketForm extends Component {
     let {
       to,
       frm,
-      luggage,
-      howMany,
-      // extraFee,
-      // fee,
-      // totalAmount,
+      luggageQty,
+      ticketQty,
       dropOffAddress,
       pickUpAddress,
       willDrop,
-      willPick
+      willPick,
+      packageInfo,
+      packageQty
     } = obj
 
+    const packFee = packageInfo.fee
     const { luggagePrice, prices } = configData
 
     let totalAmount = 0
@@ -210,11 +264,11 @@ class TicketForm extends Component {
 
     if(willDrop) dropFee += getExtraPrice(prices[ to ], dropOffAddress.zipcode)
 
-    fee += parseFloat(howMany * prices.default)
-    luggageFee += (luggagePrice * luggage)
+    fee += parseFloat(ticketQty * prices.default)
+    luggageFee += (luggagePrice * luggageQty)
 
     totalAmount += parseFloat(fee + luggageFee + pickFee + dropFee)
-    extraFee += parseFloat(luggageFee + pickFee + dropFee)
+    extraFee += parseFloat(luggageFee + pickFee + dropFee + packFee)
 
     const fees = { totalAmount, fee, extraFee }
 
@@ -222,25 +276,14 @@ class TicketForm extends Component {
   }
 
   _onCancel() {
-    // const { history } = this.props
-
-    // return history.push('/')
+    return this.props.closeForm()
   }
 
   _onChange(val, name, extra) {
     const state = { ...this.state }
-    const {
-      payment,
-      person,
-      pickUpAddress,
-      dropOffAddress,
-      // howMany
-    } = state
+    const { payment, person, pickUpAddress, dropOffAddress, packageInfo, ticketQty } = state
 
-    let {
-      luggage,
-      to
-    } = state
+    const newProp = {}
 
     switch(name) {
       case 'pick' :
@@ -256,40 +299,39 @@ class TicketForm extends Component {
         payment[ extra ] = val
         if(extra === 'cardNumber') payment.cardLastDigits = val.slice(-4)
         break
-      case 'luggage':
-        luggage = val
+      case 'package' :
+        packageInfo[ extra ] = val
         break
-      case 'to' :
-        to = val
-        // const { prices } = configData
-        // let fees = prices[ val ]
-        // const extraLuggage = state.luggage - fees.minLuggage
+      case 'packageQty' :
+        if(val > ticketQty) {
+          newProp.packageQty = ticketQty
+          break
+        }
 
-        // if(!fees) fees = prices.default
-
-        // state.fee = fees.fee
-        // if(extraLuggage > 0) state.extraFee = extraLuggage * fees.extraFee
-
-        // paymentType.totalAmount = state.howMany * (state.fee + state.extraFee)
+        newProp.packageQty = val
         break
+      // case 'luggage':
+      //   luggageQty = val
+      //   break
+      // case 'to' :
+      //   to = val
+      //   break
       default :
+        newProp[ name ] = val
         break
     }
 
-    // const fees = this._calculateFees(/*to, luggage, howMany*/)
-    // console.log(...fees)
-
-    return this.setState({
+    const newState = {
       ...state,
-      [ name ] : val,
+      ...newProp,
       person : { ...person },
       pickUpAddress : { ...pickUpAddress },
       dropOffAddress : { ...dropOffAddress },
       payment : { ...payment },
-      to,
-      luggage,
-      // ...fees
-    }, () => {
+      packageInfo : { ...packageInfo },
+    }
+
+    return this.setState({ ...newState }, () => {
       const fees = this._calculateFees()
 
       return this.setState({ ...fees })
@@ -299,7 +341,7 @@ class TicketForm extends Component {
   componentWillMount() {
     // Check this out later
     return this.setState({ ...this._calculateFees() })
-  /*
+    /*
     const { ticket = {} } = this.props
 
     if(ticket) {
@@ -361,8 +403,6 @@ class TicketForm extends Component {
   }
 
   render() {
-    // console.log(this.state)
-
     return (
       <form onSubmit={ this._onSubmit }>
         <TicketTabs
@@ -390,7 +430,6 @@ const Form = props => (
   <Dialog
     className="ticket-form dialog"
     active={ props.active }
-    // theme={ theme }
   >
     <TicketFormTop { ...props } />
     <TicketForm { ...props } />

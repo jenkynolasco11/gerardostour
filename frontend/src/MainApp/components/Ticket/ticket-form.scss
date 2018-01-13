@@ -5,6 +5,10 @@
   height : 90vh;
   width : 60vw;
 
+  // [data-react-toolbox=tabs] :nth-child(2) {
+    
+  // }
+
   &-top {
     display : flex;
     justify-content : space-between;
@@ -76,6 +80,7 @@
 
     .review-trip {
       display : block;
+
       .list {
         display : flex;
 
@@ -89,7 +94,7 @@
     }
 
     .review-fee {
-      display : block;
+      display : flex;
       font-size : 1em;
 
       div {
@@ -100,6 +105,10 @@
           width : 156px;
         }
       }
+    }
+
+    .review-actions {
+      margin-top : 50px;
     }
   }
 }

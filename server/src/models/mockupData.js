@@ -52,10 +52,10 @@ mongoose.connect(config.DBURI, { useMongoClient : true }, async () => {
   const Meta = mongoose.model('meta')
   const Package = mongoose.model('package')
 
-  const genRand = (limit, x = 0, isInt = true) => {
+  const genRand = (limit, x = 0, isFloat = false) => {
     const rand = Math.random() * limit
 
-    if(isInt) return Math.floor(rand) + x
+    if(!isFloat) return Math.floor(rand) + x
 
     return rand + x
   }
@@ -79,7 +79,7 @@ mongoose.connect(config.DBURI, { useMongoClient : true }, async () => {
   const ticketLimit = genRand(2000, 1000)
   const peopleLimit = genRand(500, 300)
   const addressLimit = genRand(40,30)
-  const rideLimit = genRand(100, 60)
+  const rideLimit = genRand(150, 100)
   let driversLimit = 4
 
   const ticktsStatus = [ 'USED', 'REDEEMED', 'NULL', 'NEW', 'DELETED' ]
@@ -204,16 +204,21 @@ mongoose.connect(config.DBURI, { useMongoClient : true }, async () => {
     const { bus, to, frm, status, time, date, seatsOccupied, luggage } = data
 
     try {
-      const willBus = genRand(2)
+      const willBus = genRand(2, 0, false) > 0.35
+      const isPending = status === 'PENDING'
+      const stat = willBus && isPending ? 'ASSIGNED' : status
+      const bs = stat !== 'PENDING' ? bus : null
+
+      console.log(stat)
 
       const ride = await new Ride({
         id : meta.lastRideId++,
-        bus : willBus ? bus : null,
+        bus : bs,
         to,
         frm,
         time,
         date,
-        status : willBus && status === 'PENDING' ? 'ASSIGNED' : status
+        status : stat
       }).save()
 
       rideTimes.push({ time, date, to, frm })
@@ -250,17 +255,6 @@ mongoose.connect(config.DBURI, { useMongoClient : true }, async () => {
   }
 
   const createReceipt = async data => {
-    // const {
-    //   id,
-    //   paymentType,
-    //   totalAmount,
-    //   cardBrand,
-    //   cardLastDigits,
-    //   luggageQty,
-    //   packagesQty,
-    //   ticketQty,
-    // } = data
-
     try {
       const receipt = await new Payment(data).save()
 
@@ -444,7 +438,7 @@ mongoose.connect(config.DBURI, { useMongoClient : true }, async () => {
 
         promises.push(
           Bus
-            .aggregate([{ $sample : { size : 1 }}])
+            .aggregate([{ $sample : { size : 1 }}, { $project : { _id : 1 }}])
             .then(([ bus ]) => createRide({
                 bus : bus._id,
                 to,

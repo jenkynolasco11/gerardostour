@@ -73,7 +73,7 @@ export const getTicketData = async tckt => {
     const pack = await Package.findById(tckt.package)
     const rcpt = await Receipt.findById(tckt.receipt)
     const details = await TicketDetail.findById(tckt.details)
-    
+
     const pick = await (tckt.willPick ? Address.findById(details.pickUpAddress) : '')
     const drop = await (tckt.willDrop ? Address.findById(details.dropOffAddress) : '')
 
@@ -83,12 +83,11 @@ export const getTicketData = async tckt => {
 
     const data = {
       id : tckt.id,
-      // _id : tckt._id,
       willDrop : tckt.willDrop,
       willPick : tckt.willPick,
-      // luggageQty : rcpt.luggageQty,
+      receipt : rcpt.id,
       status : tckt.status,
-      from : tckt.from,
+      frm : tckt.frm,
       to : tckt.to,
       pickUpAddress : pickAdd,
       dropOffAddress : dropAdd,
@@ -101,8 +100,7 @@ export const getTicketData = async tckt => {
         phoneNumber : person.phoneNumber
       },
       isPackage : tckt.isPackage,
-      package : pkg
-
+      pkg
     }
 
     return data

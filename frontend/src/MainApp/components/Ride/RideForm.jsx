@@ -20,12 +20,14 @@ import './ride-form.scss'
 
 import theme from './ride.theme.scss'
 
+const emptyVal = { value : -1, label : '' }
+
 const defaultState = {
   id : 0,
   title : 'Create',
   bus : '',
-  routeTo : 'NY',
-  routeFrom : 'PA',
+  frm : 'NY',
+  to : 'PA',
   status : 'PENDING',
   time : 3,
   date : new Date(new Date().setHours(0,0,0,0)),
@@ -33,9 +35,7 @@ const defaultState = {
 }
 
 class RideForm extends Component {
-  state = {
-    ...defaultState
-  }
+  state = { ...defaultState }
 
   constructor(props) {
     super(props)
@@ -46,9 +46,9 @@ class RideForm extends Component {
   async onSubmit(e) {
     e.preventDefault()
 
-    const { id, bus, routeTo, routeFrom, time, date, status } = this.state
+    const { busses, title, ...body } = this.state
 
-    await this.props.submitData({ id, bus, routeTo, routeFrom, time, date, status })
+    await this.props.submitData({ ...body })
 
     this.props.onSubmitData()
     return this.props.closeForm()
@@ -57,12 +57,10 @@ class RideForm extends Component {
   async componentWillMount() {
     const { ride } = this.props
 
-    console.log(ride)
-
     if(ride) {
-      const { id, bus, routeTo, routeFrom, time, date, status } = ride
+      const { bus, ...rest } = ride
 
-      this.setState({ id, bus : (bus ? bus.id : null), routeTo, routeFrom, time, date, status, title : 'Modify' })
+      this.setState({ ...rest, bus : (bus ? bus.id : null), title : 'Modify' })
     }
 
     try {
@@ -80,16 +78,7 @@ class RideForm extends Component {
 
   render() {
     const { closeForm } = this.props
-    const {
-      id,
-      title,
-      busses,
-      routeTo,
-      routeFrom,
-      bus,
-      time,
-      date,
-    } = this.state
+    const { id, title, busses, to, frm, bus, time, date } = this.state
 
     const busData = busses.map(dropDownData)
 
@@ -110,14 +99,14 @@ class RideForm extends Component {
         <Dropdown
           label="Going from"
           source={ configData.routes }
-          value={ routeFrom }
-          onChange={ e => this.setState({ routeFrom : e }) }
+          value={ frm }
+          onChange={ e => this.setState({ frm : e }) }
         />
         <Dropdown
           label="Going to"
           source={ configData.routes }
-          value={ routeTo }
-          onChange={ e => this.setState({ routeTo : e }) }
+          value={ to }
+          onChange={ e => this.setState({ to : e }) }
         />
         <DatePicker
           autoOk
@@ -149,7 +138,6 @@ const Form = props => (
     className="ride-form dialog"
     active={ props.active }
     theme={ theme }
-    // autoScrollBodyContent
   >
     <RideForm { ...props } />
   </Dialog>

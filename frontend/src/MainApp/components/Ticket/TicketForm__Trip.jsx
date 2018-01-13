@@ -21,13 +21,15 @@ const getMinDate = () => {
   return date
 }
 
-const Title = props => ([
-  <CardTitle key={ 1 } title={ props.title } />,
-  <ListDivider key={ 2 }/>
-])
+const Title = props => (
+  <React.Fragment>
+    <CardTitle title={ props.title } />
+    <ListDivider />
+  </React.Fragment>
+)
 
 const TimeInfo = props => {
-  const { departureDate, departureTime } = props
+  const { date, time } = props
 
   return (
     <List className="address-trip-info time" theme={ theme.listItem }>
@@ -36,19 +38,17 @@ const TimeInfo = props => {
           autoOk
           icon={ <MdEventAvailable /> }
           minDate={ getMinDate() }
-          value={ departureDate }
+          value={ date }
           onChange={ val => props.onChange(val, 'date') }
         />
       </ListItem>
       <ListItem ripple={ false }>
-        <FontIcon
-          value="timer"
-        />
+        <FontIcon value="timer" />
         <Dropdown
           allowBlank={ false }
           label="Departure Time"
           source={ configData.times }
-          value={ departureTime }
+          value={ time }
           onChange={ val => props.onChange(val, 'time') }
         />
       </ListItem>
@@ -57,7 +57,7 @@ const TimeInfo = props => {
 }
 
 const TripInfo = props => {
-  const { howMany, luggage, to, frm, isModify } = props
+  const { ticketQty, luggageQty, to, frm } = props
 
   return (
     <List className="address-dropdown">
@@ -70,10 +70,10 @@ const TripInfo = props => {
             required
             type="number"
             label="Tickets"
-            hint="How Many?"
-            value={ howMany }
-            disabled={ isModify }
-            onChange={ val => props.onChange(val, 'howMany') }
+            hint="How many tickets?"
+            value={ ticketQty }
+            // disabled={ isModify }
+            onChange={ val => props.onChange(onlyNumber(val), 'ticketQty') }
           />
         </ListItem>
         <ListItem ripple={ false }>
@@ -83,9 +83,8 @@ const TripInfo = props => {
             type="number"
             label="Luggage"
             hint="How Many?"
-            value={ luggage }
-            disabled={ isModify }
-            onChange={ val => props.onChange(val, 'luggage') }
+            value={ luggageQty }
+            onChange={ val => props.onChange(onlyNumber(val), 'luggageQty') }
           />
         </ListItem>
       </List>
@@ -97,7 +96,7 @@ const TripInfo = props => {
             label="From"
             required
             allowBlank={ false }
-            disabled={ isModify }
+            // disabled={ isModify }
             // template={ typeTemplate }
             source={ configData.routes }
             value={ frm }
@@ -111,7 +110,7 @@ const TripInfo = props => {
             label="To"
             required
             allowBlank={ false }
-            disabled={ isModify }
+            // disabled={ isModify }
             // template={ typeTemplate }
             source={ configData.routes }
             value={ to }
@@ -123,131 +122,130 @@ const TripInfo = props => {
   )
 }
 
-const AddressPickUpInfo = props => {
-  const { willPick, pickUpAddress } = props
+const AddressForm = props => {
+  const { willProp, prop, propName, onChangePropName, propClass, propCaption } = props
 
   return (
-    <List className="address-pick-drop pick">
-      <Title title="Pick Up Information" />
+    <List className={ `address-pick-drop ${ propClass }` }>
+      <Title title={ `${ propCaption } Information` } />
       <ListCheckbox
-        caption="Will Pick Up?"
-        checked={ willPick }
-        onChange={ val => props.onChange(val, 'willPick') }
+        caption={ `Will ${ propCaption }?` }
+        checked={ willProp }
+        onChange={ val => props.onChange(val, propName) }
       />
       {
-        willPick && [
+        willProp &&
+        <React.Fragment>
           <Input
-            key={ 0 }
             label="Street"
-            value={ pickUpAddress.street }
-            onChange={ val => props.onChange(val, 'pick', 'street')}
-          />,
+            value={ prop.street }
+            onChange={ val => props.onChange(val, onChangePropName, 'street')}
+          />
             <Input 
-            key={ 1 }
             label="City"
-            value={ pickUpAddress.city }
-            onChange={ val => props.onChange(val, 'pick', 'city')}
-          />,
+            value={ prop.city }
+            onChange={ val => props.onChange(val, onChangePropName, 'city')}
+          />
           <Autocomplete
             multiple={ false }
-            key={ 2 }
             source={ configData.stateCodes }
-            value={ pickUpAddress.state }
-            onChange={ val => props.onChange(val, 'pick', 'state') }
+            value={ prop.state }
+            onChange={ val => props.onChange(val, onChangePropName, 'state') }
             direction="down"
             label="State"
             selectedPosition="below"
-          />,
+          />
           <Input 
-            key={ 3 }
             label="ZIP Code"
-            value={ pickUpAddress.zipcode }
-            onChange={ val => props.onChange(onlyNumber(val), 'pick', 'zipcode')}
+            value={ prop.zipcode }
+            onChange={ val => props.onChange(onlyNumber(val), onChangePropName, 'zipcode')}
             maxLength={ 5 }
-          />,
-        ]
+          />
+        </React.Fragment>
       }
     </List>
   )
 }
 
-const AddressDropOffInfo = props => {
-  const { willDrop, dropOffAddress } = props
+const AddressInfo = props => (
+  <React.Fragment>
+    <AddressForm
+      willProp={ props.willPick }
+      prop={ props.pickUpAddress }
+      propName={ 'willPick' }
+      onChangePropName={ 'pick' }
+      propClass={ 'pick' }
+      propCaption={ 'Pick Up' }
+      onChange={ props.onChange }
+    />
+    <AddressForm
+      willProp={ props.willDrop }
+      prop={ props.dropOffAddress }
+      propName={ 'willDrop' }
+      onChangePropName={ 'drop' }
+      propClass={ 'drop' }
+      propCaption={ 'Drop Off' }
+      onChange={ props.onChange }
+    />
+  </React.Fragment>
+)
+
+const PackageInfo = props => {
+  const { hasPackage, onChange, packageInfo, packageQty } = props
+  const { weight, message, fee } = packageInfo
 
   return (
-    <List className="address-pick-drop drop">
-      <Title title="Drop Off Information" />
+    <List className="package-info">
+      <Title title="Package Information" />
       <ListCheckbox
-        caption="Will Drop Off?"
-        checked={ willDrop }
-        onChange={ val => props.onChange(val, 'willDrop') }
+        caption="Is this a package?"
+        checked={ hasPackage }
+        onChange={ val => props.onChange(val, 'hasPackage') }
       />
       {
-        willDrop && [
-          <Input 
-            key={ 0 }
-            label="Street"
-            value={ dropOffAddress.street }
-            onChange={ val => props.onChange(val, 'drop', 'street')}
-          />,
-          <Input 
-            key={ 1 }
-            label="City"
-            value={ dropOffAddress.city }
-            onChange={ val => props.onChange(val, 'drop', 'city')}
-          />,
-          <Autocomplete
-            multiple={ false }
-            key={ 2 }
-            source={ configData.stateCodes }
-            value={ dropOffAddress.state }
-            onChange={ val => props.onChange(val, 'drop', 'state') }
-            direction="down"
-            label="State"
-            selectedPosition="below"
+        hasPackage &&  
+        <React.Fragment>
+          <Input
+            type="number"
+            label="Packages"
+            min="0"
+            hint="How many package"
+            value={ packageQty }
+            onChange={ val => onChange(onlyNumber(val), 'packageQty') }
           />
-          ,
-          <Input 
-            key={ 3 }
-            label="ZIP Code"
-            value={ dropOffAddress.zipcode }
-            onChange={ val => props.onChange(onlyNumber(val), 'drop', 'zipcode')}
-            maxLength={ 5 }
+          {
+            packageQty === 1 &&
+            <Input
+              type="number"
+              label="Weight"
+              min="0"
+              hint="Package Weight"
+              value={ weight }
+              onChange={ val => onChange(onlyNumber(val), 'package', 'weight') }
+            />
+          }
+          <Input
+            type="text"
+            label="Message"
+            hint="Message specific for the package(s)"
+            value={ message }
+            onChange={ val => onChange(val, 'package', 'message') }
           />
-        ]
+          <Input
+            type="number"
+            label="Fee"
+            min="0"
+            hint="Fee to charge"
+            value={ fee }
+            onChange={ val => onChange(onlyNumber(val), 'package', 'fee') }
+          />
+        </React.Fragment>
       }
     </List>
   )
-}
-
-const AddressInfo = props => {
-  return [
-    <AddressPickUpInfo key={ 1 } { ...props } />,
-    <AddressDropOffInfo key={ 2 } { ...props } />
-  ]
 }
 
 class TicketAddress extends Component {
-  // componentWillMount() {
-  // //   const { to } = this.props
-  // //   const prices = configData.prices[ to ]
-  // //                   ? configData.prices[ to ]
-  // //                   : configData.prices.default
-
-  // //   const fee = null
-  // //   const extraFee = null
-
-  // //   /*    
-  // // const feesTotal = parseFloat(howMany * prices.fee).toFixed(2)
-  // // const extraTotal = parseFloat(extraLuggage * prices.extraFee).toFixed(2)
-
-  // // const totalAmoutCaption = `Total Amount : ${ parseFloat(Number(feesTotal) + Number(extraTotal)).toFixed(2) }`
-  // // const feesCaption = `${ feesTotal } (${ howMany } tickets x ${ parseFloat(prices.fee).toFixed(2) }) `
-  // // const extraFeesCaption = `${ extraTotal } (${ extraLuggage } extra luggage x ${ parseFloat(prices.extraFee).toFixed(2) })`
-  // //    */
-  // //   this.setState({ extraFee, fee })
-  // }
-
   render() {
     return (
       <List className="ticket-form-address">
@@ -256,6 +254,7 @@ class TicketAddress extends Component {
         <Title title="Trip Information" />
         <TripInfo { ...this.props } />
         <AddressInfo { ...this.props } />
+        <PackageInfo { ...this.props } />
       </List>
     )
   }

@@ -29,9 +29,10 @@ ticketRouter.post('/save', reformatTicket, async ctx => {
   const { body } = ctx.request
 
   try {
-    const data = await saveTickets(body)
+    console.log(body)
+    // const data = await saveTickets(body)
 
-    if(data) return ctx.body = { ok : true, data : { tickets : data }, message : '' }
+    // if(data) return ctx.body = { ok : true, data : { tickets : data }, message : '' }
 
     return ctx.body = { ok : false, data : null, message : 'Couldn\'t save the ticket. Contact your system administrator.' }
   } catch (e) {
@@ -59,53 +60,53 @@ ticketRouter.put('/:id/modify', async ctx => {
 })
 
 /*
-// Get tickets by Date range (if d2 is not passed, all tickets by date d1)
-ticketRouter.get('/date/:d1/:d2?', async ctx => {
-  let { d1, d2 } = ctx.params
-  const { limit = 20, skip = 0 } = ctx.query
+  // Get tickets by Date range (if d2 is not passed, all tickets by date d1)
+  ticketRouter.get('/date/:d1/:d2?', async ctx => {
+    let { d1, d2 } = ctx.params
+    const { limit = 20, skip = 0 } = ctx.query
 
-  let tickets = []
+    let tickets = []
 
-  const dateX = parseInt(d1)
-  const date1 = new Date(dateX)
+    const dateX = parseInt(d1)
+    const date1 = new Date(dateX)
 
-  // Set hours to 0
-  date1.setHours(0,0,0,0)
+    // Set hours to 0
+    date1.setHours(0,0,0,0)
 
-  d2 = d2 ? d2 : new Date(parseInt(d1)).setDate(new Date(date1).getDate() + 1)
+    d2 = d2 ? d2 : new Date(parseInt(d1)).setDate(new Date(date1).getDate() + 1)
 
-  const dateX2 = parseInt(d2)
-  const date2  = new Date(dateX2)
-  date2.setHours(0,0,0,0)
+    const dateX2 = parseInt(d2)
+    const date2  = new Date(dateX2)
+    date2.setHours(0,0,0,0)
 
-  try {
-    const details = await TicketDetail.aggregate([
-      { $skip : skip },
-      { $match : { date : { $gte : date1, $lte : date2 }}},
-      { $limit : limit },
-      { $sort : { date : -1, time : 1 }},
-    ])
+    try {
+      const details = await TicketDetail.aggregate([
+        { $skip : skip },
+        { $match : { date : { $gte : date1, $lte : date2 }}},
+        { $limit : limit },
+        { $sort : { date : -1, time : 1 }},
+      ])
 
-    // console.log(details.map( t => t._id))
-    // // return ctx.body = "ñe"
+      // console.log(details.map( t => t._id))
+      // // return ctx.body = "ñe"
 
-    if(details.length)
-      tickets = await Promise.all(
-        details.map(det => Ticket.findOne({ details : det._id }))
-      )
+      if(details.length)
+        tickets = await Promise.all(
+          details.map(det => Ticket.findOne({ details : det._id }))
+        )
 
-    if(tickets.length) {
-      const data = await Promise.all(tickets.map(getTicketData))
+      if(tickets.length) {
+        const data = await Promise.all(tickets.map(getTicketData))
 
-      return ctx.body = { ok : true, data : data.filter(Boolean), message : '' }
+        return ctx.body = { ok : true, data : data.filter(Boolean), message : '' }
+      }
+
+      return ctx.body = { ok : false, data : null, message : 'There are no ticket for this ride' }
+    } catch (e) {
+      console.log(e)
+      return ctx.body = { ok : false, data : null, message : 'Error retrieving the tickets for this ride' }
     }
-
-    return ctx.body = { ok : false, data : null, message : 'There are no ticket for this ride' }
-  } catch (e) {
-    console.log(e)
-    return ctx.body = { ok : false, data : null, message : 'Error retrieving the tickets for this ride' }
-  }
-})
+  })
 */
 
 // Assign ride to ticket
@@ -172,7 +173,8 @@ ticketRouter.get('/all', async ctx => {
     sort = 'id -1',
     limit = 10,
     skip = 0,
-    unassigned = true
+    onlypackage = 'false',
+    unassigned = 'true'
   } = ctx.query
 
   // const nonlist = [].concat(nonstatus.split(','))
@@ -183,10 +185,11 @@ ticketRouter.get('/all', async ctx => {
   const [ srt, asc ] = sort.split(' ')
   const sortCondition = { [ srt ] : asc }
 
-  if(srt === 'departureDate') sortCondition.departureTime = asc < 0 ? -1 : 1
-  if(srt === 'departureTime') sortCondition.departureDate = asc < 0 ? -1 : 1
+  if(srt === 'date') sortCondition.time = asc < 0 ? -1 : 1
+  if(srt === 'time') sortCondition.date = asc < 0 ? -1 : 1
 
-  if(unassigned) conditions.ride = null
+  if(unassigned === 'true') conditions.ride = null
+  if(onlypackage === 'true') conditions.isPackage = true
 
   try {
     const tickets = await Ticket
