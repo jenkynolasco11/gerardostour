@@ -4,7 +4,7 @@ npm-debug.*
 dist/
 bundle.js
 .old
-
+server/src/public
 styles/css
 
 appTest.js

@@ -15,6 +15,15 @@ routes.forEach(route => {
   rootRoute.use('/', route.routes(), route.allowedMethods())
 })
 
+/* ***********************/
+/** FOR TESTING PURPOSES */
+/* ***********************/
+rootRoute.get('/*', ctx => {
+  // TODO : Reconsider this redirect in here
+  return ctx.render('index', { appurl : process.env.PORT })
+})
+/* ***********************/
+
 // rootRoute.stack.forEach(p => console.log(
 //   p.path,
 //   // p.methods
