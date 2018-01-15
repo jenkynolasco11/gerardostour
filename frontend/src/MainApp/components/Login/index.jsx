@@ -10,13 +10,13 @@ import { logUserIn } from '../../store-redux/actions'
 import './login.scss'
 
 class Login extends Component{
+  state = {
+    username : '',
+    password : ''
+  }
+
   constructor(props) {
     super(props)
-
-    this.state = {
-      username : '',
-      password : ''
-    }
 
     this._onInputChange = this._onInputChange.bind(this)
     this._onSubmit = this._onSubmit.bind(this)

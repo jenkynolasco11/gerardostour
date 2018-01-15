@@ -148,7 +148,7 @@ const checkValidation = state => {
 }
 
 class TicketForm extends Component {
-  state = { ...defaultState, ...myInfo }
+  state = { ...defaultState/*, ...myInfo*/ }
 
   constructor(props) {
     super(props)
