@@ -66,6 +66,7 @@ const data = {
     packageInfo : {
       weight : 10.0,
       message : 'Handle with care',
+      fee : 40
     },
     extraFee : 0,
     fee : 30,
@@ -614,23 +615,24 @@ describe('API => ', () => {
           expect(ticket.person.firstname).to.be.eql('Jenky')
           expect(ticket).to.haveOwnProperty('isPackage')
           expect(ticket.isPackage).to.be.true
-          expect(ticket.package).to.have.all.keys(['weight', 'message'])
+          expect(ticket).to.haveOwnProperty('pkg')
+          expect(ticket.pkg).to.have.all.keys(['weight', 'message', 'fee'])
 
           done()
         })
     })
 
-    it('Should query all ticket (at least ten)', done => {
+    it('Should query all ticket (at least 3)', done => {
       agent
-        .get('/api/v1/ticket/all')
+        .get('/api/v1/ticket/all?limit=3')
         .end((err, res) => {
           const { body } = res
           commonExpects(res, 200, true, 'object', '')
 
           expect(body.data).to.haveOwnProperty('tickets')
           expect(body.data.tickets).to.be.an('array')
-          expect(body.data.tickets).to.be.length.gte(4).and.length.lte(10)
-          expect(body.data.tickets).to.have.any.keys([0,1,2,3])
+          expect(body.data.tickets).to.be.of.length.gte(3)
+          expect(body.data.tickets).to.have.any.keys([0,1,2])
 
           body.data.tickets.forEach(ticket => {
             expect(ticket).to.deep.include.any.keys('id', '_id', 'person.firstname', 'person.email', 'status', 'to', 'from', 'person')
@@ -650,7 +652,7 @@ describe('API => ', () => {
         .end((err, res) => {
           const { body } = res
           commonExpects(res, 200, true, 'object', '')
-          
+
           expect(body.data).to.haveOwnProperty('receipt')
           expect(body.data.receipt).to.have.any.keys(['paymentType', 'totalAmount', 'cardBrand', 'packageQty', 'luggageQty'])
           expect(body.data.receipt.tickets).to.be.an('array')

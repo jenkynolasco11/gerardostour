@@ -46,54 +46,45 @@ export const retrieveTickets = query => async dispatch => {
 
 export const submitTicketData = body => async dispatch => {
     try {
-      dispatch(showLoader(true))
+      // dispatch(showLoader(true))
 
-      const { person, payment, packageInfo, ...rest } = body
-            
-      const postdata = {
-        ...rest,
-        ...person,
-        ...packageInfo,
-        ...payment,
+      const { ticketQty, person, payment, packageInfo, hasPackage, packageQty, ...rest } = body
+
+      const postdata = { ticketQty, ...rest, ...person, ...payment }
+
+      if(hasPackage) {
+        const regdata = { ...postdata, ticketQty : ticketQty - packageQty }
+
+        const [ fee, extraFee, totalAmount ] = [ packageInfo.fee, 0, packageInfo.fee ]
+        
+        regdata.totalAmount = regdata.totalAmount - totalAmount
+        regdata.extraFee = regdata.extraFee - totalAmount
+
+        const pkgdata = { ...postdata, packageInfo, packageQty, isPackage : true, ticketQty : packageQty, fee, extraFee, totalAmount }
+
+        const { data : data1 } = await axios.post(`${ url }/ticket/save`, regdata)
+        const { data : data2 } = await axios.post(`${ url }/ticket/save`, pkgdata)
+
+        if(data1.ok && data2.ok) dispatch(showSnackBarWithMessage('Saved successfully!'))
+        else dispatch(showSnackBarWithMessage(`Couldn't save your ticket... => ${ data1.ok ? data1.message : data2.message }`))
+      } else {
+        const { data } = await axios.post(`${ url }/ticket/save`, postdata)
+  
+        if(data.ok) dispatch(showSnackBarWithMessage('Saved successfully!'))
+        else dispatch(showSnackBarWithMessage(`Couldn't save your ticket... => ${ data.message }`))
       }
-
-      const { data } = await axios.post(`${ url }/ticket/save`, postdata)
-
-      if(data.ok) dispatch(showSnackBarWithMessage('Saved successfuly!'))
-      else dispatch(showSnackBarWithMessage(`Couldn't save your ticket... => ${ data.message }`))
     } catch (e) {
       console.log(e)
     }
 
-    return dispatch(showLoader(false))
-
-  // const { id, bus, routeTo, routeFrom, time, date, status } = data
-
-  // try {
-  //   dispatch(showLoader(true))
-
-  //   const body = { bus, routeTo, routeFrom, time, date, status : status !== 'PENDING' ? status : 'ASSIGNED' }
-
-  //   let data = null
-    
-  //   if(id) data = await axios.put(`${ url }/ride/${ id }/modify`, body)
-  //   else data = await axios.post(`${ url }/ride/save`, body)
-
-
-  //   if(data.data.ok) dispatch(showSnackBarWithMessage('Saved successfuly!'))
-  //   else dispatch(showSnackBarWithMessage(`Couldn't save your ride... => ${ data.data.message }`))
-  // } catch (e) {
-  //   console.error(e)
-  // }
-
-  // return dispatch(showLoader(false))
+    // return dispatch(showLoader(false))
 }
 
 export const assignTicketsToRide = (tickets, ride) => async dispatch => {
   try {
     dispatch(showLoader(true))
 
-    const { data } = await axios.put(`${ url }/ticket/modify/ride`, { tickets, ride })
+    const { data } = await axios.put(`${ url }/ticket/assign/ride`, { tickets, ride })
 
     if(data.ok) dispatch(showSnackBarWithMessage('Saved successfuly!'))
     else dispatch(showSnackBarWithMessage(`Couldn't modify the tickets... => ${ data.message }`))

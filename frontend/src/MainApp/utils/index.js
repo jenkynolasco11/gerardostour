@@ -17,11 +17,12 @@ export const formatPhone = phone => {
   return `(${ phoneRegx[ 1 ] }) ${ phoneRegx[ 2 ] }-${ phoneRegx[ 3 ] }`
 }
 
-export const onlyNumber = (val, prev) => {
+export const onlyNumber = (val = 0, prev = Infinity) => {
   if(!val) return 0
-  if(isFinite(val)) return parseInt(val, 10)
+  if(prev <= val) return parseInt(prev, 10)
+  if(/[\d]/g.test(val)) return parseInt(val, 10)
 
-  return prev
+  return 0
 }
 
 export const dropDownData = data => {

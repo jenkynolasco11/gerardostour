@@ -1,12 +1,8 @@
 import React from 'react'
-import { bindActionCreators } from 'redux'
-import { connect } from 'react-redux'
 
 import { List, ListDivider, ListCheckbox, ListItem } from 'react-toolbox/lib/list'
 import { Card, /*CardActions, /*CardMedia,*/ CardTitle } from 'react-toolbox/lib/card'
 import { MdDirectionsBus, MdBuild, MdAdd, MdPublish } from 'react-icons/lib/md'
-
-import { setRideQueryOption } from '../../store-redux/actions'
 
 const RideSettings = props => {
   const { 
@@ -19,7 +15,8 @@ const RideSettings = props => {
     future,
     requestRides,
     showForm,
-    // dispatchToBus
+    dispatchToBus,
+    shouldDisableDispatch
   } = props
 
   const onChecked = (val, name) => {
@@ -69,8 +66,8 @@ const RideSettings = props => {
       <ListItem 
         avatar={ <MdPublish /> }
         caption="Dispatch to Bus"
-        onClick={ e => console.log('Clicked on dispatch!') }
-        disabled={ selected.length === 1 }
+        onClick={ dispatchToBus }
+        disabled={ shouldDisableDispatch }
         selectable
       />
       <List>
@@ -107,7 +104,7 @@ const RideSettings = props => {
         />
         {
           //////////////////////////////////////////
-          ///// ADMIN SETTINGS
+          ///// ADMIN SETTINGS | Not implemented yet
           //////////////////////////////////////////
           false &&
             <List>
@@ -129,13 +126,4 @@ const RideSettings = props => {
   )
 }
 
-const mapDispatchToProps = dispatch => bindActionCreators({
-  onChange : (val, name) => setRideQueryOption({ [ name ] : val }),
-}, dispatch)
-
-const mapStateToProps = state => {
-
-  return { ...state.ride.searchOptions }
-}
-
-export default connect(mapStateToProps, mapDispatchToProps)(RideSettings)
+export default RideSettings

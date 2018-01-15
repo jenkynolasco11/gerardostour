@@ -209,8 +209,6 @@ mongoose.connect(config.DBURI, { useMongoClient : true }, async () => {
       const stat = willBus && isPending ? 'ASSIGNED' : status
       const bs = stat !== 'PENDING' ? bus : null
 
-      console.log(stat)
-
       const ride = await new Ride({
         id : meta.lastRideId++,
         bus : bs,

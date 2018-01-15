@@ -18,7 +18,7 @@ const defaultState = {
 export const ticket = (state = defaultState, { type, payload }) => {
   switch (type) {
     case SET_TICKETS_OPTION :
-      console.log(payload)
+      // console.log(payload)
       return { ...state, searchOptions : { ...state.searchOptions, ...payload }}
     // case 'SELECTED_TICKETS' :
     //   return { ...state, selectedTickets : [].concat(payload) }

@@ -33,7 +33,6 @@ Creating a ticket =>
 ticket {
   isLocal : true,
   ticketQty : 3,
-  // packageQty : 0,
   
   // Person details
   firstname : 'Jenky',
@@ -68,8 +67,8 @@ ticket {
   extraFee : 15,
   
   // package details
-  
-  isPackage : true,
+  packageQty : 0,
+  hasPackage : false,
   packageInfo : {
     weight : 10.0,
     message : 'Handle with care',
@@ -114,4 +113,36 @@ ticket {
 }
 
 // Info to take from tickets
-{ }
+{ isLocal: true,
+  ticketQty: 3,
+  packageQty: 0,
+  willPick: true,
+  willDrop: false,
+  pickUpAddress:
+   { street: '116 Sherman Ave',
+     city: 'New York',
+     state: 'NY',
+     zipcode: 10034 },
+  dropOffAddress: { street: '', city: '', state: '', zipcode: '' },
+  frm: 'NY',
+  to: 'PA',
+  date: '2018-05-12T00:00:00.000Z',
+  time: 13,
+  luggageQty: 1,
+  hasPackage: false,
+  totalAmount: 105,
+  fee: 90,
+  extraFee: 15,
+  firstname: 'Jenky',
+  lastname: 'Nolasco',
+  phoneNumber: '3479742990',
+  email: 'jenky.nolasco@gmail.com',
+  weight: 0,
+  message: '',
+  cardBrand: 'VISA',
+  paymentType: 'CARD',
+  cardLastDigits: '4242',
+  expirationDate: '',
+  cvc: '',
+  isCard: false,
+  cardNumber: '' }

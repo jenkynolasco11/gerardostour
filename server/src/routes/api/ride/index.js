@@ -215,31 +215,66 @@ rideRouter.get('/:id', async ctx => {
   return ctx.body = { ok : false, data : null, message : 'Error retrieving ride' }
 })
 
-rideRouter.get('/dispatch/:ride/:bus', async ctx => {
-  const { ride, bus } = ctx.params
+// Dispatch rides to buses
+rideRouter.put('/dispatch', async ctx => {
+  const { rides : rids } = ctx.request.body
 
-  if(sockets[ bus ]) {
-    try {
-      const { socket, user } = sockets[ bus ]
+  try {
+    const rides = await Promise.all(
+      rids.map(id => Ride.findOne({ id }, { id : 1, bus : 1 }).populate('bus', { id : 1, status : 1, _id : 0 }).exec())
+    )
 
-      if(socket) {
-        // const bs = await Bus.findOne({ id : bus }, { active : 1, _id : 0 })
-        const rid = await Ride.findOne({ id : ride })
-        // console.log(socket.emit)
-        // console.log(socket.send)
-        // if(rid && bs.active) {
-        if(rid) {
-          console.log(`About to send data to socket ${ JSON.stringify(user) }`)
-          // console.log(filterDoc(rid._doc))
-          socket.emit('new ride', filterDoc(rid._doc))
-        }
+    rides.forEach(async ({ id, bus }) => {
+      if(sockets[ bus.id ]) {
+        console.log(`It's about to send ride => ${ id } to bus => ${ bus.id }`)
+
+        const rid = await Ride.aggregate([
+          { $match : { id }},
+          { 
+            $group : {
+              _id : {
+                month : { $month : '$date' },
+                date : { $dayOfMonth : '$date' },
+                year : { $year : '$date' }
+            },
+              body : { $push : '$$ROOT' }
+            }
+          },
+        ])
+
+        const d = filterAggregate(rid, getRideData, 'asc')
+
+        sockets[ bus.id ].emit('new ride', { ride : d })
       }
-    } catch (e) {
-      console.log(e)
-    }
+    })
+
+    return ctx.body = { ok : true, data : null, message : '' }
+  } catch (e) {
+    console.log(e)
   }
 
-  return ctx.body = 'ok'
+  return ctx.body = { ok : false, data : null, message : 'Error dispatching rides!' }
+
+  // if(sockets[ bus ]) {
+  //   try {
+  //     const { socket, user } = sockets[ bus ]
+
+  //     if(socket) {
+  //       // const bs = await Bus.findOne({ id : bus }, { active : 1, _id : 0 })
+  //       const rid = await Ride.findOne({ id : ride })
+
+  //       if(rid) {
+  //         console.log(`About to send data to socket ${ JSON.stringify(user) }`)
+  //         // console.log(filterDoc(rid._doc))
+  //         socket.emit('new ride', filterDoc(rid._doc))
+  //       }
+  //     }
+  //   } catch (e) {
+  //     console.log(e)
+  //   }
+  // }
+
+  // return ctx.body = 'ok'
 })
 
 export default rideRouter

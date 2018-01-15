@@ -38,7 +38,8 @@ export const {
   setSelectedRides,
   setRideQueryOption,
   submitRideData,
-  assignBusToRides
+  assignBusToRides,
+  dispatchToBus
 } = Ride
 
 export default {

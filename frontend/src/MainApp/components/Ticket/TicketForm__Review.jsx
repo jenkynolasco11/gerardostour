@@ -148,13 +148,13 @@ const ReviewPackage = props => {
       <ListItem
         ripple={ false }
         // leftIcon={ <MdPersonPinCircle /> }
-        caption={ packageQty }
+        caption={ '' + packageQty }
         legend="Package Quantity"
       />
       <ListItem
         ripple={ false }
         // leftIcon={ <MdPersonPinCircle /> }
-        caption={ weight }
+        caption={ '' + weight }
         legend="Weight"
       />
       <ListItem
@@ -173,9 +173,7 @@ const ReviewPayment = props => {
     packageQty,
     luggageQty,
     to,
-    fee,
-    extraFee,
-    totalAmount,
+    payment,
     frm,
     willDrop,
     willPick,
@@ -185,6 +183,7 @@ const ReviewPayment = props => {
   } = props
 
   const { luggagePrice, prices } = configData
+  const { fee, extraFee, totalAmount } = payment
 
   const packFee = packageInfo.fee
   
@@ -199,15 +198,17 @@ const ReviewPayment = props => {
     dropOffFee = getExtraPrice(prices[ to ], dropOffAddress.zipcode)
   }
 
-  const totalAmoutCaption = `Total Amount: $${ parseFloat(totalAmount).toFixed(2) }`
-  const feesCaption = `$${ parseFloat(fee).toFixed(2) } (${ ticketQty } tickets x ${ prices.default }) `
-  const extraFeesCaption = `$${ parseFloat(extraFee).toFixed(2) } (${ luggageQty } extra luggage x ${ parseFloat(luggagePrice).toFixed(2) })`
+  const totalAmoutCaption = `    $${ parseFloat(totalAmount).toFixed(2) }`
+  const feesCaption = `    $${ parseFloat(fee).toFixed(2) } (${ ticketQty } tickets x ${ prices.default }) `
+  const extraFeesCaption = `$${ parseFloat(extraFee).toFixed(2) }`
+
+  const luggageFeeCaption = `    $${ parseFloat(luggagePrice * luggageQty).toFixed(2) } (${ luggageQty } extra luggage x ${ parseFloat(luggagePrice).toFixed(2) })`
   const extraCaption = willPick 
                       ? willDrop 
-                      ? ` $${ parseFloat(pickUpFee).toFixed(2) } Pick Up + $${ parseFloat(dropOffFee).toFixed(2) } Drop Off fees` 
-                      : ` $${ parseFloat(pickUpFee).toFixed(2) } Pick Up fee` 
+                      ? `    $${ parseFloat(pickUpFee).toFixed(2) } Pick Up + $${ parseFloat(dropOffFee).toFixed(2) } Drop Off fees` 
+                      : `    $${ parseFloat(pickUpFee).toFixed(2) } Pick Up fee` 
                       : willDrop 
-                      ? ` $${ parseFloat(dropOffFee).toFixed(2) } Drop off fee` 
+                      ? `    $${ parseFloat(dropOffFee).toFixed(2) } Drop off fee` 
                       : ''
   const extraExtraCaption = ` $${ parseFloat(packFee).toFixed(2) } Package fee (${ packageQty } packages)`
 
@@ -215,9 +216,10 @@ const ReviewPayment = props => {
     // <List className="review-payment">
       <List className="review-payment list">
         <ListItem
+          className="review-fee"
           leftIcon={ <MdAttachMoney /> }
           ripple={ false }
-          caption={ totalAmoutCaption }
+          itemContent={ <div>Total Amount:<span className="total-amount-cap">{ totalAmoutCaption }</span></div> }
         />
         <ListItem
           className="review-fee"
@@ -229,6 +231,13 @@ const ReviewPayment = props => {
           className="review-fee"
           ripple={ false }
           itemContent={ <div><div className="small-caption">Extra Fee:</div> { extraFeesCaption }</div> }
+          // caption={  }
+        />
+        <ListDivider />
+        <ListItem
+          className="review-fee"
+          ripple={ false }
+          itemContent={ <div><div className="small-caption">Luggage Fee:</div> { luggageFeeCaption }</div> }
           // caption={  }
         />
         <ListItem

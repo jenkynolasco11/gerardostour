@@ -93,14 +93,22 @@
       }
     }
 
-    .review-fee {
-      display : flex;
+    .review-payment {
+      // display : flex;
       font-size : 1em;
 
-      div {
-        display : inline-block;
+      .total-amount-cap {
+        color: red;
+        font-weight: bold;
+        font-size : 1.4em;
+      }
+
+      .review-fee {
+        // display : inline-block;
 
         .small-caption {
+          // color : green;
+          display : inline-block;
           text-align : right;
           width : 156px;
         }

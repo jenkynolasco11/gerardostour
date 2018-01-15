@@ -11,7 +11,7 @@ import TicketRideModal from './TicketRideModal'
 import CustomTable from '../extras/CustomizedTable'
 
 import { formatDate, formatHour, formatPhone } from '../../utils'
-import { retrieveTickets, assignTicketsToRide } from '../../store-redux/actions'
+import { retrieveTickets, assignTicketsToRide, submitTicketData, setTicketQueryOption } from '../../store-redux/actions'
 
 import './ticket-consult.scss'
 
@@ -31,7 +31,8 @@ const formatData = data => {
       pickUpAddress,
       receipt,
       pkg,
-      isPackage
+      isPackage,
+      isAssigned
     } = item
 
     return {
@@ -49,7 +50,8 @@ const formatData = data => {
       pickUpAddress,
       receipt,
       isPackage,
-      pkg
+      isAssigned,
+      pkg,
     }
   })
 }
@@ -65,8 +67,11 @@ const tableData = {
   ] ,
   colors : {
     'true' : 'orange',
+
   },
-  colorsPropToMatch : 'isPackage'
+  colorsPropToMatch : 'isPackage',
+  rowToMatch : 'isAssigned',
+  colorRowToMatch : '#B7F39E'
 }
 
 const TicketTemplate = props => {
@@ -168,7 +173,8 @@ class TicketConsult extends Component {
 
   _requestTickets() {
     const { skip : oldSkip, limit, sortBy, sortOrder } = this.state
-    const { isPackage } = this.props
+    const { settings } = this.props
+    const { isPackage } = settings
 
     const skip = oldSkip * limit
 
@@ -181,7 +187,10 @@ class TicketConsult extends Component {
   }
 
   _onChange(val, name) {
-    return this.setState({ [ name ] : val }, this._requestTickets)
+    let { skip } = this.state
+
+    if(name === 'isPackage') skip = 0
+    return this.setState({ [ name ] : val, skip }, this._requestTickets)
   }
 
   _onRowSelected(rows) {
@@ -239,7 +248,7 @@ class TicketConsult extends Component {
       ticketToModify
     } = this.state
 
-    const { tickets, count } = this.props
+    const { tickets, count, submitTicket, setQueryOption, settings } = this.props
     const data = formatData(tickets)
 
     return (
@@ -258,17 +267,22 @@ class TicketConsult extends Component {
           template={ <TicketTemplate /> }
           colorProps={ tableData.colors }
           colorPropToMatch={ tableData.colorsPropToMatch }
+          colorToMatchRow={ tableData.colorRowToMatch }
+          rowToMatchProp={ tableData.rowToMatch }
         />
         <TicketSettings
           selected={ selected }
           showForm={ this._showForm }
           requestTickets={ this._requestTickets }
+          onChange={ setQueryOption }
+          { ...settings }
         />
         <TicketForm
           active={ showForm }
           closeForm={ () => this._showForm('showForm', false) }
           ticket={ ticketToModify }
           onSubmitData={ this._requestTickets }
+          submitTicket={ submitTicket }
         />
         <TicketRideModal
           active={ showRidesModal }
@@ -282,16 +296,17 @@ class TicketConsult extends Component {
 
 const mapDispatchToProps = dispatch => bindActionCreators({
   queryTickets : args => retrieveTickets(args),
-  assignRide : (tickets, ride) => assignTicketsToRide(tickets, ride)
-  // submitTicket : data => dispatch(submitTicketData(data)),
+  assignRide : (tickets, ride) => assignTicketsToRide(tickets, ride),
+  submitTicket : data => submitTicketData(data),
+  setQueryOption : (val, name) => setTicketQueryOption({ [ name ] : val })
 }, dispatch)
 
 const mapStateToProps = state => {
   const { tickets, searchOptions, count } = state.ticket
-  const { used, redeemed, tnull, tnew, deleted, unassigned, isPackage } = searchOptions
+  const { used, redeemed, tnull, tnew, deleted, unassigned } = searchOptions
 
   return {
-    isPackage,
+    settings : { ...searchOptions },
     tickets,
     used,
     redeemed,

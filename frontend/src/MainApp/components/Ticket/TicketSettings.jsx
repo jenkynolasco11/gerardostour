@@ -1,24 +1,18 @@
 import React from 'react'
-import { bindActionCreators } from 'redux'
-import { connect } from 'react-redux'
 
 import { List, ListDivider, ListCheckbox, ListItem } from 'react-toolbox/lib/list'
 import { Card, /*CardActions, /*CardMedia,*/ CardTitle } from 'react-toolbox/lib/card'
 import { MdAttachFile, MdReceipt, MdDirectionsBus } from 'react-icons/lib/md'
 
-import { setTicketQueryOption } from '../../store-redux/actions'
-
 const TicketSettings = props => {
   const {
     selected,
-    // getSelectedTicket,
-    // openPreview,
     requestTickets,
     onChange,
     isPackage,
     showForm
   } = props
-
+  
   const onChecked = (val, name) => {
     onChange(val, name)
     return setTimeout(requestTickets, 10)
@@ -74,16 +68,4 @@ const TicketSettings = props => {
   )
 }
 
-const mapDispatchToProps = dispatch => bindActionCreators({
-  onChange : (val, name) => setTicketQueryOption({ [ name ] : val }),
-}, dispatch)
-
-const mapStateToProps = state => {
-  const { isPackage } = state.ticket.searchOptions
-
-  return { isPackage }
-}
-
-export default connect(mapStateToProps, mapDispatchToProps)(TicketSettings)
-
-// export default TicketSettings
+export default TicketSettings

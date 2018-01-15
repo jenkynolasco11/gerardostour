@@ -29,10 +29,12 @@ ticketRouter.post('/save', reformatTicket, async ctx => {
   const { body } = ctx.request
 
   try {
-    console.log(body)
-    // const data = await saveTickets(body)
+    // console.log(body)
+    const data = await saveTickets(body)
 
-    // if(data) return ctx.body = { ok : true, data : { tickets : data }, message : '' }
+    console.log(data)
+
+    if(data) return ctx.body = { ok : true, data : { tickets : data }, message : '' }
 
     return ctx.body = { ok : false, data : null, message : 'Couldn\'t save the ticket. Contact your system administrator.' }
   } catch (e) {
@@ -47,6 +49,7 @@ ticketRouter.put('/:id/modify', async ctx => {
   const { body } = ctx.request
 
   try {
+    console.log(body)
     const data = await updateTicket(id, body)
 
     if(data) return ctx.body = { ok : true, data : { ticketId : data }, message : '' }
@@ -253,7 +256,7 @@ ticketRouter.get('/:id', async ctx => {
 
     if(tckt) {
       const ticketData = await getTicketData(tckt)
-      
+
       if(ticketData) return ctx.body = { ok : true, data : { ticket : ticketData }, message : '' }
     }
 

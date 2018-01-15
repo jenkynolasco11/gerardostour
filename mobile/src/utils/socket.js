@@ -13,12 +13,14 @@ export default data => {
   const errorMessage = () => showMessage('No server connection', 'success')
 
   socket.on('connect', () => {
+    const { auth } = store.getState()
+
     if(interval) {
       clearInterval(interval)
       showMessage('Server connection on!')
     }
 
-    socket.emit('new connection', data)
+    socket.emit('new connection', { ...data, active : auth.isActive })
   })
   socket.on('added', console.log)
   socket.on('new ride', msg => console.log(JSON.stringify(msg, null, 3)))

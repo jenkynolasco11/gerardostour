@@ -3,15 +3,17 @@ import { filterDoc, createTicketSideData } from '../../../utils'
 
 // ///////////////// Helper functions
 const eraseData = async objects => {
-  const { person, ticket, ticketDetail, receipt, pickUp, dropOff, pack } = objects
+  const { ticket, ticketDetail, receipt, pickUp, dropOff, pack } = objects
+
+  // console.log(` Objects to delete => ` + JSON.stringify(objects, null, 2))
+
   try {
-    if(ticketDetail) await TicketDetail.findByIdAndRemove(ticketDetail._id)
-    if(receipt) await Receipt.findByIdAndRemove(receipt._id)
-    if(dropOff) await Address.findByIdAndRemove(dropOff._id)
-    if(person) await Person.findByIdAndRemove(person._id)
-    if(ticket) await Ticket.findByIdAndRemove(ticket._id)
-    if(pickUp) await Address.findByIdAndRemove(pickUp._id)
-    if(pack) await Package.findByIdAndRemove(pack._id)
+    if(ticketDetail) await TicketDetail.findByIdAndRemove(ticketDetail)
+    if(receipt) await Receipt.findByIdAndRemove(receipt)
+    if(dropOff) await Address.findByIdAndRemove(dropOff)
+    if(ticket) await Ticket.findByIdAndRemove(ticket)
+    if(pickUp) await Address.findByIdAndRemove(pickUp)
+    if(pack) await Package.findByIdAndRemove(pack)
   } catch (e) { }
 }
 
@@ -69,6 +71,7 @@ export const reformatTicket = (ctx, next) => {
 
 export const getTicketData = async tckt => {
   try {
+    // let pack = null
     const person = await Person.findById(tckt.person)
     const pack = await Package.findById(tckt.package)
     const rcpt = await Receipt.findById(tckt.receipt)
@@ -80,6 +83,8 @@ export const getTicketData = async tckt => {
     const pickAdd = pick ? filterDoc(pick._doc) : 'none'
     const dropAdd = drop ? filterDoc(drop._doc) : 'none'
     const pkg = tckt.isPackage ? filterDoc(pack._doc) : null
+
+    const isAssigned = tckt.ride !== null
 
     const data = {
       id : tckt.id,
@@ -100,8 +105,11 @@ export const getTicketData = async tckt => {
         phoneNumber : person.phoneNumber
       },
       isPackage : tckt.isPackage,
-      pkg
+      pkg,
+      isAssigned,
     }
+
+    // console.log(data)
 
     return data
   } catch (e) {
@@ -113,7 +121,7 @@ export const getTicketData = async tckt => {
 }
 
 // Ticket details
-export const saveTicket = async body => {
+/* export*/ const saveTicket = async body => {
   const {
     id,
     data,
@@ -121,7 +129,6 @@ export const saveTicket = async body => {
     pickUpAddress,
     dropOffAddress,
     receipt,
-    packId,
   } = body
 
   const {
@@ -153,6 +160,7 @@ export const saveTicket = async body => {
       redeemedCount : 0
     }).save()
 
+    console.log('ticket ID => ' + id)
     // TODO: Make sure that the data inserted is sanitized, or it'll break!!!
     tckt = await new Ticket({
       id,
@@ -174,10 +182,11 @@ export const saveTicket = async body => {
 
     return tckt.id
   } catch(e) {
+    // console.log(details, tckt, pck)
     // Oh snap! Some shit happened... rolling back.... again...
-    await eraseData({ ticketDetails : details, ticket : tckt, pack : pck })
+    await eraseData({ ticketDetails : details ? details._id : null, ticket : tckt ? tckt._id : null, pack : pck ? pck._id : null })
 
-    console.log(e)
+    // console.log(e)
     console.log('... @ src/routes/api/ticket/ticket.controller.js')
   }
 
@@ -195,6 +204,8 @@ export const saveTickets = async data => {
   let receipt = null
 
   try {
+    const { willPick, willDrop, ticketQty } = data
+
     meta = await Meta.findOne({})
 
     const [ prsn, pckup, drpff, rcpt ] = await createTicketSideData({
@@ -207,37 +218,33 @@ export const saveTickets = async data => {
     dropOffAddress = drpff
     receipt = rcpt
 
-    const { willPick, willDrop, isPackage, ticketQty } = data
-
     if(!person
       || (willDrop && !dropOffAddress) 
       || (willPick && !pickUpAddress) 
       || !receipt)
       throw new Error('Shit happened... Rolling back everything!')
 
-    for(let i = 0; i < ticketQty; i++) {
+    for(let i = 0; i < ticketQty; i++)
       promises.push(saveTicket({
         id : meta.lastTicketId++,
-        // packId : isPackage ? meta.lastPackageId
         data,
         receipt,
         person,
         pickUpAddress,
         dropOffAddress,
       }))
-    }
 
     const tickets = await Promise.all(promises)
-    
+
     await meta.save()
 
     // return either tickets or receipt number
     return tickets
   } catch (e) {
     // Some shit happened... Roll back everything!!!
-    eraseData({ person, pickUpAddress, dropOffAddress, receipt })
+    await eraseData({ pickUpAddress, dropOffAddress, receipt })
 
-    console.log(e)
+    // console.log(e)
     console.log('... @ src/routes/api/ticket/ticket.controller.js')
   }
 

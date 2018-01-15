@@ -198,7 +198,7 @@ const PackageInfo = props => {
     <List className="package-info">
       <Title title="Package Information" />
       <ListCheckbox
-        caption="Is this a package?"
+        caption="Are there any packages?"
         checked={ hasPackage }
         onChange={ val => props.onChange(val, 'hasPackage') }
       />
@@ -209,7 +209,7 @@ const PackageInfo = props => {
             type="number"
             label="Packages"
             min="0"
-            hint="How many package"
+            hint="How many packages?"
             value={ packageQty }
             onChange={ val => onChange(onlyNumber(val), 'packageQty') }
           />
@@ -217,7 +217,7 @@ const PackageInfo = props => {
             packageQty === 1 &&
             <Input
               type="number"
-              label="Weight"
+              label="Weight (Lbs)"
               min="0"
               hint="Package Weight"
               value={ weight }

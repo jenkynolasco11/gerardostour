@@ -83,6 +83,21 @@ export const assignBusToRides = (bus, rides = [], query) => async dispatch => {
   // return dispatch(showLoader(true))
 }
 
+export const dispatchToBus = rides => async dispatch => {
+  // dispatch(showLoader(true))
+  console.log('Bug!')
+  try {
+    const { data } = await axios.put(`${ url }/ride/dispatch`, { rides })
+
+    if(data.ok) dispatch(showSnackBarWithMessage('Rides dispatched!'))
+    else dispatch(showSnackBarWithMessage('Couldn\'t dispatch the rides => ' + data.message))
+  } catch (e) {
+    console.log(e)
+  }
+
+  // return dispatch(showLoader(false))
+}
+
 ///////////////////////////
 // EXPORT
 ///////////////////////////
@@ -91,5 +106,6 @@ export default {
   submitRideData,
   setSelectedRides,
   setRideQueryOption,
-  assignBusToRides
+  assignBusToRides,
+  dispatchToBus
 }

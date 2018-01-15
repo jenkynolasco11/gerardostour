@@ -33,8 +33,8 @@ class RideBusModal extends Component {
   }
 
   onAccept() {
-    this.props.onAccept(this.state.selected)
-    this.props.onDialogClose(true)
+    setTimeout(() => this.props.onAccept(this.state.selected, this.props.isDispatch), 1000)
+    this.props.onDialogClose()
   }
 
   async makeRequest() {
@@ -73,7 +73,7 @@ class RideBusModal extends Component {
         theme={ theme }
       >
         <div>
-          <CardTitle title="Assign Bus" />
+          <CardTitle title="Assign to Bus" />
           <ListDivider />
           <Dropdown
             className="bus-list"

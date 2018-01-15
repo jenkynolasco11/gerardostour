@@ -7,18 +7,16 @@ export const socketServer = app => {
   const sckts = new SocketIo(app)
 
   sckts.on('connection', socket => {
-    // socket.send('WELCOME!')
-
     socket.on('new connection', async msg => {
-      const { bus, user } = msg
+      const { bus, user, active } = msg
 
       console.log(`We received ${ JSON.stringify(msg) }`)
 
       // console.log(sockets, bus, sockets[ bus ])
       if(sockets[ bus ]) delete sockets[ bus ]
 
-      try {    
-        const bs = await Bus.findOne({ id : bus }, { _id : 1 })
+      try {
+        const bs = await Bus.findOneAndUpdate({ id : bus }, { active }, { new : true })
 
         if(bs) sockets[ bus ] = { socket, user }
 
@@ -29,13 +27,17 @@ export const socketServer = app => {
       // sockets[ bus ].send('added', { this : 'works' })
     })
 
-    socket.on('disconnect', () => {
-      for(const key in sockets) {
-        if(socket.id === sockets[ key ].socket.id) {
-          console.log(`about to delete ${ key } socket`)
-          delete sockets[ key ]
+    socket.on('disconnect', async () => {
+      for(const id in sockets)
+        if(socket.id === sockets[ id ].socket.id) {
+          try {
+            await Bus.findOneAndUpdate({ id }, { active : false })
+            console.log(`about to delete ${ id } socket`)
+          } catch (e) {
+            console.log(e)
+          }
+          delete sockets[ id ]
         }
-      }
     })
   })
 }

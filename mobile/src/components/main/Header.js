@@ -2,7 +2,6 @@ import React from 'react'
 import { Header, Left, Body, Right, Button, Icon, Text } from 'native-base'
 import { connect } from 'react-redux'
 
-import { requestLogout, setActiveStatusTo, requestRides } from '../../store/actions'
 import { showActionSheet } from '../../utils'
 
 import styles from './styles'
@@ -54,15 +53,4 @@ const HeaderComponent = props => {
   )
 }
 
-// const mapDispatchToProps = dispatch => ({
-//   logout : () => dispatch(requestLogout()),
-//   setActive : (bus, status) => dispatch(setActiveStatusTo(bus, status)),
-// })
-
-// const mapStateToProps = state => {
-//   const { auth } = state
-
-//   return { active : auth.isActive, bus : auth.bus }
-// }
-
-export default HeaderComponent // connect(mapStateToProps, mapDispatchToProps)(HeaderComponent)
+export default HeaderComponent

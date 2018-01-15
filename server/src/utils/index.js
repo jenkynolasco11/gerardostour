@@ -4,7 +4,7 @@ import {
   Person,
   Address,
   Receipt,
-  Meta,
+  // Meta,
   // Bus,
   // BusDetail,
   // Payment,
@@ -60,7 +60,7 @@ export const createReceipt = async data => {
     return receipt._id
   } catch (e) {
     console.log(e)
-    console.log('... @ src/routes/api/ticket/ticket.controller.js')
+    console.log('... @ src/routes/api/utils/index.js@createReceipt')
   }
 
   return null
@@ -110,7 +110,7 @@ export const filterAggregate = async (docs, filterFunc, sortOrder) => {
   const collator = new  Intl.Collator(undefined, { numeric : true, sensitivity : 'base' }) 
 
   const sortedDocuments = newDocs.sort((a,b) => collator.compare(a.datekey, b.datekey))
-  
+
   //newDocs.sort((a, b) => sortOrder === 'asc' ? a.dateKey - b.dateKey : b.dateKey - a.dateKey)
   console.log(sortedDocuments)
 
@@ -142,5 +142,4 @@ export const createTicketSideData = async data => {
   }
 
   return null
-  // throw new Error('Oh snap...')
 }

@@ -64,7 +64,19 @@ class TableRow extends Component {
   }
 
   render() {
-    const { selected, onSelectRow, item, headerProps, index, template, colorProps, colorPropToMatch } = this.props
+    const {
+      colorToMatchRow = 'white',
+      rowToMatchProp = null,
+      selected,
+      onSelectRow,
+      item,
+      headerProps,
+      index,
+      template,
+      colorProps,
+      colorPropToMatch
+    } = this.props
+
     const { isClosed } = this.state
 
     const isSelected = selected.includes(index)
@@ -74,10 +86,11 @@ class TableRow extends Component {
                       : 'transparent'
                       : null
 
+    const rowColor = item[ rowToMatchProp ] ? { backgroundColor : colorToMatchRow } : {}
 
     return (
       <div className={ `table-row${ isSelected ? ' selected' : '' }` }>
-        <div className="table-row-content">
+        <div className="table-row-content" style={ rowColor }>
           <CheckMark onSelect={ () => onSelectRow(index) } isChecked={ isSelected } />
           <div className="header" onClick={ this._toggleContent }>
             {

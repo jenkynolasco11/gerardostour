@@ -1,80 +1,18 @@
 import React, { Component } from 'react'
-import { bindActionCreators } from 'redux'
-import { connect } from 'react-redux'
 import Dialog from 'react-toolbox/lib/dialog/Dialog'
 import FontIcon from 'react-toolbox/lib/font_icon/FontIcon'
-// import { MdClose } from 'react-icons/lib/md'
-
-// import axios from 'axios'
 
 import TicketTabs from './TicketForm__Tabs'
 import configData from '../../config/config-values.json'
 import { /*formatTicketData, reformatTicketData,*/ getExtraPrice } from './utils'
-import { submitTicketData } from '../../store-redux/actions'
+// import { submitTicketData } from '../../store-redux/actions'
 
 import './ticket-form.scss'
-/*
-const defaultState = {
-  isLocal : true,
-  
-  // Person Form Fields
-  person : {
-    firstname : '',
-    lastname : '',
-    email : '',
-    phoneNumber : '',
-  },
-
-  // Address Form Fields
-  date : new Date(new Date().setHours(0,0,0,0)),
-  time : 3,
-  willPick : false,
-  willDrop : false,
-  pickUpAddress : {
-    street : '',
-    city : '',
-    state : '',
-    zipcode : ''
-  }, 
-  dropOffAddress : {
-    street : '',
-    city : '',
-    state : '',
-    zipcode : '',
-  },
-  frm : 'NY',
-  to : 'PA',
-  /////////
-
-  // Payment From Fields
-  payment : {
-    type : 'CASH',
-    isCard : false,
-    cardLastDigits : '',
-    cardNumber : '',
-    expirationDate : '',
-    cvc : '',
-  },
-  // Per Ticket Information
-  extraFee : 0.0,
-  fee : 0.0,
-  totalAmount : 0,
-  
-  /////////////////
-  
-  howMany : 1,
-  luggage : 0,
-  ///////////
-  status : 'NEW',
-  redeemedCount : 0,
-}
-*/
 
 const defaultState = {
   // general info
     isLocal : true,
     ticketQty : 1,
-    packageQty : 0,
     
     // Person details
     person : {
@@ -116,7 +54,7 @@ const defaultState = {
   
     luggageQty : 0,
   
-    // Ticket details
+    // Package details
     hasPackage : false,
     packageInfo : {
       weight : 0,
@@ -124,12 +62,11 @@ const defaultState = {
       fee : 0
     }
 }
-//*
+
 const myInfo = {
   // general info
   isLocal : true,
   ticketQty : 3,
-  packageQty : 0,
   luggageQty : 1,  
   // Person details
   person : {
@@ -175,16 +112,15 @@ const myInfo = {
     cardNumber : '',
   },
 
-  // Ticket details
-  hasPackage : false,
+  // Package details
+  packageQty : 1,
+  hasPackage : true,
   packageInfo : {
-    weight : 0,
-    message : '',
-    fee : 0
+    weight : 43,
+    message : 'Handle with care',
+    fee : 40
   }
 }
-
-// */
 
 // TODO : Make a validation function to validate every field in the form
 const checkValidation = state => {
@@ -228,6 +164,8 @@ class TicketForm extends Component {
 
     const data = { ...this.state }
 
+    // console.log(data)
+
     await this.props.submitTicket(data)
 
     this.props.onSubmitData()
@@ -247,7 +185,8 @@ class TicketForm extends Component {
       willDrop,
       willPick,
       packageInfo,
-      packageQty
+      hasPackage
+      // packageQty
     } = obj
 
     const packFee = packageInfo.fee
@@ -268,10 +207,15 @@ class TicketForm extends Component {
     luggageFee += (luggagePrice * luggageQty)
 
     totalAmount += parseFloat(fee + luggageFee + pickFee + dropFee)
-    extraFee += parseFloat(luggageFee + pickFee + dropFee + packFee)
+    totalAmount += hasPackage ? packFee : 0
+
+    extraFee += parseFloat(luggageFee + pickFee + dropFee)
+    extraFee += hasPackage ? packFee : 0
 
     const fees = { totalAmount, fee, extraFee }
-
+    
+    // console.log(fees)
+    
     return fees
   }
 
@@ -310,12 +254,6 @@ class TicketForm extends Component {
 
         newProp.packageQty = val
         break
-      // case 'luggage':
-      //   luggageQty = val
-      //   break
-      // case 'to' :
-      //   to = val
-      //   break
       default :
         newProp[ name ] = val
         break
@@ -332,74 +270,17 @@ class TicketForm extends Component {
     }
 
     return this.setState({ ...newState }, () => {
+      const { payment } = this.state
       const fees = this._calculateFees()
 
-      return this.setState({ ...fees })
+      return this.setState({ payment : { ...payment, ...fees }})
     })
   }
 
   componentWillMount() {
-    // Check this out later
-    return this.setState({ ...this._calculateFees() })
-    /*
-    const { ticket = {} } = this.props
+    const { payment } = this.state
 
-    if(ticket) {
-
-      // TODO : Show ticket ID, request payment info, set date properly
-      ticket.date = new Date(ticket.date)
-
-      setTimeout(async () => {
-        try {
-          const { data } = await axios.get(`${ url }/ticket/${ ticket.id }/receipt`)
-          
-            // TODO : 
-            // Took this away cuz I don't want to modify tickets.
-            // I will delete the receipt, then create a new one
-          
-
-        } catch (e) {
-          console.log(e)
-        }
-      }, 100)
-    }
-
-    const fees = this._calculateFees(ticket)
-    
-    return this.setState({ ...ticket, ...fees })
-    // */
-
-    // const { state } = this.props.location
-    // let { to, luggage, howMany } = this.state
-
-    // const params = this._calculateFees()
-    // let ticketData = null
-
-    // if(state) {
-    //   params.title = state.title
-    //   params.isModify = state.isModify
-    //   // if(params.isModify) params.status = 'REDEEMED'
-
-    //   const id = state.ticket
-
-    //   try {
-    //     const { data } = await axios.get(`${ url }/ticket/${ id }`)
-
-    //     if(data.ok) {
-    //       ticketData = { ...formatTicketData(data.data) }
-    //       console.log(ticketData)
-    //     }
-    //     // else this.props.history.goBack()
-    //   } catch (e) {
-    //     console.log('Something Happened....')
-    //     console.log(e)
-    //     // this.props.history.goBack()
-    //   }
-    //   // Do axios in here
-    // }
-    // console.log(params)
-    // console.log(ticketData)
-    // this.setState({ ...ticketData, ...params, })
+    return this.setState({ payment : { ...payment, ...this._calculateFees() }})
   }
 
   render() {
@@ -436,8 +317,4 @@ const Form = props => (
   </Dialog>
 )
 
-const mapDispatchToProps = dispatch => bindActionCreators({
-  submitTicket : data => submitTicketData(data)
-}, dispatch)
-
-export default connect(null, mapDispatchToProps)(Form)
+export default Form

@@ -10,14 +10,14 @@ import RideForm from './RideForm'
 import { ListDivider, ListItem, List } from 'react-toolbox/lib/list'
 import { CardTitle } from 'react-toolbox/lib/card'
 
-import { retrieveRides, assignBusToRides } from '../../store-redux/actions'
+import { retrieveRides, assignBusToRides, setRideQueryOption, dispatchToBus } from '../../store-redux/actions'
 import { formatDate, formatHour } from '../../utils'
 
 import './ride-consult.scss'
 
 const formatData = data => {
   return data.map(item => {
-    const { time, date, status } = item
+    const { time, date } = item
 
     return {
       ...item,
@@ -80,7 +80,8 @@ class Ride extends Component {
       showBusForm : false, // Show assign bus modal
       rideToModify : null,
     }
-
+    
+    this._getSelectedRides = this._getSelectedRides.bind(this)
     this._dispatchToBus = this._dispatchToBus.bind(this)
     this._onRowSelected = this._onRowSelected.bind(this)
     this._clearSelected = this._clearSelected.bind(this)
@@ -92,14 +93,22 @@ class Ride extends Component {
     this._onChange = this._onChange.bind(this)
     this._onSort = this._onSort.bind(this)
   }
+
   //#region Private functions
-  _onAssignBus(bus) {
-    const { selected, sortBy, sortOrder, skip, limit } = this.state
+  _getSelectedRides() {
+    const { selected } = this.state
     const { rides } = this.props
 
     const selectedRides = rides
                           .filter((_, i) => selected.includes(i))
                           .map(x => x.id)
+    return selectedRides
+  }
+
+  _onAssignBus(bus) {
+    const { sortBy, sortOrder, skip, limit } = this.state
+   
+    const selectedRides = this._getSelectedRides()
 
     const query = {
       skip,
@@ -114,7 +123,8 @@ class Ride extends Component {
   }
 
   _getStatus() {
-    const { onTheWay, finished, assigned, pending /*, future*/ } = this.props
+    const { settings } = this.props
+    const { onTheWay, finished, assigned, pending } = settings
 
     const statusList = {
       'ON-THE-WAY' : onTheWay,
@@ -134,7 +144,8 @@ class Ride extends Component {
 
   _requestRides() {
     const { skip : oldSkip, limit, sortBy, sortOrder } = this.state
-    const { /*onTheWay, finished, assigned, pending,*/ future } = this.props
+    const { settings } = this.props
+    const {  /*onTheWay, finished, assigned, pending,*/ future } = settings
 
     const skip = oldSkip * limit
     
@@ -142,7 +153,7 @@ class Ride extends Component {
 
     const sort = `${ sortBy } ${ sortOrder }`
 
-    this.setState({ selected : [] })
+    this.setState({ selected : [], isDispatch : false })
     return this.props.queryRides({ skip, status, sort, future, limit })
   }
 
@@ -151,7 +162,7 @@ class Ride extends Component {
   }
 
   _onRowSelected(rows) {
-    this.setState({ selected : [].concat(rows) })
+    return this.setState({ selected : [].concat(rows) })
   }
 
   _clearSelected() {
@@ -159,7 +170,7 @@ class Ride extends Component {
   }
 
   _onPaginate({ selected : skip }) {
-    this.setState({ skip/*, selected : []*/ }, this._requestRides)
+    return this.setState({ skip/*, selected : []*/ }, this._requestRides)
   }
 
   _onSort(nextSortBy) {
@@ -170,7 +181,7 @@ class Ride extends Component {
 
     sortBy = nextSortBy
 
-    this.setState({ sortBy, sortOrder/*, selected : []*/ }, this._requestRides)
+    return this.setState({ sortBy, sortOrder/*, selected : []*/ }, this._requestRides)
   }
 
   _showForm(which, willShow) {
@@ -189,10 +200,12 @@ class Ride extends Component {
     return this.setState({ [ which ] : willShow, rideToModify })
   }
 
-  _dispatchToBus(bus) {
-    const { selected } = this.state
+  _dispatchToBus() {
+    const selectedRides = this._getSelectedRides()
 
-    console.log(bus, selected)
+    console.log(selectedRides)
+
+    return this.props.dispatchBus(selectedRides)
   }
 //#endregion
 
@@ -200,28 +213,21 @@ class Ride extends Component {
   componentWillMount() {
     return this._requestRides()
   }
-
-  // componentWillReceiveProps(nextProps) {
-  //   const { count } = nextProps
-
-  //   this.setState({ count })
-  //   // return this._clearSelected()
-  // }
 //#endregion
 
   render() {
     const {
       skip,
       limit,
-      // count,
       selected,
       showForm,
       rideToModify,
-      showBusForm
+      showBusForm,
     } = this.state
 
-    const { rides, count } = this.props
+    const { rides, count, settings, setQueryOption } = this.props
     const data = formatData(rides)
+    const disableDispatch = !selected.every(i => rides[ i ].status === 'ASSIGNED')
 
     return (
       <div className="ride-consult">
@@ -240,11 +246,14 @@ class Ride extends Component {
           colorProps={ tableData.colors }
           colorPropToMatch={ tableData.colorsPropToMatch }
         />
-        <RideSettings 
+        <RideSettings
           selected={ selected }
           requestRides={ this._requestRides }
           showForm={ this._showForm }
           dispatchToBus={ this._dispatchToBus }
+          shouldDisableDispatch={ selected.length === 0 || disableDispatch }
+          onChange={ setQueryOption }
+          { ...settings }
         />
         <RideForm
           active={ showForm }
@@ -262,14 +271,17 @@ class Ride extends Component {
   }
 }
 
+// TODO : Refactor this part. All the connects should be send by the higher component
 const mapStateToProps = state => {
-  const { rides, count, /*selectedRides,*/ searchOptions } = state.ride
+  const { rides, count, searchOptions } = state.ride
 
-  return { rides, count, ...searchOptions }
+  return { rides, count, settings : searchOptions }
 }
 
 const mapDispatchToProps = dispatch => bindActionCreators({
   queryRides : args => retrieveRides(args),
+  dispatchBus : rides => dispatchToBus(rides),
+  setQueryOption : (val, name) => setRideQueryOption({ [ name ] : val }),
   assignBus : (bus, rides, query) => assignBusToRides(bus, rides, query),
 }, dispatch)
 
