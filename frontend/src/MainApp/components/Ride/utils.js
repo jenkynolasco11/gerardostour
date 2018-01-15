@@ -21,10 +21,12 @@ export const FormatBusItem = bus => (
   <div className="bus-item">
     <div className="">
       <strong>{ bus.name }</strong>
-      <p>
-        <em><strong>Seats :</strong>{`${ bus.seats }`}</em>
-        <em><strong>Luggage :</strong>{`${ bus.luggage }`}</em>
-      </p>
+      {/*
+        <p>
+          <em><strong>Seats :</strong>{`${ bus.seats }`}</em>
+          <em><strong>Luggage :</strong>{`${ bus.luggage }`}</em>
+        </p>
+      */}
     </div>
     <div className="">
       <p>Driver : { `${ bus.driver.firstname } ${ bus.driver.lastname }` }</p>

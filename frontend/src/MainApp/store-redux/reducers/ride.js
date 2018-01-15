@@ -7,7 +7,7 @@ const defaultState = {
   searchOptions : {
     pending : true,
     finished : false,
-    assigned : false,
+    assigned : true,
     onTheWay : false,
     future : true,
   }
