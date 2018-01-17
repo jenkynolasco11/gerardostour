@@ -14,6 +14,7 @@ import { retrieveRides, assignBusToRides, setRideQueryOption, dispatchToBus, cle
 import { formatDate, formatHour } from '../../utils'
 
 import './ride-consult.scss'
+import { Dropdown } from 'react-toolbox/lib/dropdown';
 
 const formatData = data => {
   return data.map(item => {
@@ -42,7 +43,11 @@ const tableData = {
     'ON-THE-WAY' : 'cyan',
     'FINISHED' : 'lightgreen'
   },
-  colorsPropToMatch : 'status'
+  colorsPropToMatch : 'status',
+  dropdownData : [
+    { value : 'id', label : 'ID' },
+    { value : 'bus', label : 'Bus' },
+  ]
 }
 
 const DetailTemplate = props => (
@@ -79,6 +84,7 @@ class Ride extends Component {
       showForm : false, // Show create ride form
       showBusForm : false, // Show assign bus modal
       rideToModify : null,
+      searchDropdown : 'id'
     }
     
     this._getSelectedRides = this._getSelectedRides.bind(this)
@@ -232,6 +238,7 @@ class Ride extends Component {
       showForm,
       rideToModify,
       showBusForm,
+      searchDropdown
     } = this.state
 
     const { rides, count, settings, setQueryOption } = this.props
@@ -255,6 +262,16 @@ class Ride extends Component {
           colorProps={ tableData.colors }
           colorPropToMatch={ tableData.colorsPropToMatch }
           onSearchChange={ this._onSearchChange }
+          onSearchEnter={ console.log }
+          searchPlaceholderText={ `Check on server for ${ searchDropdown }` }
+          rightDropDown={
+            <Dropdown
+              auto
+              source={ tableData.dropdownData }
+              value={ searchDropdown }
+              onChange={ e => this.setState({ searchDropdown : e }) }
+            /> 
+          }
         />
         <RideSettings
           selected={ selected }

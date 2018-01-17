@@ -37,8 +37,8 @@ class MainApp extends Component{
   }
 
   render() {
-    console.log(this.props.tickets)
-    console.log(this.props.rides)
+    // console.log(this.props.tickets)
+    // console.log(this.props.rides)
     return (
       <Router>
         <React.Fragment>
@@ -63,10 +63,11 @@ const mapDispatchToProps = dispatch => ({
 
 const mapStateToProps = state => {
   const { isAuth } = state.auth
-  const { rides } = state.ride
-  const { tickets } = state.ticket
+  // const { rides } = state.ride
+  // const { tickets } = state.ticket
 
-  return { isAuth, tickets, rides }
+  // return { isAuth, tickets, rides }
+  return { isAuth }
 }
 
 export default connect(mapStateToProps, mapDispatchToProps)(MainApp)

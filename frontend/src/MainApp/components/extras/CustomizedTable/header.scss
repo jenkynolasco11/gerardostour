@@ -1,0 +1,29 @@
+@import '../../../styles/scss/globals.scss';
+
+.custom-table {
+  .table {
+    &-header {
+      border-top-left-radius : 2px;
+      border-top-right-radius : 2px;
+      height : $componentHeight;
+      background-color : white;
+      display : flex;
+      border-bottom : 1px solid #eee;
+
+      &-item {
+        cursor : pointer;
+        flex : 2;
+        @include alignCenter();
+
+        &:not(.checkmark) {
+          flex : 2;
+        }
+
+        &:nth-child(2) {
+          flex : 1;
+        }
+      }
+    }
+
+  }
+}

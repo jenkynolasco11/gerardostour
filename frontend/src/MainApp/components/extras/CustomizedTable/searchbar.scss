@@ -1,0 +1,122 @@
+@import '../../../styles/scss/globals.scss';
+
+.custom-table {
+  .table {
+    .search-bar {
+      background : white;
+      height : $componentHeight;
+      border-bottom : 1px solid #eee;
+      display : flex;
+
+      &_input-field {
+        flex : 3;
+        position : relative;
+
+        ::-webkit-input-placeholder {
+          opacity : 0;
+          transition : opacity .12s linear;
+        }
+        :-moz-placeholder {
+          opacity : 0;
+          transition : opacity .12s linear;
+        }
+        ::-moz-placeholder {
+          opacity : 0;
+          transition : opacity .12s linear;
+        }
+        :-ms-input-placeholder {  
+          opacity : 0;
+          transition : opacity .12s linear;
+        }
+        :focus::-webkit-input-placeholder {
+          opacity : 0.3;
+        }
+        :focus:-moz-placeholder {
+          opacity : 0.3;
+        }
+        :focus::-moz-placeholder {
+          opacity : 0.3;
+        }
+        :focus:-ms-input-placeholder {
+          opacity : 0.3;
+        }
+
+        .search-bar_icon {
+          width : 45px;
+          color : rgb(216, 216, 216);
+          text-align : center;
+          vertical-align : middle;
+          margin-top : -10px;
+          margin-right : -36px;
+          font-size : 2em;
+
+          &.close {
+            opacity : 0;
+            margin-left : -45px;
+            transition : opacity .12s linear;
+            cursor : default;
+
+            &.appear {
+              cursor : pointer;
+              // display : none;
+              opacity : 1;
+            }
+          }
+        }
+
+        .search-bar_input {
+          font-size :  calc(1.6 * var(--unit));
+          background : transparent;
+          height : 40px;
+          line-height : 40px;
+          border : none;
+          border-bottom : 1px solid #eee;
+          width : 90%;
+          margin-left : 40px;
+          padding-top : 18px;
+          padding-left : 4px;
+
+          &:focus {
+            outline : none;
+          }
+        }
+
+        .search-bar_placeholder {
+          position : absolute;
+          bottom : 3px;
+          color : rgb(145, 145, 145);
+          left : 45px;
+          margin-left : 6px;
+          font-size : 1.6em;
+          transition : bottom .12s linear, color .12s linear, font-size .12s linear, margin .12s linear;
+
+          &.top {
+            // margin : 0;
+            bottom : 28px;
+            font-size : 0.8em;
+            color : #ccc;
+          }
+        }
+      }
+
+      &_dropdown {
+        flex : 1;
+        height : $componentHeight;
+        display : flex;
+
+        span {
+          flex : 1;
+          white-space : nowrap;
+          margin-right : 10px;
+          margin-top : 14px;
+          font-size : 1.2em;
+          color : #ccc;
+        }
+
+        [data-react-toolbox=input] {
+          padding : 9px 4px;
+        }
+      }
+    }
+  }
+}

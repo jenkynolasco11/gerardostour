@@ -4,6 +4,7 @@ import { connect } from 'react-redux'
 
 import { List, ListDivider, /*ListCheckbox,*/ ListItem } from 'react-toolbox/lib/list'
 import { /*Card, CardActions, CardMedia,*/ CardTitle } from 'react-toolbox/lib/card'
+import { Dropdown } from 'react-toolbox/lib/dropdown';
 
 import TicketSettings from './TicketSettings'
 import TicketForm from './TicketForm'
@@ -14,6 +15,7 @@ import { formatDate, formatHour, formatPhone } from '../../utils'
 import { retrieveTickets, assignTicketsToRide, submitTicketData, setTicketQueryOption, clearTickets } from '../../store-redux/actions'
 
 import './ticket-consult.scss'
+
 
 const formatData = data => {
   return data.map( item => {
@@ -71,7 +73,13 @@ const tableData = {
   },
   colorsPropToMatch : 'isPackage',
   rowToMatch : 'isAssigned',
-  colorRowToMatch : '#B7F39E'
+  colorRowToMatch : '#B7F39E',
+  dropdownData : [
+    { value : 'id', label : 'ID' },
+    { value : 'firstname', label : 'First Name' },
+    { value : 'lastname', label : 'Last Name' },
+    { value : 'phoneNumber', label : 'Phone Number' },
+  ]
 }
 
 const TicketTemplate = props => {
@@ -122,6 +130,7 @@ class TicketConsult extends Component {
       showForm : false,
       showRidesModal : false,
       ticketToModify : null,
+      searchDropdown : 'id',
     }
 
     this._onSearchChange = this._onSearchChange.bind(this)
@@ -253,7 +262,8 @@ class TicketConsult extends Component {
       selected,
       showForm,
       showRidesModal,
-      ticketToModify
+      ticketToModify,
+      searchDropdown,
     } = this.state
 
     const { tickets, count, submitTicket, setQueryOption, settings } = this.props
@@ -278,6 +288,16 @@ class TicketConsult extends Component {
           colorToMatchRow={ tableData.colorRowToMatch }
           rowToMatchProp={ tableData.rowToMatch }
           onSearchChange={ this._onSearchChange }
+          onSearchEnter={ console.log }
+          searchPlaceholderText={ `Check on server for ${ searchDropdown }` }
+          rightDropDown={
+            <Dropdown
+              auto
+              source={ tableData.dropdownData }
+              value={ searchDropdown }
+              onChange={ e => this.setState({ searchDropdown : e }) }
+            /> 
+          }
         />
         <TicketSettings
           selected={ selected }
