@@ -103,10 +103,10 @@ export const reformatTicketData = tickt => {
 
 export const FormatRideItem = ride => (
   <div className="ride-item">
-    <div className="">
+    <div className="ride-item_route">
       <p>
-        <em><strong>From :</strong>{`${ ride.routeFrom }`}</em>
-        <em><strong>To :</strong>{`${ ride.routeTo }`}</em>
+        <em><strong>From :</strong>{`${ ride.frm }`}</em>
+        <em><strong>To :</strong>{`${ ride.to }`}</em>
       </p>
     </div>
     {/*
@@ -116,9 +116,9 @@ export const FormatRideItem = ride => (
     {
       //*
       ride.bus &&
-      <React.Fragment>
+      // <React.Fragment>
         <p><strong>Bus :</strong> { `${ ride.bus.name }` }</p>
-      </React.Fragment>
+      // </React.Fragment>
       //*/
     }
     </div>

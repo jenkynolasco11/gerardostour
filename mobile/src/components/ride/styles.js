@@ -27,6 +27,7 @@ const styles = StyleSheet.create({
   icon : {
     fontSize : 24
   },
+  // button : { width : width * 0.9 },
   // Color themes
   color1 : { backgroundColor : settings.color1 },
   color2 : { backgroundColor : settings.color2 },

@@ -89,11 +89,6 @@ class TicketRide extends Component {
     return this._makeRequest()
   }
 
-  // componentWillReceiveProps(props) {
-  //   if()
-  // }
-//#endregion
-
   render() {
     const { date, time, rides, rideSelected } = this.state
     const { onDialogClose } = this.props

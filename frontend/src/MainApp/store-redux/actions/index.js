@@ -14,7 +14,8 @@ export const {
   retrieveTickets,
   submitTicketData,
   setTicketQueryOption,
-  assignTicketsToRide
+  assignTicketsToRide,
+  clearTickets
 } = Ticket
 
 // export const {
@@ -39,7 +40,8 @@ export const {
   setRideQueryOption,
   submitRideData,
   assignBusToRides,
-  dispatchToBus
+  dispatchToBus,
+  clearRides
 } = Ride
 
 export default {

@@ -1,4 +1,4 @@
-import { ADD_RIDES_COUNT, ADD_RIDES, SELECTED_RIDES, SET_RIDES_OPTION } from '../constants'
+import { ADD_RIDES_COUNT, ADD_RIDES, SELECTED_RIDES, SET_RIDES_OPTION, CLEAR_RIDES } from '../constants'
 
 const defaultState = {
   rides : [],
@@ -25,8 +25,8 @@ export const ride = (state = defaultState, { type, payload }) => {
       return { ...state, count : payload }
     case ADD_RIDES :
       return { ...state, rides : [].concat(payload) }
-    case 'CLEAR_RIDES' :
-      return { ...state, rides : [] }
+    case CLEAR_RIDES :
+      return { ...state, rides : [], count : 0 }
     default :
       return state
   }

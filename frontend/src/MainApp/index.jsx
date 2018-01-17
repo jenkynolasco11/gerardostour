@@ -28,7 +28,7 @@ class MainApp extends Component{
   //   console.log(info)
   // }
 
-  async componentWillMount() {
+  componentWillMount() {
     // TODO : send the username stored in LocalStorage
 
     const username = window.sessionStorage.getItem('session:user')
@@ -37,6 +37,8 @@ class MainApp extends Component{
   }
 
   render() {
+    console.log(this.props.tickets)
+    console.log(this.props.rides)
     return (
       <Router>
         <React.Fragment>
@@ -61,8 +63,10 @@ const mapDispatchToProps = dispatch => ({
 
 const mapStateToProps = state => {
   const { isAuth } = state.auth
+  const { rides } = state.ride
+  const { tickets } = state.ticket
 
-  return { isAuth }
+  return { isAuth, tickets, rides }
 }
 
 export default connect(mapStateToProps, mapDispatchToProps)(MainApp)

@@ -164,8 +164,6 @@ class TicketForm extends Component {
 
     const data = { ...this.state }
 
-    // console.log(data)
-
     await this.props.submitTicket(data)
 
     this.props.onSubmitData()

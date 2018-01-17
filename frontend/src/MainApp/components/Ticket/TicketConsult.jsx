@@ -11,7 +11,7 @@ import TicketRideModal from './TicketRideModal'
 import CustomTable from '../extras/CustomizedTable'
 
 import { formatDate, formatHour, formatPhone } from '../../utils'
-import { retrieveTickets, assignTicketsToRide, submitTicketData, setTicketQueryOption } from '../../store-redux/actions'
+import { retrieveTickets, assignTicketsToRide, submitTicketData, setTicketQueryOption, clearTickets } from '../../store-redux/actions'
 
 import './ticket-consult.scss'
 
@@ -124,6 +124,7 @@ class TicketConsult extends Component {
       ticketToModify : null,
     }
 
+    this._onSearchChange = this._onSearchChange.bind(this)
     this._requestTickets = this._requestTickets.bind(this)
     this._clearSelected = this._clearSelected.bind(this)
     this._onRowSelected = this._onRowSelected.bind(this)
@@ -229,12 +230,19 @@ class TicketConsult extends Component {
 
     return this.setState({ [ which ] : willShow, /*ticketToModify*/ })
   }
+  
+  _onSearchChange(val) {
+    console.log(val)
+  }
 //#endregion
-
   //#region Lifecycle
   componentWillMount() {
     // console.log(this.props.tickets)
     return this._requestTickets()
+  }
+
+  componentWillUnmount() {
+    return this.props.clearTickets()
   }
 
 //#endregion
@@ -269,6 +277,7 @@ class TicketConsult extends Component {
           colorPropToMatch={ tableData.colorsPropToMatch }
           colorToMatchRow={ tableData.colorRowToMatch }
           rowToMatchProp={ tableData.rowToMatch }
+          onSearchChange={ this._onSearchChange }
         />
         <TicketSettings
           selected={ selected }
@@ -298,7 +307,8 @@ const mapDispatchToProps = dispatch => bindActionCreators({
   queryTickets : args => retrieveTickets(args),
   assignRide : (tickets, ride) => assignTicketsToRide(tickets, ride),
   submitTicket : data => submitTicketData(data),
-  setQueryOption : (val, name) => setTicketQueryOption({ [ name ] : val })
+  setQueryOption : (val, name) => setTicketQueryOption({ [ name ] : val }),
+  clearTickets : () => clearTickets()
 }, dispatch)
 
 const mapStateToProps = state => {

@@ -20,7 +20,7 @@ class ContentComponent extends Component {
     console.log(info)
     console.log('Error while fetching the data... Maybe?')
 
-    this.setState({ tickets : [] })
+    return this.setState({ tickets : [] })
   }
 
   render() {
@@ -33,7 +33,7 @@ class ContentComponent extends Component {
         <List>
           {
             tickets.map((ticket, i) => {
-              console.log(ticket)
+              // console.log(ticket)
               const { person, dropOffAddress, pickUpAddress } = ticket
 
               const fullname = `${ person.firstname } ${ person.lastname }`
@@ -61,6 +61,7 @@ class ContentComponent extends Component {
                   </ListItem>
                   <ListItem noBorder style={ styles.color1 }>
                     <Button
+                      transparent={ Platform.OS === 'android' }
                       style={ styles.color1 }
                       onPress={ () => Linking.openURL(`${ url }${ person.phoneNumber}`).catch(console.error) }
                     > 
@@ -71,26 +72,25 @@ class ContentComponent extends Component {
                   {
                     pick &&
                     <ListItem noBorder style={ styles.color1 }>
-                      <Icon style={ styles.textColor4 } name="home" />
                       <Button
+                        transparent={ Platform.OS === 'android' }
                         style={ styles.color1 }
-                        onPress={ null }
+                        onPress={ () => Linking.openURL(`https://maps.google.com/?q=${ pick }`).catch(console.log) }
                       >
+                        <Icon style={ styles.textColor4 } name="home" />
                         <Text note>{ pick }</Text>
                       </Button>
                     </ListItem>
                   }
                   {
                     drop &&
-                    <ListItem
-                      style={ styles.color1 }
-                      noBorder
-                    >
-                      <Icon style={ styles.textColor4 } name="pin" />
+                    <ListItem style={ styles.color1 } noBorder>
                       <Button
+                        transparent={ Platform.OS === 'android' }
                         style={ styles.color1 }
-                        onPress={ null }
+                        onPress={ () => Linking.openURL(`https://maps.google.com/?q=${ drop }`).catch(console.log) }
                       >
+                        <Icon style={ styles.textColor4 } name="pin" />
                         <Text note>{ drop }</Text>
                       </Button>
                     </ListItem>
@@ -104,7 +104,7 @@ class ContentComponent extends Component {
                           { 
                             ticket.package.weight 
                             ? parseFloat(ticket.package.weight).toFixed(1) 
-                            : 0.0 
+                            : 0.0
                           }
                         </Text>
                         {

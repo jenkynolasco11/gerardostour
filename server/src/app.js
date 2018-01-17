@@ -6,7 +6,9 @@ import Pug from 'koa-pug'
 import mongoose from 'mongoose'
 import serve from 'koa-static'
 // import session from 'koa-session-minimal'
-import session from 'koa-session'
+import session from 'koa-generic-session'
+// import session from 'koa-session'
+// import session from 'koa-session2'
 // import SessionStore from 'koa-session-mongoose'
 import bluebird from 'bluebird'
 import passport from 'koa-passport'
@@ -46,6 +48,7 @@ const server = async (port, done) => {
 
     const sessionParams = {
       key : config.KEY,
+      signed : true,
       // httpOnly : true,
       // store,
     }
@@ -53,11 +56,15 @@ const server = async (port, done) => {
     app.keys = config.KEYS
 
     app
+      // .use((ctx, next) => {
+      //   console.log(ctx.header)
+      //   next()
+      // })
       .use(bodyparser({ multipart : true }))
       .use(session(sessionParams, app))
-      .use(cors({ 
-        origin : () => '*',
-        // credentials : true,
+      .use(cors({
+        origin : 'http://localhost:3000', // () => '*',
+        credentials : true,
         exposeHeaders: ['WWW-Authenticate', 'Server-Authorization'],
         allowHeaders: ['Content-Type', 'Authorization', 'Accept', 'Cache-Control']
       }))

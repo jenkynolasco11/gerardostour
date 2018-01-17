@@ -1,6 +1,6 @@
 import axios from 'axios'
 
-import { ADD_TICKETS, ADD_TICKETS_COUNT, SET_TICKETS_OPTION } from '../constants'
+import { ADD_TICKETS, ADD_TICKETS_COUNT, SET_TICKETS_OPTION, CLEAR_TICKETS } from '../constants'
 import { showLoader, showSnackBarWithMessage } from './app'
 // import { showSnackBarWithMessage } from './app'
 import { url } from '../../config/config-values.json'
@@ -16,7 +16,7 @@ import { url } from '../../config/config-values.json'
 
 /*export */ const setTicketQueryOption = payload => ({ type : SET_TICKETS_OPTION, payload })
 
-// /*export */ const clearTickets = payload => ({ type : 'CLEATICKETS', payload })
+ export const clearTickets = payload => ({ type : CLEAR_TICKETS, payload })
 
 
 // ///////////////////////
@@ -119,7 +119,8 @@ export default {
   retrieveTickets,
   submitTicketData,
   setTicketQueryOption,
-  assignTicketsToRide
+  assignTicketsToRide,
+  clearTickets
   // retrieveRides,
   // submitRideData,
   // setSelectedRides,

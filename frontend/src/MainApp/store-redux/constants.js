@@ -12,12 +12,14 @@ export const LOG_USER_OUT = 'LOG_USER_OUT'
 // actions/ride.js
 
 export const ADD_RIDES = 'ADD_RIDES'
+export const CLEAR_RIDES = 'CLEAR_RIDES'
 export const ADD_RIDES_COUNT = 'ADD_RIDES_COUNT'
-export const SELECTED_RIDES = 'SELECTED_RIDES'
 export const SET_RIDES_OPTION = 'SET_RIDES_OPTION'
+export const SELECTED_RIDES = 'SELECTED_RIDES'
 
 // actions/ticket.js
 
 export const ADD_TICKETS = 'ADD_TICKETS'
+export const CLEAR_TICKETS = 'CLEAR_TICKETS'
 export const ADD_TICKETS_COUNT = 'ADD_TICKETS_COUNT'
 export const SET_TICKETS_OPTION = 'SET_TICKETS_OPTION'

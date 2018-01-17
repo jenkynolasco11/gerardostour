@@ -10,7 +10,7 @@ import RideForm from './RideForm'
 import { ListDivider, ListItem, List } from 'react-toolbox/lib/list'
 import { CardTitle } from 'react-toolbox/lib/card'
 
-import { retrieveRides, assignBusToRides, setRideQueryOption, dispatchToBus } from '../../store-redux/actions'
+import { retrieveRides, assignBusToRides, setRideQueryOption, dispatchToBus, clearRides } from '../../store-redux/actions'
 import { formatDate, formatHour } from '../../utils'
 
 import './ride-consult.scss'
@@ -82,6 +82,7 @@ class Ride extends Component {
     }
     
     this._getSelectedRides = this._getSelectedRides.bind(this)
+    this._onSearchChange = this._onSearchChange.bind(this)
     this._dispatchToBus = this._dispatchToBus.bind(this)
     this._onRowSelected = this._onRowSelected.bind(this)
     this._clearSelected = this._clearSelected.bind(this)
@@ -207,11 +208,19 @@ class Ride extends Component {
 
     return this.props.dispatchBus(selectedRides)
   }
+
+  _onSearchChange(val) {
+    console.log(val)
+  }
 //#endregion
 
   //#region Lifecycle functions
   componentWillMount() {
     return this._requestRides()
+  }
+
+  componentWillUnmount() {
+    return this.props.clearRides()
   }
 //#endregion
 
@@ -245,6 +254,7 @@ class Ride extends Component {
           headerProps={ tableData.headers }
           colorProps={ tableData.colors }
           colorPropToMatch={ tableData.colorsPropToMatch }
+          onSearchChange={ this._onSearchChange }
         />
         <RideSettings
           selected={ selected }
@@ -283,6 +293,7 @@ const mapDispatchToProps = dispatch => bindActionCreators({
   dispatchBus : rides => dispatchToBus(rides),
   setQueryOption : (val, name) => setRideQueryOption({ [ name ] : val }),
   assignBus : (bus, rides, query) => assignBusToRides(bus, rides, query),
+  clearRides : () => clearRides()
 }, dispatch)
 
 export default connect(mapStateToProps, mapDispatchToProps)(Ride)

@@ -6,6 +6,15 @@
     width : 90vw !important;
   }
 
+
+  .ride-item {
+    &_route {
+      em {
+        margin-right : 20px;
+      }
+    }
+  }
+
   .dates {
     display : flex;
 

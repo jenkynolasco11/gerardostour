@@ -15,6 +15,66 @@ const CheckMark = props => (
   // </div>
 )
 
+class SearchBar extends Component{
+  state = { searchQry : '', spanTop : false }
+
+  constructor(props) {
+    super(props)
+
+    this._onChange = this._onChange.bind(this)
+    this._onFocus = this._onFocus.bind(this)
+  }
+
+  _onChange(e) {
+    const { value } = e.target
+
+    return this.setState({ searchQry : value }, () => {
+      const { onSearchChange = null } = this.props
+
+      if(onSearchChange) return onSearchChange(value)
+    })
+  }
+
+  _onFocus(spanTop) {
+    return this.setState({ spanTop })
+  }
+
+  render() {
+    const { spanTop, searchQry } = this.state
+    const { rightDropDown : DropDown } = this.props
+    const spanClass = `search-bar_placeholder${ spanTop || searchQry.length ? ' top' : '' }`
+    const shouldCloseAppear = searchQry.length > 0
+    const closeIconClass = `search-bar_icon close${ shouldCloseAppear ? ' appear' : '' }`
+
+    return (
+      <div className="search-bar">
+        <div className="search-bar_input-field">
+          <FontIcon value="search" className="search-bar_icon"/>
+          <input
+            placeholder="Check on server for a Date"
+            className="search-bar_input"
+            type="text"
+            onChange={ this._onChange }
+            value={ searchQry }
+            onFocus={ () => this._onFocus(true) }
+            onBlur={ () => this._onFocus(false) }
+          />
+          <span className={ spanClass }>Search</span>
+          <FontIcon
+            value="close"
+            className={ closeIconClass }
+            onClick={ () => this.setState({ searchQry : '' }) }
+          />
+          {
+            DropDown &&
+            <DropDown />
+          }
+        </div>
+      </div>
+    )
+  }
+} 
+
 const TableHeader = props => (
   <div className="table-header">
     <CheckMark onSelect={ props.onSelectAll } />
@@ -60,7 +120,7 @@ class TableRow extends Component {
   }
 
   componentWillReceiveProps(/* props */) {
-    this.setState({ isClosed : true })
+    return this.setState({ isClosed : true })
   }
 
   render() {
@@ -128,10 +188,11 @@ class TableRow extends Component {
 
 class TableBody extends Component{
   render() {
-    const { total = 0, limit = 10, onPaginate, skip = 0, data } = this.props
+    const { total = 0, limit = 10, onPaginate, skip = 0, data, onSearchChange = null, headerProps = [0,1,2,3] } = this.props
 
     return (
       <div className="table">
+        <SearchBar onSearchChange={ onSearchChange }/>
         <TableHeader { ...this.props } />
         <div className="table-body">
           {
@@ -144,7 +205,24 @@ class TableBody extends Component{
             data &&
             data.length
             ? null
-            : <div className="table-no-content"> There is no content available </div>
+            : // <div className="table-no-content"> There is no content available </div>
+            [...Array(limit).keys()].map((_, i) => (
+              <div key={ i }className="skeleton-data">
+                {
+                  [...headerProps].map((_, j) => (
+                    <div
+                      key={ j }
+                      className="dummy"
+                      style={
+                        _.flex
+                        ? { flex : _.flex }
+                        : {}
+                      }
+                    />
+                  ))
+                }
+              </div>
+            ))
           }
         </div>
         <Paginate {...{ total, limit, skip, onPaginate }} />

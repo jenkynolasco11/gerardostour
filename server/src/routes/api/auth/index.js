@@ -32,6 +32,9 @@ const setUserData = async usr => {
 const isAuthenticated = async (ctx, next) => {
   try {
     if(ctx.isAuthenticated()) {
+      console.log('KEWL!')
+      console.log(ctx.session)
+      console.log(ctx.session.passport)
       const { user } = ctx.state
     
       const data = await setUserData(user)
@@ -42,12 +45,16 @@ const isAuthenticated = async (ctx, next) => {
     console.log(e)
   }
 
+  console.log('NOPE')
   return next()
 }
 
 auth.post('/login', isAuthenticated, ctx =>
   passport.authenticate('local', async (err, user, msg) => {
     const { driverToken } = ctx.request.body
+
+    console.log(`This says that the user was ${ ctx.isAuthenticated() ? '' : 'not ' }authenticated`)
+    console.log(`Testing this: ${ ctx.session.isNew }`)
 
     if(user) {
       if(driverToken && user.position !== 'DRIVER') return ctx.body = { ok : false, data : null, message : 'Not a valid Driver' }
@@ -78,8 +85,10 @@ auth.post('/login', isAuthenticated, ctx =>
 // TODO : give an use to the username
 // (for logging or do something if :username wants to log off)
 auth.get('/logout', /* isAuthenticated, */ ctx => {
-// auth.get('/logout/:username', isAuthenticated, ctx => {
+  // auth.get('/logout/:username', isAuthenticated, ctx => {
   // const { username } = ctx.params
+  console.log('Logging out...')
+  console.log(`User was ${ ctx.isAuthenticated() ? '' : 'not' } authenticated`)
 
   if(ctx.state.user) {
     console.log(`${ ctx.state.user.username } is logging out...`)
@@ -91,17 +100,23 @@ auth.get('/logout', /* isAuthenticated, */ ctx => {
   return ctx.body = { ok : false, data : null, message : '' }
 })
 
-auth.get('/check-auth', ctx => {
-  // console.log(ctx.session)
+auth.get('/check-auth', isAuthenticated, async ctx => {
   // console.log(`User is ${ ctx.isAuthenticated() ? '' : 'not' } authenticated`)
+  console.log(ctx.session)
+  console.log(ctx.session.passport)
 
   if(ctx.isAuthenticated()) {
-    const { username, lastSession } = ctx.state.user
+  // if(ctx.session.user = ctx.session.passport.user.user) {
+  //   ctx.state.user = ctx.session.passport.user.user
 
-    const data = {
-      username,
-      lastSession
-    }
+
+    console.log('Inside, boys!')
+
+    const data = await setUserData(ctx.state.user)
+    // const data = {
+    //   username,
+    //   lastSession
+    // }
 
     return ctx.body = { ok : true, data : { userInfo : data }, message : '' }
   }

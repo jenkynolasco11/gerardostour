@@ -1,6 +1,6 @@
 import axios from 'axios'
 
-import { ADD_RIDES_COUNT, ADD_RIDES, SELECTED_RIDES, SET_RIDES_OPTION } from '../constants'
+import { ADD_RIDES_COUNT, ADD_RIDES, SELECTED_RIDES, SET_RIDES_OPTION, CLEAR_RIDES } from '../constants'
 import { showLoader } from './app'
 import { showSnackBarWithMessage } from './app'
 import { url } from '../../config/config-values.json'
@@ -16,7 +16,7 @@ import { url } from '../../config/config-values.json'
 
 /*export */ const setRideQueryOption = payload => ({ type : SET_RIDES_OPTION, payload })
 
-// /*export */ const clearRides = payload => ({ type : 'CLEAR_RIDES', payload })
+export const clearRides = payload => ({ type : CLEAR_RIDES, payload })
 
 
 // ///////////////////////
@@ -107,5 +107,6 @@ export default {
   setSelectedRides,
   setRideQueryOption,
   assignBusToRides,
-  dispatchToBus
+  dispatchToBus,
+  clearRides
 }
