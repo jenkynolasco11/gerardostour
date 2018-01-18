@@ -4,7 +4,7 @@ import FontIcon from 'react-toolbox/lib/font_icon/FontIcon'
 import './searchbar.scss'
 
 class SearchBar extends Component{
-  state = { searchQry : '', spanTop : false }
+  state = { spanTop : false }
 
   constructor(props) {
     super(props)
@@ -16,19 +16,16 @@ class SearchBar extends Component{
 
   _onChange(e) {
     const { value } = e.target
+    const { onSearchChange } = this.props
 
-    return this.setState({ searchQry : value }, () => {
-      const { onSearchChange = null } = this.props
-
-      if(onSearchChange) return onSearchChange(value)
-    })
+    if(onSearchChange) return onSearchChange(value)
   }
 
   _onFocus(spanTop) {
     return this.setState({ spanTop })
   }
 
-  _onKeyPress({ key, repeat }, shouldLock) {
+  _onKeyPress({ key, repeat }) {
     if(repeat) return
 
     const { onSearchEnter = null } = this.props
@@ -38,10 +35,10 @@ class SearchBar extends Component{
   }
 
   render() {
-    const { spanTop, searchQry } = this.state
-    const { rightDropDown : DropDown, searchPlaceholderText } = this.props
-    const spanClass = `search-bar_placeholder${ spanTop || searchQry.length ? ' top' : '' }`
-    const shouldCloseAppear = searchQry.length > 0
+    const { spanTop } = this.state
+    const { rightDropDown : DropDown, searchPlaceholderText, searchString = '' } = this.props
+    const spanClass = `search-bar_placeholder${ spanTop || searchString.length ? ' top' : '' }`
+    const shouldCloseAppear = searchString.length > 0
     const closeIconClass = `search-bar_icon close${ shouldCloseAppear ? ' appear' : '' }`
     const placeholder = searchPlaceholderText || "Check on server"
 
@@ -54,16 +51,16 @@ class SearchBar extends Component{
             className="search-bar_input"
             type="text"
             onChange={ this._onChange }
-            value={ searchQry }
+            value={ searchString }
             onFocus={ () => this._onFocus(true) }
             onBlur={ () => this._onFocus(false) }
-            onKeyDown={ e => this._onKeyPress(e, true) }
+            onKeyDown={ e => this._onKeyPress(e) }
           />
           <span className={ spanClass }>Search</span>
           <FontIcon
             value="close"
             className={ closeIconClass }
-            onClick={ () => this.setState({ searchQry : '' }) }
+            onClick={ () => this._onChange({ target : { value : '' }}) }
           />
         </div>
         {

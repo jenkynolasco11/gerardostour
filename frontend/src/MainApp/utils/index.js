@@ -1,3 +1,34 @@
+import React from 'react'
+// import FontIcon from 'react-toolbox/lib/font_icon/FontIcon'
+
+export const filterTicket = ({ ticketType = 'REGULAR', ...rest }) => {
+
+  const {
+    ticketQty,
+    message,
+    person,
+    payment,
+    ...body
+  } = rest
+
+  const data = { ticketQty, ...body, ...person, ...payment, ticketType }
+
+  if(ticketType === 'PACKAGE') return { ...data, message, luggageQty : 0 }
+  if(ticketType === 'VIP') return { ...data, message }
+  if(ticketType === 'SPECIAL') return { ...data, message, to : 'N/A', frm : 'N/A', ride : -1 }
+  if(ticketType === 'AIRPORT') return { ...data, message, to : 'N/A', frm : 'N/A', ride : -1, willDrop : false }
+
+  return data
+}
+
+export const getMinDate = () => {
+  const date = new Date()
+
+  date.setDate(date.getDate() - 1)
+
+  return date
+}
+
 export const formatHour = t => `${ ('00' + (t % 12 ? (t % 12) + 1 : 1)).slice(-2) }:00 ${ t > 10 && t !== 23 ? 'PM' : 'AM' }`
 
 export const formatDate = d => {
@@ -33,6 +64,48 @@ export const dropDownData = data => {
     value : id
   }
 }
+
+export const FormatBusItem = bus => (
+  <div className="bus-item">
+    <div className="">
+      <strong>{ bus.name }</strong>
+      {/*
+        <p>
+          <em><strong>Seats :</strong>{`${ bus.seats }`}</em>
+          <em><strong>Luggage :</strong>{`${ bus.luggage }`}</em>
+        </p>
+      */}
+    </div>
+    <div className="">
+      <p>Driver : { `${ bus.driver.firstname } ${ bus.driver.lastname }` }</p>
+      <em>{ bus.alias }</em>
+    </div>
+  </div>
+)
+
+export const FormatRideItem = ride => (
+  <div className="ride-item">
+    {
+      ride.label === 'none' &&
+      <p> None </p>
+    }
+    <div className="ride-item_route">
+    {
+      ride.frm && ride.to &&
+      <p>
+        <em><strong>From :</strong>{`${ ride.frm }`}</em>
+        <em><strong>To :</strong>{`${ ride.to }`}</em>
+      </p>
+    }
+    </div>
+    <div className="ride-item_bus">
+    {
+      ride.bus &&
+      <p><strong>Bus :</strong> { `${ ride.bus.name }` }</p>
+    }
+    </div>
+  </div>
+)
 // export const dropDownData = data => {
 //   const { id, ...rest } = data
 

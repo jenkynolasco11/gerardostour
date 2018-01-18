@@ -1,5 +1,6 @@
 import axios from 'axios'
 
+import { filterTicket } from '../../utils'
 import { ADD_TICKETS, ADD_TICKETS_COUNT, SET_TICKETS_OPTION, CLEAR_TICKETS } from '../constants'
 import { showLoader, showSnackBarWithMessage } from './app'
 // import { showSnackBarWithMessage } from './app'
@@ -23,12 +24,12 @@ import { url } from '../../config/config-values.json'
 // Thunks
 // ///////////////////////
 export const retrieveTickets = query => async dispatch => {
-  const { skip, limit, sort, status, unassigned, isPackage } = query
+  const { skip, limit, sort, status, unassigned, isPackage, search, searchCriteria } = query
 
   try {
     dispatch(showLoader(true))
 
-    const { data } = await axios.get(`${ url }/ticket/all?skip=${ skip }&limit=${ limit }&sort=${ sort }&status=${ status }&unassigned=${ unassigned }&onlypackage=${ isPackage }`)
+    const { data } = await axios.get(`${ url }/ticket/all?skip=${ skip }&limit=${ limit }&sort=${ sort }&status=${ status }&unassigned=${ unassigned }&onlypackage=${ isPackage }&search=${ search }&searchCriteria=${ searchCriteria }`)
 
     if(data.ok) {
       const { count, tickets } = data.data
@@ -46,38 +47,15 @@ export const retrieveTickets = query => async dispatch => {
 
 export const submitTicketData = body => async dispatch => {
     try {
-      // dispatch(showLoader(true))
+      const postdata = filterTicket(body)
 
-      const { ticketQty, person, payment, packageInfo, hasPackage, packageQty, ...rest } = body
+      const { data } = await axios.post(`${ url }/ticket/save`, postdata)
 
-      const postdata = { ticketQty, ...rest, ...person, ...payment }
-
-      if(hasPackage) {
-        const regdata = { ...postdata, ticketQty : ticketQty - packageQty }
-
-        const [ fee, extraFee, totalAmount ] = [ packageInfo.fee, 0, packageInfo.fee ]
-        
-        regdata.totalAmount = regdata.totalAmount - totalAmount
-        regdata.extraFee = regdata.extraFee - totalAmount
-
-        const pkgdata = { ...postdata, packageInfo, packageQty, isPackage : true, ticketQty : packageQty, fee, extraFee, totalAmount }
-
-        const { data : data1 } = await axios.post(`${ url }/ticket/save`, regdata)
-        const { data : data2 } = await axios.post(`${ url }/ticket/save`, pkgdata)
-
-        if(data1.ok && data2.ok) dispatch(showSnackBarWithMessage('Saved successfully!'))
-        else dispatch(showSnackBarWithMessage(`Couldn't save your ticket... => ${ data1.ok ? data1.message : data2.message }`))
-      } else {
-        const { data } = await axios.post(`${ url }/ticket/save`, postdata)
-  
-        if(data.ok) dispatch(showSnackBarWithMessage('Saved successfully!'))
-        else dispatch(showSnackBarWithMessage(`Couldn't save your ticket... => ${ data.message }`))
-      }
+      if(data.ok) dispatch(showSnackBarWithMessage('Saved successfully!'))
+      else dispatch(showSnackBarWithMessage(`Couldn't save your ticket... => ${ data.message }`))
     } catch (e) {
       console.log(e)
     }
-
-    // return dispatch(showLoader(false))
 }
 
 export const assignTicketsToRide = (tickets, ride) => async dispatch => {

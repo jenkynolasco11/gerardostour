@@ -5,8 +5,8 @@ import { filterDoc } from '../../../utils'
 export const createRide = async data => {
   const {
     bus = null,
-    to,
     frm,
+    to,
     status = 'PENDING',
     time,
     date,

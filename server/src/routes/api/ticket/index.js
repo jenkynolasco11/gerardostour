@@ -1,6 +1,6 @@
 import Router from 'koa-router'
 
-import { Ticket, Ride } from '../../../models'
+import { Ticket, Ride, Person } from '../../../models'
 import { getTicketData, reformatTicket, saveTickets, getTicketReceipt, updateTicket } from './ticket.controller'
 
 const ticketRouter = new Router({ prefix : 'ticket' })
@@ -31,9 +31,7 @@ ticketRouter.post('/save', reformatTicket, async ctx => {
   try {
     // console.log(body)
     const data = await saveTickets(body)
-
-    console.log(data)
-
+    // console.log(data)
     if(data) return ctx.body = { ok : true, data : { tickets : data }, message : '' }
 
     return ctx.body = { ok : false, data : null, message : 'Couldn\'t save the ticket. Contact your system administrator.' }
@@ -49,7 +47,7 @@ ticketRouter.put('/:id/modify', async ctx => {
   const { body } = ctx.request
 
   try {
-    console.log(body)
+    // console.log(body)
     const data = await updateTicket(id, body)
 
     if(data) return ctx.body = { ok : true, data : { ticketId : data }, message : '' }
@@ -172,6 +170,8 @@ ticketRouter.get('/all', async ctx => {
   // [ 'USED', 'REDEEMED', 'NULL', 'NEW', 'DELETED' ]
   const {
     // status = 'NULL,USED,DELETED',
+    search = '',
+    searchCriteria = '',
     status = 'NEW,REDEEMED',
     sort = 'id -1',
     limit = 10,
@@ -195,6 +195,12 @@ ticketRouter.get('/all', async ctx => {
   if(onlypackage === 'true') conditions.isPackage = true
 
   try {
+    if(searchCriteria !== 'id') {
+      const person = await Person.find({ [ searchCriteria ] : search }, { _id : 1 })
+
+      conditions.person = { $in : [].concat(person.map(({ _id }) => _id )) }
+    }
+
     const tickets = await Ticket
                           .find(conditions)
                           .skip(Number(skip))
@@ -202,9 +208,11 @@ ticketRouter.get('/all', async ctx => {
                           .sort(sortCondition)
                           .exec()
 
+    console.log(tickets)
+
     if(tickets.length) {
       const data = await Promise.all(tickets.map(getTicketData))
-
+      // console.log(JSON.stringify(data, null, 2))
       const count = await Ticket.count(conditions)
       // console.log(JSON.stringify(data, null, 3))
       return ctx.body = { ok : true, data : { tickets : data, count }, message : '' }

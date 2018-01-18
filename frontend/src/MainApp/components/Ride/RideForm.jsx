@@ -14,8 +14,7 @@ import Button from 'react-toolbox/lib/button/Button'
 import { submitRideData } from '../../store-redux/actions'
 import configData, { url } from '../../config/config-values.json'
 
-import { FormatBusItem, getMinDate } from './utils'
-import { dropDownData } from '../../utils'
+import { getMinDate, dropDownData, FormatBusItem } from '../../utils'
 import './ride-form.scss'
 
 import theme from './ride.theme.scss'

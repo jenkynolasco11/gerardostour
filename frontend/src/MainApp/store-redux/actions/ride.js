@@ -23,12 +23,12 @@ export const clearRides = payload => ({ type : CLEAR_RIDES, payload })
 // Thunks
 // ///////////////////////
 export const retrieveRides = query => async dispatch => {
-  const { skip, limit, sort, status, future } = query
+  const { skip, limit, sort, status, future, search, searchCriteria } = query
 
   try {
     dispatch(showLoader(true))
 
-    const { data } = await axios.get(`${ url }/ride/all?skip=${ skip }&limit=${ limit }&sort=${ sort }&status=${ status }&future=${ future }`)
+    const { data } = await axios.get(`${ url }/ride/all?skip=${ skip }&limit=${ limit }&sort=${ sort }&status=${ status }&future=${ future }&search=${ search }&searchCriteria=${ searchCriteria }`)
     
     if(data.ok) {
       const { rides, count } = data.data

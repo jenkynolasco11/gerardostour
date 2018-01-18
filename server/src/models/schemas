@@ -4,7 +4,6 @@ ticket {
   ride : ref => Ride,
   receipt : ref => Receipt,
   details : ref => TicketDetails,
-  package : ref => Package,
   status : String [ 'USED', 'REDEEMED', 'NULL', 'NEW', 'DELETED' ],
   willPick : Boolean,
   willDrop : Boolean,
@@ -12,32 +11,26 @@ ticket {
   to : String [ 'NY', 'PA' ],
   time : Number,
   date : Date,
-  isPackage : Boolean
+  type : String [ 'REGULAR', 'PACKAGE', 'VIP', 'SPECIAL', 'AIRPORT' ]
 }
 
 ticketDetails {
   pickUpAddress : ref => Address,
   dropOffAddress: ref => Address,
   redeemedCount : Number,
-  fee : Number,
-  extraFee : Number,
   isLocal : Boolean
 }
 
 receipt {
   id : Number,
   paymentType : String [ 'CASH', 'CARD' ],
+  fee : Number,
+  extraFee : Number,
   totalAmount : Number,
   cardBrand : String [ '', 'VISA', 'MASTERCARD', 'AMERICAN EXPRESS', 'DISCOVERY' ],
-  packageQty : Number,
   luggageQty : Number,
   ticketQty : Number,
   cardLastDigits : Number,
-}
-
-package {
-  weight : Number,
-  message : String,
 }
 
 person {
@@ -49,10 +42,11 @@ person {
 
 user {
   username : String,
+  internalCode : String,
   person : ref => Person,
   password : String,
   position : String [ 'SUPERUSER', 'DRIVER', 'MANAGER', 'DISPATCHER', 'NONE' ],
-  status : String,
+  status : String [ 'ACTIVE', 'INACTIVE', 'DISABLED', 'DELETED' ],
   lastSession : Date
 }
 
@@ -77,6 +71,19 @@ rideDetails {
   ride : ref => Ride,
   seatsOccupied : Number,
   luggage : Number,
+  startTime : Date,
+  endTime : Date,
+}
+
+rideFees {
+  ride : ref => Ride,
+  gas : Number,
+  toll : Number,
+  wash : Number,
+  other : Number,
+  parking : Number,
+  otherDetail : String,
+  modifiedAt : Date,
 }
 
 bus {

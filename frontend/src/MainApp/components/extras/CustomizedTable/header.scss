@@ -14,6 +14,16 @@
         cursor : pointer;
         flex : 2;
         @include alignCenter();
+        color : #ccc;
+
+        &.selected {
+          color : #888;
+          text-shadow : 0 0px 6px rgb(186, 186, 186);
+
+          // [data-react-toolbox=font-icon] {
+          //   background : red;
+          // }
+        }
 
         &:not(.checkmark) {
           flex : 2;

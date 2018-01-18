@@ -1,19 +1,6 @@
 // Tempting to rename CRUD
 
-import {
-  Person,
-  Address,
-  Receipt,
-  // Meta,
-  // Bus,
-  // BusDetail,
-  // Payment,
-  // Ride,
-  // RideDetail,
-  // Ticket,
-  // TicketDetail,
-  // User
-} from '../models'
+import { Person, Address, Receipt } from '../models'
 
 // TODO : Add how many times this person has bought tickets in the application for logging purposes
 export const createPerson = async data => {
@@ -41,8 +28,9 @@ export const createReceipt = async data => {
     luggageQty = 0,
     cardLastDigits = '',
     ticketQty = 1,
-    packageQty = 0,
-    id
+    id,
+    fee = 0,
+    extraFee = 0,
   } = data
 
   try {
@@ -54,7 +42,8 @@ export const createReceipt = async data => {
       cardLastDigits,
       ticketQty,
       luggageQty,
-      packageQty
+      fee,
+      extraFee,
     }).save()
 
     return receipt._id

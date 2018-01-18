@@ -1,15 +1,16 @@
 import React, { Component } from 'react'
+import axios from 'axios'
+
 import { List, ListDivider, ListCheckbox, ListItem } from 'react-toolbox/lib/list'
 import { CardTitle } from 'react-toolbox/lib/card'
 import Dropdown from 'react-toolbox/lib/dropdown/Dropdown'
-import { MdEventAvailable } from 'react-icons/lib/md'
 import DatePicker from 'react-toolbox/lib/date_picker/DatePicker'
 import { Input } from 'react-toolbox/lib/input'
 import { Autocomplete } from 'react-toolbox/lib/autocomplete'
 import { FontIcon } from 'react-toolbox/lib/font_icon'
 
-import configData from '../../config/config-values.json'
-import { onlyNumber } from '../../utils'
+import configData, { url } from '../../config/config-values.json'
+import { onlyNumber, dropDownData, FormatRideItem } from '../../utils'
 
 import theme from './ticket.theme.scss'
 
@@ -28,96 +29,207 @@ const Title = props => (
   </React.Fragment>
 )
 
-const TimeInfo = props => {
-  const { date, time } = props
+const ticketOptions = [
+  { value : 'REGULAR', label : 'Regular' },
+  { value : 'PACKAGE', label : 'Package' },
+  { value : 'VIP', label : 'VIP' },
+  { value : 'SPECIAL', label : 'Special' },
+  { value : 'AIRPORT', label : 'Airport' },
+]
 
-  return (
-    <List className="address-trip-info time" theme={ theme.listItem }>
-      <ListItem ripple={ false }>
-        <DatePicker
-          autoOk
-          icon={ <MdEventAvailable /> }
-          minDate={ getMinDate() }
-          value={ date }
-          onChange={ val => props.onChange(val, 'date') }
-        />
-      </ListItem>
-      <ListItem ripple={ false }>
-        <FontIcon value="timer" />
-        <Dropdown
-          allowBlank={ false }
-          label="Departure Time"
-          source={ configData.times }
-          value={ time }
-          onChange={ val => props.onChange(val, 'time') }
-        />
-      </ListItem>
-    </List>
-  )
+const TypeTicket = props => (
+  <List>
+    <Title title="Ticket Type" />
+    <ListItem ripple={ false }>
+      <Dropdown
+        label="Ticket Type"
+        source={ ticketOptions }
+        onChange={ e => props.onChange(e, 'ticketType') }
+        value={ props.ticketType }
+      />
+      
+    </ListItem>
+  </List>
+)
+
+class TimeInfo extends Component{
+  state = { rides : [] }
+
+  constructor(props) {
+    super(props)
+
+    this._requestRides = this._requestRides.bind(this)
+  }
+
+  async _requestRides(date, time) {
+    let rids = []
+
+    try {
+      const { data } = await axios.get(`${ url }/ride/date/${ date.getTime() }/hour/${ time }`)
+
+      if(data.ok) {
+        const { rides } = data.data
+        // const [ rid ] = rides
+
+        rids = [].concat({ value : -1, label : 'none' }, rides)
+      }
+
+      this.setState({ rides : rids })
+
+      const [ rid ] = rids
+
+      return rid
+    } catch (e) {
+      console.log(e)
+    }
+  }
+
+  componentWillReceiveProps(props) {
+    const { date, time, ticketType } = props
+
+    if(ticketType === 'SPECIAL' || ticketType === 'AIRPORT') return
+    return this._requestRides(date, time)
+  }
+
+  componentWillMount() {
+    const { date, time, ticketType } = this.props
+
+    if(ticketType === 'SPECIAL' || ticketType === 'AIRPORT') return
+    return this._requestRides(date, time)
+  }
+
+  render() {
+    const { rides } = this.state
+    const { date, time, onChange, ride, ticketType } = this.props
+    const src = rides.map(dropDownData)
+
+    const source = src.length ? [].concat(src) : [{ value : -1, label : 'none' }]
+
+    return (
+      <List className="address-trip-info time" theme={ theme.listItem }>
+        <List className="list">
+          <ListItem ripple={ false }>
+            <FontIcon value="date_range" />
+            <DatePicker
+              autoOk
+              minDate={ getMinDate() }
+              value={ date }
+              onChange={ val => onChange(val, 'date') }
+            />
+          </ListItem>
+          <ListItem ripple={ false }>
+            <FontIcon value="timer" />
+            <Dropdown
+              allowBlank={ false }
+              label="Departure Time"
+              source={ configData.times }
+              value={ time }
+              onChange={ val => onChange(val, 'time') }
+            />
+          </ListItem>
+        </List>
+        {
+          ticketType !== 'SPECIAL' &&
+          ticketType !== 'AIRPORT' &&
+          <List className="list">
+            <ListItem ripple={ false }>
+              <FontIcon value="directions_bus"/>
+              <Dropdown
+                className="ride-select"
+                source={ source }
+                onChange={ e => onChange(e, 'ride') }
+                value={ ride }
+                label="Ride"
+                allowBlank={ false }
+                template={ src.length ? FormatRideItem : null }
+              />
+            </ListItem>
+            <ListItem ripple={ false } />
+          </List>
+        }
+      </List>
+    )
+  }
 }
 
+// BUG-INFO : 
+// THIS SHOULD ASSIGN A RIDE IF RETRIEVED FROM THE REQUEST WITH DATE AND HOUR
+// WHEN THE COMPONENT MOUNTS...
 const TripInfo = props => {
-  const { ticketQty, luggageQty, to, frm } = props
+  const { ticketQty, luggageQty, to, frm, ticketType } = props
+  const isPackage = ticketType === 'PACKAGE'
+  const isSpecial = ticketType === 'SPECIAL'
+  const isAirport = ticketType === 'AIRPORT'
+
 
   return (
     <List className="address-dropdown">
       <List className="list">
         <ListItem ripple={ false }>
-          <p>Tickets:</p>
+          <p>{ !isPackage ? 'Tickets' : 'Packages' }:</p>
           <Input
-            min="1"
-            max="20"
+            min={ 1 }
+            max={ 20 }
             required
             type="number"
             label="Tickets"
             hint="How many tickets?"
             value={ ticketQty }
-            // disabled={ isModify }
+            disabled={ isSpecial }
             onChange={ val => props.onChange(onlyNumber(val), 'ticketQty') }
           />
         </ListItem>
-        <ListItem ripple={ false }>
-          <p>Luggage:</p>
-          <Input
-            required
-            type="number"
-            label="Luggage"
-            hint="How Many?"
-            value={ luggageQty }
-            onChange={ val => props.onChange(onlyNumber(val), 'luggageQty') }
-          />
-        </ListItem>
+        {
+          !isPackage && !isSpecial
+          ?
+          <ListItem ripple={ false }>
+            <p>Luggage:</p>
+            <Input
+              disabled={ isPackage }
+              required
+              type="number"
+              label="Luggage"
+              hint="How Many?"
+              value={ luggageQty }
+              onChange={ val => props.onChange(onlyNumber(val), 'luggageQty') }
+            />
+          </ListItem>
+          : <ListItem disabled={ true } ripple={ false } />
+        }
       </List>
-      <List className="list">
-        <ListItem ripple={ false }>
-          <p>From:</p>
-          <Dropdown
-            className="address-dropdown from"
-            label="From"
-            required
-            allowBlank={ false }
-            // disabled={ isModify }
-            // template={ typeTemplate }
-            source={ configData.routes }
-            value={ frm }
-            onChange={ val => props.onChange(val, 'frm') }
-          />
-        </ListItem>
-        <ListItem ripple={ false }>
-          <p>To:</p>
-          <Dropdown
-            className="address-dropdown to"
-            label="To"
-            required
-            allowBlank={ false }
-            // disabled={ isModify }
-            // template={ typeTemplate }
-            source={ configData.routes }
-            value={ to }
-            onChange={ val => props.onChange(val, 'to') }
-          />
-        </ListItem>
-      </List>
+      {
+        !isSpecial && !isAirport &&
+        <List className="list">
+          <ListItem ripple={ false }>
+            <p>From:</p>
+            <Dropdown
+              className="address-dropdown from"
+              label="From"
+              required
+              allowBlank={ false }
+              // disabled={ isModify }
+              // template={ typeTemplate }
+              source={ configData.routes }
+              value={ frm }
+              onChange={ val => props.onChange(val, 'frm') }
+            />
+          </ListItem>
+          <ListItem ripple={ false }>
+            <p>To:</p>
+            <Dropdown
+              className="address-dropdown to"
+              label="To"
+              required
+              allowBlank={ false }
+              // disabled={ isModify }
+              // template={ typeTemplate }
+              source={ configData.routes }
+              value={ to }
+              onChange={ val => props.onChange(val, 'to') }
+            />
+          </ListItem>
+        </List>
+      }
     </List>
   )
 }
@@ -178,69 +290,50 @@ const AddressInfo = props => (
       propCaption={ 'Pick Up' }
       onChange={ props.onChange }
     />
-    <AddressForm
-      willProp={ props.willDrop }
-      prop={ props.dropOffAddress }
-      propName={ 'willDrop' }
-      onChangePropName={ 'drop' }
-      propClass={ 'drop' }
-      propCaption={ 'Drop Off' }
-      onChange={ props.onChange }
-    />
+    {
+      props.ticketType !== 'AIRPORT' &&
+      <AddressForm
+        willProp={ props.willDrop }
+        prop={ props.dropOffAddress }
+        propName={ 'willDrop' }
+        onChangePropName={ 'drop' }
+        propClass={ 'drop' }
+        propCaption={ 'Drop Off' }
+        onChange={ props.onChange }
+      />
+    }
   </React.Fragment>
 )
 
-const PackageInfo = props => {
-  const { hasPackage, onChange, packageInfo, packageQty } = props
-  const { weight, message, fee } = packageInfo
+const ExtraInfo = props => {
+  const { message, specialFee, ticketType, onChange } = props
+  const isPackage = ticketType === 'PACKAGE'
+  const isVIP = ticketType === 'VIP'
+  const isSpecial = ticketType === 'SPECIAL'
+  const isAirport = ticketType === 'AIRPORT'
+  
+  const isAny = isPackage || isVIP || isSpecial || isAirport
+
+  if(!isAny) return null
 
   return (
-    <List className="package-info">
-      <Title title="Package Information" />
-      <ListCheckbox
-        caption="Are there any packages?"
-        checked={ hasPackage }
-        onChange={ val => props.onChange(val, 'hasPackage') }
+    <List className="special-info">
+      <Title title="Fee Information" />
+      <Input
+        type="number"
+        label="Fee"
+        min={ 0 }
+        hint="How much?"
+        value={ specialFee }
+        onChange={ val => onChange(onlyNumber(val), 'specialFee') }
       />
-      {
-        hasPackage &&  
-        <React.Fragment>
-          <Input
-            type="number"
-            label="Packages"
-            min="0"
-            hint="How many packages?"
-            value={ packageQty }
-            onChange={ val => onChange(onlyNumber(val), 'packageQty') }
-          />
-          {
-            packageQty === 1 &&
-            <Input
-              type="number"
-              label="Weight (Lbs)"
-              min="0"
-              hint="Package Weight"
-              value={ weight }
-              onChange={ val => onChange(onlyNumber(val), 'package', 'weight') }
-            />
-          }
-          <Input
-            type="text"
-            label="Message"
-            hint="Message specific for the package(s)"
-            value={ message }
-            onChange={ val => onChange(val, 'package', 'message') }
-          />
-          <Input
-            type="number"
-            label="Fee"
-            min="0"
-            hint="Fee to charge"
-            value={ fee }
-            onChange={ val => onChange(onlyNumber(val), 'package', 'fee') }
-          />
-        </React.Fragment>
-      }
+      <Input
+        type="text"
+        label="Message"
+        hint="Message specific for this(these) ticket(s)"
+        value={ message }
+        onChange={ val => onChange(val, 'message') }
+      />
     </List>
   )
 }
@@ -249,12 +342,13 @@ class TicketAddress extends Component {
   render() {
     return (
       <List className="ticket-form-address">
+        <TypeTicket { ...this.props } />
         <Title title="Time Information" />
         <TimeInfo { ...this.props } />
         <Title title="Trip Information" />
         <TripInfo { ...this.props } />
+        <ExtraInfo { ...this.props } />
         <AddressInfo { ...this.props } />
-        <PackageInfo { ...this.props } />
       </List>
     )
   }

@@ -4,7 +4,6 @@ import './user'
 import './ride'
 import './ticket'
 import './person'
-import './package'
 import './address'
 import './bus'
 import './receipt'
@@ -14,7 +13,6 @@ import { userDefault, passDefault } from '../config'
 
 export const Person = mongoose.model('person')
 export const User = mongoose.model('user')
-export const Package = mongoose.model('package')
 export const Ride = mongoose.model('ride')
 export const RideDetail = mongoose.model('rideDetails')
 export const Ticket = mongoose.model('ticket')
@@ -38,7 +36,6 @@ export const deleteAllCollections = async () => {
     await User.collection.remove({})
     await Bus.collection.remove({})
     await BusDetail.collection.remove({})
-    await Package.collection.remove({})
   } catch (e) {
     return false
   }
@@ -92,7 +89,6 @@ export const createMeta = async (clear) => {
         lastBusId : 1,
         lastRideId : 1,
         lastTicketId : 1,
-        // lastPackageId : 1,
         lastReceiptId : 1,
       }
 
@@ -107,7 +103,6 @@ export const createMeta = async (clear) => {
 export default {
   deleteAllCollections,
   Person,
-  Package,
   Ride,
   Ticket,
   TicketDetail,

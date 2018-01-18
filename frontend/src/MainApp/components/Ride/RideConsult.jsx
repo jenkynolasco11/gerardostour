@@ -71,21 +71,24 @@ const DetailTemplate = props => (
 )
 
 class Ride extends Component {
+  state = {
+    limit : 20,
+    skip : 0,
+    count : 0,
+    sortBy : 'date',
+    sortOrder : -1,
+    selected : [],
+    showForm : false, // Show create ride form
+    showBusForm : false, // Show assign bus modal
+    rideToModify : null,
+    searchCriteria : 'id',
+    searchString : '',
+  }
+
+  timeout = null
+
   constructor(props) {
     super(props)
-
-    this.state = {
-      limit : 20,
-      skip : 0,
-      count : 0,
-      sortBy : 'date',
-      sortOrder : -1,
-      selected : [],
-      showForm : false, // Show create ride form
-      showBusForm : false, // Show assign bus modal
-      rideToModify : null,
-      searchDropdown : 'id'
-    }
     
     this._getSelectedRides = this._getSelectedRides.bind(this)
     this._onSearchChange = this._onSearchChange.bind(this)
@@ -150,7 +153,7 @@ class Ride extends Component {
   }
 
   _requestRides() {
-    const { skip : oldSkip, limit, sortBy, sortOrder } = this.state
+    const { skip : oldSkip, limit, sortBy, sortOrder, searchCriteria, searchString } = this.state
     const { settings } = this.props
     const {  /*onTheWay, finished, assigned, pending,*/ future } = settings
 
@@ -161,7 +164,7 @@ class Ride extends Component {
     const sort = `${ sortBy } ${ sortOrder }`
 
     this.setState({ selected : [], isDispatch : false })
-    return this.props.queryRides({ skip, status, sort, future, limit })
+    return this.props.queryRides({ skip, status, sort, future, limit, search : searchString, searchCriteria })
   }
 
   _onChange(val, name) {
@@ -216,7 +219,18 @@ class Ride extends Component {
   }
 
   _onSearchChange(val) {
-    console.log(val)
+    if(this.timeout) clearTimeout(this.timeout)
+
+    return this.setState({ searchString : val}, () => {
+      this.timeout = setTimeout(() => {
+        // const { searchCriteria } = this.state
+  
+        if(val) {
+          this._requestRides()
+          // this.setState({ searchString : '' })
+        }
+      }, 2000)
+    })
   }
 //#endregion
 
@@ -238,7 +252,10 @@ class Ride extends Component {
       showForm,
       rideToModify,
       showBusForm,
-      searchDropdown
+      sortBy,
+      sortOrder,
+      searchCriteria,
+      searchString,
     } = this.state
 
     const { rides, count, settings, setQueryOption } = this.props
@@ -261,17 +278,19 @@ class Ride extends Component {
           headerProps={ tableData.headers }
           colorProps={ tableData.colors }
           colorPropToMatch={ tableData.colorsPropToMatch }
+          searchString={ searchString }
           onSearchChange={ this._onSearchChange }
           onSearchEnter={ console.log }
-          searchPlaceholderText={ `Check on server for ${ searchDropdown }` }
+          searchPlaceholderText={ `Check on server for ${ searchCriteria }` }
           rightDropDown={
             <Dropdown
               auto
               source={ tableData.dropdownData }
-              value={ searchDropdown }
-              onChange={ e => this.setState({ searchDropdown : e }) }
+              value={ searchCriteria }
+              onChange={ e => this.setState({ searchCriteria : e }) }
             /> 
           }
+          sortOptions={{ sortBy, sortOrder }}
         />
         <RideSettings
           selected={ selected }

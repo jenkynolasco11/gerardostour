@@ -100,27 +100,3 @@ export const reformatTicketData = tickt => {
     extraFee : parseFloat(tickt.extraFee),
   }
 }
-
-export const FormatRideItem = ride => (
-  <div className="ride-item">
-    <div className="ride-item_route">
-      <p>
-        <em><strong>From :</strong>{`${ ride.frm }`}</em>
-        <em><strong>To :</strong>{`${ ride.to }`}</em>
-      </p>
-    </div>
-    {/*
-      TODO : edit dropdown rides for assignment on tickets
-    */}
-    <div className="">
-    {
-      //*
-      ride.bus &&
-      // <React.Fragment>
-        <p><strong>Bus :</strong> { `${ ride.bus.name }` }</p>
-      // </React.Fragment>
-      //*/
-    }
-    </div>
-  </div>
-)

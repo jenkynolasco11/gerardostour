@@ -41,6 +41,7 @@ class Body extends Component{
       data,
       onSearchChange = null,
       onSearchEnter = null,
+      searchString = '',
       searchPlaceholderText = '',
       rightDropDown = null,
       headerProps = [0,1,2,3]
@@ -48,7 +49,7 @@ class Body extends Component{
 
     return (
       <div className="table">
-        <SearchBar {...{ onSearchChange, onSearchEnter, rightDropDown, searchPlaceholderText }}/>
+        <SearchBar {...{ onSearchChange, searchString, onSearchEnter, rightDropDown, searchPlaceholderText }}/>
         <TableHeader { ...this.props } />
         <div className="table-body">
           {

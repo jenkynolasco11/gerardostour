@@ -15,6 +15,8 @@ rideRouter.get('/all', async ctx => {
     skip = 0,
     sort = 'date -1',
     future = 'true',
+    search = '',
+    searchCriteria = '',
   } = ctx.query
 
   const list = [].concat(status.split(','))
@@ -33,6 +35,12 @@ rideRouter.get('/all', async ctx => {
   }
 
   try {
+    if(searchCriteria === 'bus') {
+      const bus = await Bus.find({ id : search }, { _id : 1 })
+
+      conditions.bus = { $in : [].concat(bus.map(({ _id }) => _id )) }
+    }
+
     const rides = await Ride
                         .find(conditions)
                         .skip(Number(skip))
@@ -127,10 +135,7 @@ rideRouter.get('/date/:date/hour/:hour', async ctx => {
   conditions.bus = { $ne : null }
 
   try {
-    // console.log(conditions)
     const rides = await Ride.find(conditions)
-
-    // console.log(await Ride.find({}))
 
     if(rides.length) {
       const data = await Promise.all(rides.map(getRideData))

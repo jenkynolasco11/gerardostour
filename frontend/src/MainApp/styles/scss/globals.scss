@@ -4,9 +4,27 @@
 
 body {
   #root {
-    font-family : Roboto,Helvetica,Arial,sans-serif;
+    // --preferred-font : Lato,Helvetica,Arial,sans-serif;
+    // font-family : var(--preferred-font) !important;
     background : var(--palette-blue-100);
+
     @include hw();
     // @include alignCenter();
+  }
+
+  .ride-item {
+    &_route {
+      p em {
+        margin-right : 20px;
+
+        strong {
+          margin-right : 4px;
+        }
+      }
+    }
+
+    &_bus {
+
+    }
   }
 }

@@ -1,11 +1,9 @@
-import { Ticket, Receipt, TicketDetail, Person, Meta, Address, Package } from '../../../models'
+import { Ticket, Receipt, TicketDetail, Person, Meta, Address, Ride } from '../../../models'
 import { filterDoc, createTicketSideData } from '../../../utils'
 
 // ///////////////// Helper functions
 const eraseData = async objects => {
-  const { ticket, ticketDetail, receipt, pickUp, dropOff, pack } = objects
-
-  // console.log(` Objects to delete => ` + JSON.stringify(objects, null, 2))
+  const { ticket, ticketDetail, receipt, pickUp, dropOff, ride } = objects
 
   try {
     if(ticketDetail) await TicketDetail.findByIdAndRemove(ticketDetail)
@@ -13,7 +11,7 @@ const eraseData = async objects => {
     if(dropOff) await Address.findByIdAndRemove(dropOff)
     if(ticket) await Ticket.findByIdAndRemove(ticket)
     if(pickUp) await Address.findByIdAndRemove(pickUp)
-    if(pack) await Package.findByIdAndRemove(pack)
+    if(ride) await Ride.findByIdAndRemove(ride)
   } catch (e) { }
 }
 
@@ -73,7 +71,6 @@ export const getTicketData = async tckt => {
   try {
     // let pack = null
     const person = await Person.findById(tckt.person)
-    const pack = await Package.findById(tckt.package)
     const rcpt = await Receipt.findById(tckt.receipt)
     const details = await TicketDetail.findById(tckt.details)
 
@@ -82,7 +79,6 @@ export const getTicketData = async tckt => {
 
     const pickAdd = pick ? filterDoc(pick._doc) : 'none'
     const dropAdd = drop ? filterDoc(drop._doc) : 'none'
-    const pkg = tckt.isPackage ? filterDoc(pack._doc) : null
 
     const isAssigned = tckt.ride !== null
 
@@ -104,12 +100,10 @@ export const getTicketData = async tckt => {
         email : person.email,
         phoneNumber : person.phoneNumber
       },
-      isPackage : tckt.isPackage,
-      pkg,
+      type : tckt.type,
+      message : details.message,
       isAssigned,
     }
-
-    // console.log(data)
 
     return data
   } catch (e) {
@@ -122,6 +116,8 @@ export const getTicketData = async tckt => {
 
 // Ticket details
 /* export*/ const saveTicket = async body => {
+  // console.log(body)
+
   const {
     id,
     data,
@@ -129,6 +125,7 @@ export const getTicketData = async tckt => {
     pickUpAddress,
     dropOffAddress,
     receipt,
+    ride
   } = body
 
   const {
@@ -139,35 +136,35 @@ export const getTicketData = async tckt => {
     status = 'NEW',
     date,
     time,
-    isPackage = false,
-    packageInfo = null
+    message = '',
+    ticketType : type = 'REGULAR',
+    isLocal = true,
   } = data
 
   let details = null
   let tckt = null
-  let pck = null
 
   try {
     const ddate = new Date(new Date(date).setHours(0,0,0,0))
     const ttime = Number(time)
 
-    if(isPackage) pck = await new Package({ ...packageInfo }).save()
-
     details = await new TicketDetail({ 
-      ...data,
+      isLocal,
       pickUpAddress,
       dropOffAddress,
-      redeemedCount : 0
+      redeemedCount : 0,
+      message,
+      // fee,
+      // extraFee,
     }).save()
 
-    console.log('ticket ID => ' + id)
     // TODO: Make sure that the data inserted is sanitized, or it'll break!!!
     tckt = await new Ticket({
       id,
       person,
       details : details._id,
       receipt,
-      package : isPackage ? pck._id : null,
+      ride,
       status,
       willPick,
       willDrop,
@@ -175,7 +172,7 @@ export const getTicketData = async tckt => {
       to,
       date : ddate,
       time : ttime,
-      isPackage
+      type
     }).save()
 
     if(!details || !tckt) throw new Error('Error while inserting data on tickets!')
@@ -202,9 +199,10 @@ export const saveTickets = async data => {
   let pickUpAddress = null
   let dropOffAddress = null
   let receipt = null
+  let ride = null
 
   try {
-    const { willPick, willDrop, ticketQty } = data
+    const { willPick, willDrop, ticketQty, ride : rid = null } = data
 
     meta = await Meta.findOne({})
 
@@ -212,6 +210,8 @@ export const saveTickets = async data => {
       ...data,
       id : meta.lastReceiptId++
     })
+
+    if(rid && rid !== -1 ) ride = await Ride.findOne({ id : rid }, { _id : 1 })
 
     person = prsn
     pickUpAddress = pckup
@@ -232,6 +232,7 @@ export const saveTickets = async data => {
         person,
         pickUpAddress,
         dropOffAddress,
+        ride : ride ? ride._id : null  // In case Ride is provided
       }))
 
     const tickets = await Promise.all(promises)
@@ -242,7 +243,7 @@ export const saveTickets = async data => {
     return tickets
   } catch (e) {
     // Some shit happened... Roll back everything!!!
-    await eraseData({ pickUpAddress, dropOffAddress, receipt })
+    await eraseData({ pickUpAddress, dropOffAddress, receipt, ride })
 
     // console.log(e)
     console.log('... @ src/routes/api/ticket/ticket.controller.js')

@@ -10,6 +10,7 @@ import TicketTrip from './TicketForm__Trip'
 
 class TicketTabs extends Component{
   state = { index : 0 }
+
   constructor(props) {
     super(props)
 

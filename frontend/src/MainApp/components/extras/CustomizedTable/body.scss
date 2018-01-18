@@ -43,10 +43,16 @@
 
           &.body {
             width : 100%;
-            background : gray;
+            background-color : rgb(237, 156, 156);
+            // background : gray;
+            color : white;
             padding : 4px 0;
             transition : height .1s linear, padding .1s linear;
             box-shadow : inset 0px 8px 5px -8px black;
+
+            hr {
+              background-color : rgb(107, 33, 33);
+            }
 
             &.closed {
               overflow : hidden;

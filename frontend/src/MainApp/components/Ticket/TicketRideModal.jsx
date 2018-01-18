@@ -10,8 +10,7 @@ import Dropdown from 'react-toolbox/lib/dropdown/Dropdown'
 import Dialog from 'react-toolbox/lib/dialog/Dialog'
 
 import configData, { url } from '../../config/config-values.json'
-import { dropDownData } from '../../utils'
-import { FormatRideItem } from './utils'
+import { FormatRideItem, dropDownData } from '../../utils'
 
 import './ticket-modal.scss'
 import Button from 'react-toolbox/lib/button/Button'

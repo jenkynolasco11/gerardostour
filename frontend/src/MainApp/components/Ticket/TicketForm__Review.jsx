@@ -5,22 +5,16 @@ import Button from 'react-toolbox/lib/button/Button'
 import {
   MdThumbUp,
   MdThumbDown,
-  MdPersonPinCircle,
-  MdPinDrop,
   MdAttachMoney,
   MdPhone,
   MdEmail,
   MdPerson,
-  MdEventAvailable,
-  MdTimer,
-  // MdDirectionsBus
 } from 'react-icons/lib/md'
-import { TiHome } from 'react-icons/lib/ti'
-import { FaRoad } from 'react-icons/lib/fa'
 
 import configData from '../../config/config-values.json'
 import { formatDate, formatHour } from '../../utils'
 import { getExtraPrice } from './utils'
+import FontIcon from 'react-toolbox/lib/font_icon/FontIcon'
 
 const Title = prop => (
   <React.Fragment>
@@ -77,47 +71,59 @@ const ReviewTrip = props => {
     willPick,
     pickUpAddress,
     dropOffAddress,
+    ticketType
   } = props
 
   return (
     <React.Fragment>
       <List className="review-trip">
+        <ListItem
+          caption={ `Ticket(s) type: ${ ticketType }` }
+          ripple={ false }
+
+        />
         <List className="list">
           <ListItem
             ripple={ false }
-            leftIcon={ <MdEventAvailable /> }
+            leftIcon={ <FontIcon value="event" /> }
             caption={ formatDate(date) }
             legend="Date"
           />
           <ListItem
             ripple={ false }
-            leftIcon={ <MdTimer /> }
+            leftIcon={ <FontIcon value="timer" /> }
             caption={ formatHour(time) }
             legend="Departure Time"
           />
         </List>
       </List>
-      <List className="review-trip">
-        <List className="list">
-          <ListItem
-            ripple={ false }
-            leftIcon={ <TiHome/> }
-            caption={ frm }
-            legend="From"
-          />
-          <ListItem
-            ripple={ false }
-            leftIcon={ <FaRoad /> }
-            caption={ to }
-            legend="Going To"
-          />
+      {
+        ticketType !== 'SPECIAL' &&
+        <List className="review-trip">
+          <List className="list">
+            <ListItem
+              ripple={ false }
+              leftIcon={ <FontIcon value="home" /> }
+              caption={ frm }
+              legend="From"
+            />
+            {
+              ticketType !== 'AIRPORT' &&
+              <ListItem
+                ripple={ false }
+                leftIcon={ <FontIcon value="location_on" /> }
+                caption={ to }
+                legend="Going To"
+              />
+            }
+          </List>
         </List>
-      </List>
+      }
       {
         willPick &&
         <ListItem
           ripple={ false }
-          leftIcon={ <MdPersonPinCircle /> }
+          leftIcon={ <FontIcon value="person_pin_circle" /> }
           caption={ `${ pickUpAddress.street }, ${ pickUpAddress.city }, ${ pickUpAddress.state } ${ pickUpAddress.zipcode }` }
           legend="Pick Up Address"
         />
@@ -126,7 +132,7 @@ const ReviewTrip = props => {
         willDrop &&
         <ListItem
           ripple={ false }
-          leftIcon={ <MdPinDrop /> }
+          leftIcon={ <FontIcon value="pin_drop" /> }
           caption={ `${ dropOffAddress.street }, ${ dropOffAddress.city }, ${ dropOffAddress.state } ${ dropOffAddress.zipcode }` }
           legend="Pick Up Address"
         />
@@ -135,42 +141,27 @@ const ReviewTrip = props => {
   )
 }
 
-const ReviewPackage = props => {
-  const { hasPackage, packageInfo, packageQty } = props
-
-  if(!hasPackage) return null
-  
-  const { message, weight } = packageInfo
-
-  return (
+const ExtraInfo = props => (
+  <React.Fragment>
+  {
+    props.message
+    ?
     <List>
-      <Title title="Package Information" />
+      <Title title="Extra Information" />
       <ListItem
+        caption={ props.message }
         ripple={ false }
-        // leftIcon={ <MdPersonPinCircle /> }
-        caption={ '' + packageQty }
-        legend="Package Quantity"
-      />
-      <ListItem
-        ripple={ false }
-        // leftIcon={ <MdPersonPinCircle /> }
-        caption={ '' + weight }
-        legend="Weight"
-      />
-      <ListItem
-        ripple={ false }
-        // leftIcon={ <MdPersonPinCircle /> }
-        caption={ message }
-        legend="Package message"
+        legend="Special Message"
       />
     </List>
-  )
-}
+    : null
+  }
+  </React.Fragment>
+)
 
 const ReviewPayment = props => {
   const {
     ticketQty,
-    packageQty,
     luggageQty,
     to,
     payment,
@@ -179,13 +170,13 @@ const ReviewPayment = props => {
     willPick,
     pickUpAddress,
     dropOffAddress,
-    packageInfo
+    ticketType
   } = props
 
   const { luggagePrice, prices } = configData
   const { fee, extraFee, totalAmount } = payment
 
-  const packFee = packageInfo.fee
+  
   
   let dropOffFee = 0
   let pickUpFee = 0
@@ -210,7 +201,7 @@ const ReviewPayment = props => {
                       : willDrop 
                       ? `    $${ parseFloat(dropOffFee).toFixed(2) } Drop off fee` 
                       : ''
-  const extraExtraCaption = ` $${ parseFloat(packFee).toFixed(2) } Package fee (${ packageQty } packages)`
+  // const extraExtraCaption = ` $${ parseFloat(packFee).toFixed(2) } Package fee (${ packageQty } packages)`
 
   return (
     // <List className="review-payment">
@@ -221,35 +212,35 @@ const ReviewPayment = props => {
           ripple={ false }
           itemContent={ <div>Total Amount:<span className="total-amount-cap">{ totalAmoutCaption }</span></div> }
         />
-        <ListItem
-          className="review-fee"
-          ripple={ false }
-          itemContent={ <div><div className="small-caption">Fee:</div> { feesCaption }</div> }
-          // caption={ []}
-        />
-        <ListItem
-          className="review-fee"
-          ripple={ false }
-          itemContent={ <div><div className="small-caption">Extra Fee:</div> { extraFeesCaption }</div> }
-          // caption={  }
-        />
-        <ListDivider />
-        <ListItem
-          className="review-fee"
-          ripple={ false }
-          itemContent={ <div><div className="small-caption">Luggage Fee:</div> { luggageFeeCaption }</div> }
-          // caption={  }
-        />
-        <ListItem
-          className="review-fee"
-          ripple={ false }
-          itemContent={ <div><div className="small-caption">Drop/Pick fees:</div>{ extraCaption }</div> }
-        />
-        <ListItem
-          className="review-fee"
-          ripple={ false }
-          itemContent={ <div><div className="small-caption">Package fees:</div>{ extraExtraCaption }</div> }
-        />
+        {
+          ticketType === 'REGULAR' &&
+          <React.Fragment>
+            <ListItem
+              className="review-fee"
+              ripple={ false }
+              itemContent={ <div><div className="small-caption">Fee:</div> { feesCaption }</div> }
+              // caption={ []}
+            />
+            <ListItem
+              className="review-fee"
+              ripple={ false }
+              itemContent={ <div><div className="small-caption">Extra Fee:</div> { extraFeesCaption }</div> }
+              // caption={  }
+            />
+            <ListDivider />
+            <ListItem
+              className="review-fee"
+              ripple={ false }
+              itemContent={ <div><div className="small-caption">Luggage Fee:</div> { luggageFeeCaption }</div> }
+              // caption={  }
+            />
+            <ListItem
+              className="review-fee"
+              ripple={ false }
+              itemContent={ <div><div className="small-caption">Drop/Pick fees:</div>{ extraCaption }</div> }
+            />
+          </React.Fragment>
+        }
       </List>
     // </List>
   )
@@ -284,7 +275,7 @@ const TicketReview = props => {
       <ReviewPersonal { ...props.person } />
       <Title title="Trip Information" />
       <ReviewTrip { ...props } />
-      <ReviewPackage { ...props }/>
+      <ExtraInfo { ...props} />
       <Title title="Payment Information" />
       <ReviewPayment { ...props } />
       <ListDivider />

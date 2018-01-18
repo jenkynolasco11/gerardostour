@@ -3,7 +3,7 @@
 .ticket-form {
   padding : 10px 10px 20px;
   height : 90vh;
-  width : 60vw;
+  width : 70vw !important;
 
   // [data-react-toolbox=tabs] :nth-child(2) {
     
@@ -27,41 +27,71 @@
   }
 
   &-address {
-    .address-trip-info {
-      display : flex;
-      
-      li {
-        flex : 1;
-      }
-    }
-
-    .address-dropdown {
-      .list {
+    .address-trip-info, .address-dropdown {
+      [data-react-toolbox=list] {
         display : flex;
-        align-items : center;
 
-        li {
+        & > li {
           flex : 1;
-          @include alignCenter;
+            & > span > span {
+              display : flex;
+              width : 100%;
 
-          p {
-            width : 60px;
-            text-align : right;
-            margin-right : 10px;
-          }
+              & > :nth-child(1) {
+                flex : 1;
+                
+                & > p {
+                  width : 60px;
+                  text-align : right;
+                }
+              }
 
-          [data-react-toolbox=input], [data-react-toolbox=dropdown] {
-            width : 160px;
+              & > :nth-child(2) {
+                flex : 20;
 
-            @media (max-width : 860px) {
-              width : 140px;
+                [data-react-toolbox=dropdown], 
+                [data-react-toolbox=date-picker],
+                [data-react-toolbox=input]{
+                  width : 100%;
+                }
+              }
             }
-          }
         }
+        // .ride-select {
+        //   background : red;
+        //   display : flex;
+
+        // }
       }
     }
 
-    .address-pick-drop {
+    // .address-dropdown {
+    //   .list {
+    //     display : flex;
+    //     align-items : center;
+
+    //     li {
+    //       flex : 1;
+    //       @include alignCenter;
+
+    //       p {
+    //         width : 60px;
+    //         text-align : right;
+    //         margin-right : 10px;
+    //       }
+
+    //       [data-react-toolbox=input], [data-react-toolbox=dropdown] {
+    //         width : 160px;
+
+    //         @media (max-width : 860px) {
+    //           width : 140px;
+    //         }
+    //       }
+    //     }
+    //   }
+    // }
+
+    .address-pick-drop, [class*=-info] {
       display : block;
       // [data-react-toolbox=input], [data-react-toolbox=autocomplete] {
       //   @media (max-width : 860px) {

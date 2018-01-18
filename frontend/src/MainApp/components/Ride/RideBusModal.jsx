@@ -6,8 +6,7 @@ import Dropdown from 'react-toolbox/lib/dropdown/Dropdown'
 import Dialog from 'react-toolbox/lib/dialog/Dialog'
 import axios from 'axios'
 
-import { dropDownData } from '../../utils'
-import { FormatBusItem } from './utils'
+import { dropDownData, FormatBusItem } from '../../utils'
 import { url } from '../../config/config-values.json'
 import './ride-modal.scss'
 

@@ -5,7 +5,6 @@ import FontIcon from 'react-toolbox/lib/font_icon/FontIcon'
 import TicketTabs from './TicketForm__Tabs'
 import configData from '../../config/config-values.json'
 import { /*formatTicketData, reformatTicketData,*/ getExtraPrice } from './utils'
-// import { submitTicketData } from '../../store-redux/actions'
 
 import './ticket-form.scss'
 
@@ -13,6 +12,10 @@ const defaultState = {
   // general info
     isLocal : true,
     ticketQty : 1,
+    luggageQty : 0,
+    ticketType : 'REGULAR',
+
+    ride : -1,
     
     // Person details
     person : {
@@ -52,75 +55,80 @@ const defaultState = {
       cardLastDigits : '',
     },
   
-    luggageQty : 0,
-  
-    // Package details
-    hasPackage : false,
-    packageInfo : {
-      weight : 0,
-      message : '',
-      fee : 0
-    }
+    // Special Info
+    message : '',
+    specialFee : 0,
+
+    // // VIP Fee
+    // vipMessage : '',
+    // vipFee : 0,
+
+    // // Special Fee
+    // specialMessage : '',
+    // specialFee : 0,
+
+    // // Airport Fee
+    // airportMessage : '',
+    // airportFee : 0
 }
 
-const myInfo = {
-  // general info
-  isLocal : true,
-  ticketQty : 3,
-  luggageQty : 1,  
-  // Person details
-  person : {
-    firstname : 'Jenky',
-    lastname : 'Nolasco',
-    phoneNumber : '3479742990',
-    email : 'jenky.nolasco@gmail.com',
-  },
+// const myInfo = {
+//   // general info
+//   isLocal : true,
+//   ticketQty : 1,
+//   luggageQty : 0,
+//   ticketType : 'SPECIAL',
 
-  // Trip details
-  willPick : true,
-  willDrop : false,
-  pickUpAddress : {
-    street : '116 Sherman Ave',
-    city : 'New York',
-    state : 'NY',
-    zipcode : 10034
-  },
-  dropOffAddress : {
-    street : '',
-    city : '',
-    state : '',
-    zipcode : ''
-  },
-  frm : 'NY',
-  to : 'PA',
-  date : new Date('2018-05-12'),
-  time : 13,
+//   ride : -1,
 
-  // Receipt details
-  payment : {
-    fee : 90,
-    extraFee : 15,
-    totalAmount : 105,
-    cardBrand : 'VISA',
-    paymentType : 'CARD',
-    cardLastDigits : '4242',
+//   // Person details
+//   person : {
+//     firstname : 'Jenky',
+//     lastname : 'Nolasco',
+//     phoneNumber : '3479742990',
+//     email : 'jenky.nolasco@gmail.com',
+//   },
 
-    // App settings
-    expirationDate : '',
-    cvc : '',
-    isCard : false,
-    cardNumber : '',
-  },
+//   // Trip details
+//   willPick : true,
+//   willDrop : false,
+//   pickUpAddress : {
+//     street : '116 Sherman Ave',
+//     city : 'New York',
+//     state : 'NY',
+//     zipcode : 10034
+//   },
+//   dropOffAddress : {
+//     street : '',
+//     city : '',
+//     state : '',
+//     zipcode : ''
+//   },
+//   frm : 'NY',
+//   to : 'PA',
+//   date : new Date(2018, 0, 19),
+//   time : 11,
 
-  // Package details
-  packageQty : 1,
-  hasPackage : true,
-  packageInfo : {
-    weight : 43,
-    message : 'Handle with care',
-    fee : 40
-  }
-}
+//   // Receipt details
+//   payment : {
+//     fee : 90,
+//     extraFee : 15,
+//     totalAmount : 105,
+//     cardBrand : 'VISA',
+//     paymentType : 'CARD',
+//     cardLastDigits : '4242',
+
+//     // App settings
+//     expirationDate : '',
+//     cvc : '',
+//     isCard : false,
+//     cardNumber : '',
+//   },
+
+//   // Special Info
+//   message : 'Handle with care',
+//   specialFee : 40,
+// }
 
 // TODO : Make a validation function to validate every field in the form
 const checkValidation = state => {
@@ -182,12 +190,13 @@ class TicketForm extends Component {
       pickUpAddress,
       willDrop,
       willPick,
-      packageInfo,
-      hasPackage
-      // packageQty
+      ticketType,
+      specialFee
     } = obj
 
-    const packFee = packageInfo.fee
+    if(ticketType !== 'REGULAR') return { totalAmount : specialFee, fee : specialFee, extraFee : 0 }
+
+    // const packFee = packageInfo.fee
     const { luggagePrice, prices } = configData
 
     let totalAmount = 0
@@ -205,14 +214,12 @@ class TicketForm extends Component {
     luggageFee += (luggagePrice * luggageQty)
 
     totalAmount += parseFloat(fee + luggageFee + pickFee + dropFee)
-    totalAmount += hasPackage ? packFee : 0
+    // totalAmount += hasPackage ? packFee : 0
 
     extraFee += parseFloat(luggageFee + pickFee + dropFee)
-    extraFee += hasPackage ? packFee : 0
+    // extraFee += hasPackage ? packFee : 0
 
     const fees = { totalAmount, fee, extraFee }
-    
-    // console.log(fees)
     
     return fees
   }
@@ -223,7 +230,7 @@ class TicketForm extends Component {
 
   _onChange(val, name, extra) {
     const state = { ...this.state }
-    const { payment, person, pickUpAddress, dropOffAddress, packageInfo, ticketQty } = state
+    const { payment, person, pickUpAddress, dropOffAddress } = state
 
     const newProp = {}
 
@@ -241,17 +248,26 @@ class TicketForm extends Component {
         payment[ extra ] = val
         if(extra === 'cardNumber') payment.cardLastDigits = val.slice(-4)
         break
-      case 'package' :
-        packageInfo[ extra ] = val
-        break
-      case 'packageQty' :
-        if(val > ticketQty) {
-          newProp.packageQty = ticketQty
-          break
+      case 'ticketType':
+        newProp.message = ''
+        newProp.specialFee = 0
+        newProp.ticketType = val
+        if(val === 'SPECIAL') {
+          newProp.ticketQty = 1
+          newProp.luggageQty = 0
         }
-
-        newProp.packageQty = val
         break
+      // case 'package' :
+      //   packageInfo[ extra ] = val
+      //   break
+      // case 'packageQty' :
+      //   if(val > ticketQty) {
+      //     newProp.packageQty = ticketQty
+      //     break
+      //   }
+
+      //   newProp.packageQty = val
+      //   break
       default :
         newProp[ name ] = val
         break
@@ -264,7 +280,7 @@ class TicketForm extends Component {
       pickUpAddress : { ...pickUpAddress },
       dropOffAddress : { ...dropOffAddress },
       payment : { ...payment },
-      packageInfo : { ...packageInfo },
+      // packageInfo : { ...packageInfo },
     }
 
     return this.setState({ ...newState }, () => {

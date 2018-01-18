@@ -32,9 +32,8 @@ const formatData = data => {
       dropOffAddress,
       pickUpAddress,
       receipt,
-      pkg,
-      isPackage,
-      isAssigned
+      isAssigned,
+      type
     } = item
 
     return {
@@ -51,9 +50,8 @@ const formatData = data => {
       dropOffAddress,
       pickUpAddress,
       receipt,
-      isPackage,
       isAssigned,
-      pkg,
+      type
     }
   })
 }
@@ -61,17 +59,19 @@ const formatData = data => {
 const tableData = {
   headers : [
     { value : 'id', label : 'Ticket ID', flex : 1 },
-    // { value : 'receipt', label : 'Receipt #', flex : 1 },
     { value : 'person', label : 'Name', flex : 2 },
     { value : 'time', label : 'Time', flex : 1 },
     { value : 'date', label : 'Date', flex : 2 },
     { value : 'phoneNumber', label : 'Phone Number', flex : 2 },
   ] ,
   colors : {
-    'true' : 'orange',
-
+    'REGULAR' : 'orange',
+    'PACKAGE' : 'darkgray',
+    'VIP' : 'gold',
+    'AIRPORT' : 'brown',
+    'SPECIAL' : 'green',
   },
-  colorsPropToMatch : 'isPackage',
+  colorsPropToMatch : 'type',
   rowToMatch : 'isAssigned',
   colorRowToMatch : '#B7F39E',
   dropdownData : [
@@ -118,20 +118,23 @@ const TicketTemplate = props => {
 )}
 
 class TicketConsult extends Component {
+  state = {
+    limit : 20,
+    skip : 0,
+    sortBy : 'date',
+    sortOrder : -1,
+    selected : [],
+    showForm : false,
+    showRidesModal : false,
+    ticketToModify : null,
+    searchCriteria : 'id',
+    searchString : ''
+  }
+
+  timeout = null
+
   constructor(props) {
     super(props)
-
-    this.state = {
-      limit : 20,
-      skip : 0,
-      sortBy : 'date',
-      sortOrder : -1,
-      selected : [],
-      showForm : false,
-      showRidesModal : false,
-      ticketToModify : null,
-      searchDropdown : 'id',
-    }
 
     this._onSearchChange = this._onSearchChange.bind(this)
     this._requestTickets = this._requestTickets.bind(this)
@@ -182,7 +185,7 @@ class TicketConsult extends Component {
   }
 
   _requestTickets() {
-    const { skip : oldSkip, limit, sortBy, sortOrder } = this.state
+    const { skip : oldSkip, limit, sortBy, sortOrder, searchString, searchCriteria } = this.state
     const { settings } = this.props
     const { isPackage } = settings
 
@@ -193,7 +196,7 @@ class TicketConsult extends Component {
     const sort = `${ sortBy } ${ sortOrder }`
 
     this.setState({ selected : [] })
-    return this.props.queryTickets({ skip, status, sort, limit, unassigned : false, isPackage })
+    return this.props.queryTickets({ skip, status, sort, limit, unassigned : false, isPackage, search : searchString, searchCriteria })
   }
 
   _onChange(val, name) {
@@ -241,7 +244,18 @@ class TicketConsult extends Component {
   }
   
   _onSearchChange(val) {
-    console.log(val)
+    if(this.timeout) clearTimeout(this.timeout)
+
+    return this.setState({ searchString : val}, () => {
+      this.timeout = setTimeout(() => {
+        // const { searchCriteria } = this.state
+  
+        if(val) {
+          this._requestTickets()
+          // this.setState({ searchString : '' })
+        }
+      }, 2000)
+    })
   }
 //#endregion
   //#region Lifecycle
@@ -263,7 +277,10 @@ class TicketConsult extends Component {
       showForm,
       showRidesModal,
       ticketToModify,
-      searchDropdown,
+      searchCriteria,
+      sortBy,
+      sortOrder,
+      searchString
     } = this.state
 
     const { tickets, count, submitTicket, setQueryOption, settings } = this.props
@@ -287,17 +304,19 @@ class TicketConsult extends Component {
           colorPropToMatch={ tableData.colorsPropToMatch }
           colorToMatchRow={ tableData.colorRowToMatch }
           rowToMatchProp={ tableData.rowToMatch }
+          searchString={ searchString }
           onSearchChange={ this._onSearchChange }
           onSearchEnter={ console.log }
-          searchPlaceholderText={ `Check on server for ${ searchDropdown }` }
+          searchPlaceholderText={ `Check on server for ${ searchCriteria }` }
           rightDropDown={
             <Dropdown
               auto
               source={ tableData.dropdownData }
-              value={ searchDropdown }
-              onChange={ e => this.setState({ searchDropdown : e }) }
+              value={ searchCriteria }
+              onChange={ e => this.setState({ searchCriteria : e }) }
             /> 
           }
+          sortOptions={{ sortBy, sortOrder }}
         />
         <TicketSettings
           selected={ selected }
