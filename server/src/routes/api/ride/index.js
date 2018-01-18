@@ -20,7 +20,7 @@ rideRouter.get('/all', async ctx => {
   } = ctx.query
 
   const list = [].concat(status.split(','))
-  const conditions = { status : { $in : list }}
+  let conditions = { status : { $in : list }}
 
   const [ srt, asc ] = sort.split(' ')
   const sortCondition = { [ srt ] : Number(asc) }
@@ -35,11 +35,18 @@ rideRouter.get('/all', async ctx => {
   }
 
   try {
-    if(searchCriteria === 'bus') {
-      const bus = await Bus.find({ id : search }, { _id : 1 })
+    if(search) {
+      delete conditions.status
 
-      conditions.bus = { $in : [].concat(bus.map(({ _id }) => _id )) }
+      if(searchCriteria === 'bus') {
+        const bus = await Bus.find({ id : search }, { _id : 1 })
+  
+        conditions.bus = { $in : [].concat(bus.map(({ _id }) => _id )) }
+      // } else conditions.id = search
+      } else conditions = { $where : `/^${ search }.*/.test(this.id)` }
     }
+
+    // console.log(conditions)
 
     const rides = await Ride
                         .find(conditions)

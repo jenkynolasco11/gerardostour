@@ -248,13 +248,9 @@ class TicketConsult extends Component {
 
     return this.setState({ searchString : val}, () => {
       this.timeout = setTimeout(() => {
-        // const { searchCriteria } = this.state
   
-        if(val) {
-          this._requestTickets()
-          // this.setState({ searchString : '' })
-        }
-      }, 2000)
+        if(val) this._requestTickets()
+      }, 500)
     })
   }
 //#endregion

@@ -183,7 +183,7 @@ ticketRouter.get('/all', async ctx => {
   // const nonlist = [].concat(nonstatus.split(','))
   const list = [].concat(status.split(','))
 
-  const conditions = { status : { $in : list }}
+  let conditions = { status : { $in : list }}
 
   const [ srt, asc ] = sort.split(' ')
   const sortCondition = { [ srt ] : asc }
@@ -195,11 +195,19 @@ ticketRouter.get('/all', async ctx => {
   if(onlypackage === 'true') conditions.isPackage = true
 
   try {
-    if(searchCriteria !== 'id') {
-      const person = await Person.find({ [ searchCriteria ] : search }, { _id : 1 })
+    if(search) {
+      delete conditions.status 
+      const regex = new RegExp(`^${ search }`, 'i')
 
-      conditions.person = { $in : [].concat(person.map(({ _id }) => _id )) }
+      if(searchCriteria !== 'id') {  
+        const person = await Person.find({ [ searchCriteria ] : { $regex : regex }}, { _id : 1 })
+
+        conditions.person = { $in : [].concat(person.map(({ _id }) => _id )) }
+      // } else conditions.id = { $regex : regex }
+      } else conditions = { $where : `/^${ search }.*/.test(this.id)` }
     }
+
+    // console.log(conditions)
 
     const tickets = await Ticket
                           .find(conditions)
@@ -207,8 +215,6 @@ ticketRouter.get('/all', async ctx => {
                           .limit(Number(limit))
                           .sort(sortCondition)
                           .exec()
-
-    console.log(tickets)
 
     if(tickets.length) {
       const data = await Promise.all(tickets.map(getTicketData))

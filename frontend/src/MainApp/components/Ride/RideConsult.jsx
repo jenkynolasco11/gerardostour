@@ -223,13 +223,9 @@ class Ride extends Component {
 
     return this.setState({ searchString : val}, () => {
       this.timeout = setTimeout(() => {
-        // const { searchCriteria } = this.state
-  
-        if(val) {
-          this._requestRides()
-          // this.setState({ searchString : '' })
-        }
-      }, 2000)
+
+        if(val) this._requestRides()
+      }, 500)
     })
   }
 //#endregion
@@ -257,6 +253,8 @@ class Ride extends Component {
       searchCriteria,
       searchString,
     } = this.state
+
+    console.log(searchString)
 
     const { rides, count, settings, setQueryOption } = this.props
     const data = formatData(rides)

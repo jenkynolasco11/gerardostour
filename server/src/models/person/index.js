@@ -1,8 +1,8 @@
 import mongoose, { Schema } from 'mongoose'
 
 const PersonSchema = new Schema({
-  firstname : { type : String, required : true },
-  lastname : { type : String, required : true },
+  firstname : { type : String, required : true, index : true },
+  lastname : { type : String, required : true, index : true },
   phoneNumber : {
     type : String,
     match : /^\d{10}$/,

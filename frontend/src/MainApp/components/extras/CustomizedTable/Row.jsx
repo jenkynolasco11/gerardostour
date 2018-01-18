@@ -1,5 +1,5 @@
 import React, { Component } from 'react'
-// import FontIcon from 'react-toolbox/lib/font_icon/FontIcon'
+import tooltip from 'react-toolbox/lib/tooltip'
 
 import Checkmark from './Checkmark'
 
@@ -33,7 +33,8 @@ class Row extends Component{
       index,
       template,
       colorProps,
-      colorPropToMatch
+      colorPropToMatch,
+      tooltipText = '',
     } = this.props
 
     const { isClosed } = this.state
@@ -45,6 +46,21 @@ class Row extends Component{
                       : 'transparent'
                       : null
 
+    const ToolTipSpan = tooltip(props => <span { ...props } /> )
+    const spanStyle = { backgroundColor : colorSign }
+
+    const Span = () => (
+      <ToolTipSpan
+        tooltipPosition="left"
+        className="colormark"
+        style={ spanStyle }
+        tooltip={ item.type ? item.type : item.status }
+      />
+    )
+
+    // console.log(Span)
+
+    // const Span = () => <span />
     const rowColor = item[ rowToMatchProp ] ? { backgroundColor : colorToMatchRow } : {}
 
     return (
@@ -56,7 +72,7 @@ class Row extends Component{
               headerProps.map((obj, i) => (
                 <div 
                   key={ i } 
-                  className="header-item" 
+                  className="header-item"
                   style={
                     obj.flex
                     ? { flex : obj.flex }
@@ -70,7 +86,7 @@ class Row extends Component{
           </div>
           {
             colorSign &&
-            <span className="colormark" style={{ backgroundColor : colorSign }} />
+            <Span />
           }
         </div>
         <div className={ `table-row-content body${ isClosed ? ' closed' : '' }` }>
