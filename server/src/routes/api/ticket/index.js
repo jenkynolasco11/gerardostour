@@ -27,6 +27,7 @@ ticketRouter.get('/:id/receipt', async ctx => {
 // Saves a(s many) ticket
 ticketRouter.post('/save', reformatTicket, async ctx => {
   const { body } = ctx.request
+  const { phoneNumber } = body
 
   try {
     // console.log(body)
@@ -238,6 +239,7 @@ ticketRouter.get('/all/:ride', async ctx => {
 
   try {
     const rid = await Ride.findOne({ id : ride }, { _id : 1 })
+    // Ticket.find({}, console.log)
 
     const tickets = await Ticket
                           .find({ ride : rid._id, status : { $ne : 'DELETED' }})
@@ -245,6 +247,7 @@ ticketRouter.get('/all/:ride', async ctx => {
                           .exec()
 
     if(tickets.length) {
+      // console.log(tickets)
       const data = await Promise.all(tickets.map(getTicketData))
 
       return ctx.body = { ok : true, data : { tickets : data }, message : '' }

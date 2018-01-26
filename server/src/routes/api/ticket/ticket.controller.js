@@ -1,3 +1,4 @@
+import { twilio } from '../../../modules'
 import { Ticket, Receipt, TicketDetail, Person, Meta, Address, Ride } from '../../../models'
 import { filterDoc, createTicketSideData } from '../../../utils'
 
@@ -200,9 +201,10 @@ export const saveTickets = async data => {
   let dropOffAddress = null
   let receipt = null
   let ride = null
+  let confirmation = null
 
   try {
-    const { willPick, willDrop, ticketQty, ride : rid = null } = data
+    const { willPick, willDrop, ticketQty, ride : rid = null, phoneNumber } = data
 
     meta = await Meta.findOne({})
 
@@ -216,7 +218,8 @@ export const saveTickets = async data => {
     person = prsn
     pickUpAddress = pckup
     dropOffAddress = drpff
-    receipt = rcpt
+    receipt = rcpt.id
+    confirmation = rcpt.confirmationNumber
 
     if(!person
       || (willDrop && !dropOffAddress) 
@@ -228,7 +231,7 @@ export const saveTickets = async data => {
       promises.push(saveTicket({
         id : meta.lastTicketId++,
         data,
-        receipt,
+        receipt : rcpt._id,
         person,
         pickUpAddress,
         dropOffAddress,
@@ -236,6 +239,17 @@ export const saveTickets = async data => {
       }))
 
     const tickets = await Promise.all(promises)
+    const receiptNum = `GA-${ ('00000000' + receipt).slice(-8) }`
+
+    const msg = `Gerardo Trans\n\nThanks for traveling with us.\n\nYour confirmation number is: \n${ confirmation }\n\nYour receipt number is:\n${ receiptNum }`
+
+    const response = await twilio.sendSMS({
+      body : msg,
+      to : phoneNumber,
+      from : '+14134895573'
+    })
+
+    // console.log(response)
 
     await meta.save()
 
@@ -243,7 +257,7 @@ export const saveTickets = async data => {
     return tickets
   } catch (e) {
     // Some shit happened... Roll back everything!!!
-    await eraseData({ pickUpAddress, dropOffAddress, receipt, ride })
+    await eraseData({ pickUpAddress, dropOffAddress, receipt: receipt ? receipt._id : null, ride })
 
     // console.log(e)
     console.log('... @ src/routes/api/ticket/ticket.controller.js')

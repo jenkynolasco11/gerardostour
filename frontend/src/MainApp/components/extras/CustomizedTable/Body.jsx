@@ -34,7 +34,8 @@ const skeletonRender = (rows, cols) => (
 
 class Body extends Component{
   render() {
-    const { total = 0,
+    const {
+      total = 0,
       limit = 10,
       onPaginate,
       skip = 0,

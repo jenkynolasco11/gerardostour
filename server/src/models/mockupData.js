@@ -1,5 +1,6 @@
 import mongoose from 'mongoose'
 import config from '../config'
+import { generateVerificationNumber } from '../utils'
 
 mongoose.connect(config.DBURI, { useMongoClient : true }, async () => {
   console.log('Connected to the DB')
@@ -31,13 +32,13 @@ mongoose.connect(config.DBURI, { useMongoClient : true }, async () => {
   require('./bus')
   require('./receipt')
   require('./meta')
-  require('./package')
+  // require('./package')
 
   mongoose.Promise = global.Promise
 
   const addresses = require('./mockupData-streets').default
   const users = require('./mockupData-users').default
-  const packageInfo = require('./mockupData-package').default
+  // const packageInfo = require('./mockupData-package').default
 
   const Person = mongoose.model('person')
   const User = mongoose.model('user')
@@ -47,10 +48,10 @@ mongoose.connect(config.DBURI, { useMongoClient : true }, async () => {
   const Address = mongoose.model('address')
   const Bus = mongoose.model('bus')
   const BusDetail = mongoose.model('busDetails')
-  const Payment = mongoose.model('receipt')
+  const Receipt = mongoose.model('receipt')
   const RideDetail = mongoose.model('rideDetails')
   const Meta = mongoose.model('meta')
-  const Package = mongoose.model('package')
+  // const Package = mongoose.model('package')
 
   const genRand = (limit, x = 0, isFloat = false) => {
     const rand = Math.random() * limit
@@ -76,7 +77,7 @@ mongoose.connect(config.DBURI, { useMongoClient : true }, async () => {
     return new Date(a)
   }
 
-  const ticketLimit = genRand(2000, 1000)
+  let ticketLimit = genRand(2000, 1000)
   const peopleLimit = genRand(500, 300)
   const addressLimit = genRand(40,30)
   const rideLimit = genRand(150, 100)
@@ -91,6 +92,7 @@ mongoose.connect(config.DBURI, { useMongoClient : true }, async () => {
   const routes = [ 'NY', 'PA' ]
   const rideStatus = [ 'FINISHED', 'PENDING', 'ASSIGNED', 'ON-THE-WAY', 'CANCELLED' ]
   const times = [ 3, 5, 7, 9, 11, 13, 15, 17, 20, 22 ]
+  const ticketTypes = [ 'REGULAR', 'PACKAGE', 'VIP', 'SPECIAL', 'AIRPORT' ]
   const rideTimes = []
 
   const usersLimit = 50
@@ -121,7 +123,7 @@ mongoose.connect(config.DBURI, { useMongoClient : true }, async () => {
   
       return person._id
     } catch (e) {
-      console.log('shit happened at Person')
+      // console.log('shit happened at Person')
       // console.log(e)
       // throw new Error(`Person =====> ${ JSON.stringify(e) }`)
     }
@@ -145,7 +147,7 @@ mongoose.connect(config.DBURI, { useMongoClient : true }, async () => {
       // console.log(e)
       // console.log(id, user, pass, pos)
       // console.log('\n')
-      console.log('shit happened at User')
+      // console.log('shit happened at User')
       // console.log(e)
       // process.exit()
       // return new Error(`User =====> ${ JSON.stringify(e) }`)
@@ -234,27 +236,27 @@ mongoose.connect(config.DBURI, { useMongoClient : true }, async () => {
     }
   }
 
-  const createPackage = async person => {
-    const info = packageInfo[ genRand(packageInfo.length) ]
-    const { weight, message } = info
+  // const createPackage = async person => {
+  //   const info = packageInfo[ genRand(packageInfo.length) ]
+  //   const { weight, message } = info
 
-    try {
-      const pack = await new Package({
-        // id : meta.lastPackageId++,
-        person,
-        weight,
-        message,
-      }).save()
+  //   try {
+  //     const pack = await new Package({
+  //       // id : meta.lastPackageId++,
+  //       person,
+  //       weight,
+  //       message,
+  //     }).save()
 
-      return pack._id
-    } catch (e) {
-      throw new Error(`Package =====> ${ JSON.stringify(e) }`)
-    }
-  }
+  //     return pack._id
+  //   } catch (e) {
+  //     throw new Error(`Package =====> ${ JSON.stringify(e) }`)
+  //   }
+  // }
 
   const createReceipt = async data => {
     try {
-      const receipt = await new Payment(data).save()
+      const receipt = await new Receipt(data).save()
 
       return receipt._id
     } catch (e) {
@@ -278,23 +280,24 @@ mongoose.connect(config.DBURI, { useMongoClient : true }, async () => {
       date,
       time,
       isLocal,
-      isPackage,
-      fee,
-      extraFee
+      type,
+      message,
+      // isPackage,
+      // fee,
+      // extraFee
     } = ticketData
 
-    let pack = null
-
     try {
-      if(isPackage) pack = await createPackage(person)
+      // if(isPackage) pack = await createPackage(person)
 
       const details = await new TicketDetail({
         pickUpAddress : pick,
         dropOffAddress : drop,
         redeemedCount : 0,
         isLocal,
-        fee,
-        extraFee
+        // fee,
+        // extraFee,
+        message : type !== 'REGULAR' ? message : ''
       }).save()
 
       const ticket = await new Ticket({
@@ -310,15 +313,21 @@ mongoose.connect(config.DBURI, { useMongoClient : true }, async () => {
         willDrop : Boolean(drop),
         frm,
         to,
-        isPackage,
-        package : pack,
+        type
+        // isPackage,
+        // package : pack,
       }).save()
+
+      // console.log(ticket.type)
 
       return ticket._id
     } catch (e) {
       console.log(e)
-      throw new Error(`Ticket =====> ${ JSON.stringify(e) }`)
+      process.exit()
+      // throw new Error(`Ticket =====> ${ JSON.stringify(e) }`)
     }
+
+    return null
   }
 //#endregion
 
@@ -501,129 +510,144 @@ mongoose.connect(config.DBURI, { useMongoClient : true }, async () => {
     const projection = { $project : { _id : 1 }}
     const promises = []
 
+    function retrieveARide([ person ]) {
+      return Promise.all([
+        person,
+        Ride.aggregate([{ $sample : { size : 1 }}])
+      ])
+    }
+    
+    function createAReceipt([ person, [ ride ]], total, fee, extra, tckts) {
+      const paymentType = payType[ genRand(payType.length) ]
+      const isCard = paymentType === 'CARD'
+      const cardBrand
+        = isCard
+        ? getRandCard()
+        : ''
+      const cardLastDigits
+        = isCard
+        ? `${ genRand(10000, 0) }`
+        : ''
+      const luggageQty = genRand(5)
+
+      const receipt = createReceipt({
+        id : meta.lastReceiptId++,
+        paymentType,
+        totalAmount : total,
+        cardBrand,
+        cardLastDigits,
+        luggageQty,
+        ticketQty : tckts,
+        fee,
+        extraFee : extra,
+        confirmationNumber : generateVerificationNumber(ride.to)
+      })
+
+      return Promise.all([ person, ride, receipt ])
+    }
+
+    async function createTheTickets([ person, ride, receipt ]) {
+      // const type = tickettypes[ genRand(tickettypes.length) ]
+      const status = ticktsStatus[ genRand(ticktsStatus.length) ]
+      const assignedRide = genRand(2)
+      const willPick = genRand(2)
+      const willDrop = genRand(2)
+      const howMany = genRand(7)
+
+      const ticketType = ticketTypes[ genRand(ticketTypes.length) ]
+      const message = 'Lorem Ipsum...'
+
+      // console.log(ticketType)
+
+      let toState = null
+      let frmState = null
+      let time = null
+      let date = null
+
+      if(assignedRide) {
+        toState = ride.to
+        frmState = ride.frm
+        time = ride.time
+        date = ride.date
+
+      } else {
+        const rd = rideTimes[ genRand(rideTimes.length) ]
+
+        toState = rd.to
+        frmState = rd.frm
+        time = rd.time
+        date = rd.date
+      }
+
+      const [ pick ] = await (
+                  willPick
+                  ? Address.aggregate([{ $sample : { size : 1 }}, projection ])
+                  : [ null ]
+                )
+      const [ drop ] = await (
+                  willDrop
+                  ? Address.aggregate([{ $sample : { size : 1 }}, projection ])
+                  : [ null ]
+                )
+
+      const isLocal = genRand(2)
+
+      const ticketsPromises = []
+
+      for(let j = 0; j < howMany; j++) {
+        // const isPackage = howManyPackages-- > 0
+
+        ticketsPromises.push(
+          createTicket({
+            to : toState,
+            frm : frmState,
+            person : person._id,
+            ride : assignedRide ? ride._id : null,
+            receipt,
+            status,
+            pick : pick !== null ? pick._id : null,
+            drop : drop !== null ? drop._id : null,
+            date,
+            time,
+            isLocal,
+            type : ticketType,
+            message
+          })
+        )
+      }
+      
+      return Promise.all(ticketsPromises)
+    }
+
     try {
-      for(let i = 0; i < ticketLimit; i++) {
+      while(ticketLimit > 0) {
         const howManyTickets = genRand(4, 1)
-        let howManyPackages = genRand(howManyTickets)
+
+        // let howManyPackages = genRand(howManyTickets)
 
         const fee = 30
-        const extraFee = howManyPackages * 15
+        const extraFee = 15
 
         const totalAmount = (fee * howManyTickets) + extraFee
 
         promises.push(
           Person
             .aggregate([{ $sample : { size : 1 }}, projection ])
-            .then(([ person ]) =>
-              Promise.all([
-                person,
-                Ride.aggregate([{ $sample : { size : 1 }} ])
-              ])
-            )
-            .then(([ person, [ ride ]]) => {
-              const paymentType = payType[ genRand(payType.length) ]
-
-              const isCard = paymentType === 'CARD'
-              const cardBrand
-                = isCard
-                ? getRandCard()
-                : ''
-              const cardLastDigits
-                = isCard
-                ? `${ genRand(10000, 0) }`
-                : ''
-              const luggageQty = genRand(5)
-
-              const receipt = createReceipt({
-                id : meta.lastReceiptId++,
-                paymentType,
-                totalAmount,
-                cardBrand,
-                cardLastDigits,
-                luggageQty,
-                packagesQty : howManyPackages,
-                ticketQty : howManyTickets,
-              })
-
-              return Promise.all([ person, ride, receipt ])
-            })
-            .then(async ([ person, ride, receipt ]) => {
-
-              const status = ticktsStatus[ genRand(ticktsStatus.length) ]
-              const assignedRide = genRand(2)
-              const willPick = genRand(2)
-              const willDrop = genRand(2)
-              const howMany = genRand(7)
-
-              let toState = null
-              let frmState = null
-              let time = null
-              let date = null
-
-              if(assignedRide) {
-                toState = ride.to
-                frmState = ride.frm
-                time = ride.time
-                date = ride.date
-
-              } else {
-                const rd = rideTimes[ genRand(rideTimes.length) ]
-
-                toState = rd.to
-                frmState = rd.frm
-                time = rd.time
-                date = rd.date
-              }
-
-              const [ pick ] = await (
-                          willPick
-                          ? Address.aggregate([{ $sample : { size : 1 }}, projection ])
-                          : [ null ]
-                        )
-              const [ drop ] = await (
-                          willDrop
-                          ? Address.aggregate([{ $sample : { size : 1 }}, projection ])
-                          : [ null ]
-                        )
-
-              const isLocal = genRand(2)
-
-              const ticketsPromises = []
-
-              for(let j = 0; j < howMany; j++) {
-                const isPackage = howManyPackages-- > 0
-
-                ticketsPromises.push(
-                  createTicket({
-                    to : toState,
-                    frm : frmState,
-                    person : person._id,
-                    ride : assignedRide ? ride._id : null,
-                    receipt,
-                    status,
-                    pick : pick !== null ? pick._id : null,
-                    drop : drop !== null ? drop._id : null,
-                    date,
-                    time,
-                    isLocal,
-                    isPackage,
-                    fee,
-                    extraFee : isPackage ? 15 : 0
-                  })
-                )
-              }
-              
-              return Promise.all(ticketsPromises)
-            })
+            .then(retrieveARide)
+            .then(data => createAReceipt(data, totalAmount, fee, extraFee, howManyTickets))
+            .then(createTheTickets)
+            // .catch(e => {
+            //   console.log(e)
+            // })
         )
 
-        i += howManyTickets
+        ticketLimit -= howManyTickets
       }
 
       const p = await Promise.all(promises)
-      console.log(p.reduce((p, n) => p.concat(n), []))
+      // console.log(p.reduce((p, n) => p.concat(n), []))
 
-      console.log('Tickets created!!')
+      console.log(p.length + ' Tickets created!!')
 
       // process.exit()
 
@@ -646,19 +670,19 @@ mongoose.connect(config.DBURI, { useMongoClient : true }, async () => {
       const d = await RideDetail.remove({})
       const e = await Ticket.remove({})//, () => {})
       const f = await TicketDetail.remove({})
-      const g = await Payment.remove({})
+      const g = await Receipt.remove({})
       const h = await Address.remove({})
       const i = await Bus.remove({})
       const j = await BusDetail.remove({})
       const k = await Meta.remove({})
-      const l = await Package.remove({})
+      // const l = await Package.remove({})
 
       // await Person.collection.dropIndexes()
       // await User.collection.dropIndexes()
       // await Ride.collection.dropIndexes()
       // await Ticket.collection.dropIndexes()
       // await TicketDetail.collection.dropIndexes()
-      // await Payment.collection.dropIndexes()
+      // await Receipt.collection.dropIndexes()
       // await Route.collection.dropIndexes()
       // await Bus.collection.dropIndexes()
       // process.exit()

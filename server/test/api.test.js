@@ -61,13 +61,8 @@ const data = {
   },
   package : {
     ticketQty : 2,
-    isPackage : true,
-    packageQty : 2,
-    packageInfo : {
-      weight : 10.0,
-      message : 'Handle with care',
-      fee : 40
-    },
+    type : 'PACKAGE',
+    message : 'lorem ipsum',
     extraFee : 0,
     fee : 30,
     totalAmount : 30,
@@ -579,37 +574,39 @@ describe('API => ', () => {
         })
     })
 
-    // it('Should create a ticket (Package)', done => {
-    //   agent
-    //     .post('/api/v1/ticket/save')
-    //     .send({ ...data.ticket, ...data.package })
-    //     .end((err, res) => {
-    //       const { body } = res
-    //       commonExpects(res, 200, true, 'object', '')
+    it('Should create a ticket (Package)', done => {
+      agent
+        .post('/api/v1/ticket/save')
+        .send({ ...data.ticket, ...data.package })
+        .end((err, res) => {
+          const { body } = res
+          commonExpects(res, 200, true, 'object', '')
 
-    //       expect(body.data).to.haveOwnProperty('tickets')
-    //       expect(body.data.tickets).to.be.an('array')
+          expect(body.data).to.haveOwnProperty('tickets')
+          expect(body.data.tickets).to.be.an('array')
 
-    //       body.data.tickets.forEach(id => {
-    //         expect(id).to.be.an('number')
-    //       })
+          body.data.tickets.forEach(id => {
+            expect(id).to.be.an('number')
+          })
 
-    //       done()
-    //     })
-    // })
+          done()
+        })
+    })
 
     it('Should query a ticket', done => {
       agent
         .get('/api/v1/ticket/3')
         .end((err, res) => {
           const { body } = res
+
+          // console.log(body.data)
           commonExpects(res, 200, true, 'object', '')
 
           expect(body.data).to.haveOwnProperty('ticket')
           const { ticket } = body.data
 
           expect(ticket).to.haveOwnProperty('id')
-          expect(ticket.id).to.be.eql(4)
+          expect(ticket.id).to.be.eql(3)
           expect(ticket).to.haveOwnProperty('person')
           expect(ticket.person).to.haveOwnProperty('firstname')
           expect(ticket.person.firstname).to.be.eql('Jenky')
@@ -708,10 +705,18 @@ describe('API => ', () => {
     })
 
     it('Should query tickets assigned to ride', done => {
+      // agent
+      //   .get(`/api/v1/ticket/all`)
+      //   .end((err, res) => {
+      //     console.log(res.body)
+      //   })
+
       agent
         .get(`/api/v1/ticket/all/${ rideId }`)
         .end((err, res) => {
           const { body } = res
+
+          // console.log(body.data)
           commonExpects(res, 200, true, 'object', '')
 
           expect(body.data).to.haveOwnProperty('tickets')

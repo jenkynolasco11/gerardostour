@@ -13,7 +13,12 @@ const ReceiptSchema = new Schema({
   luggageQty : Number,
   ticketQty : Number,
   cardLastDigits : Number,
-  createdAt : { type : Date, default : Date.now }
+  createdAt : { type : Date, default : Date.now },
+  confirmationNumber : { type : String, index : true, required : true },
 })
+
+ReceiptSchema.methods.verifyConfirmation = function(number) {
+  return this.confirmationNumber === number
+}
 
 export default mongoose.model('receipt', ReceiptSchema, 'receipt')

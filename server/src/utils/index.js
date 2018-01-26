@@ -2,6 +2,15 @@
 
 import { Person, Address, Receipt } from '../models'
 
+export const generateVerificationNumber = (to = 'PA') => {
+  const confirmation = `GA-${ to }`
+
+  // Found in StackOverflow
+  const random = (Math.random() * 0xFFFFFF << 0).toString(16).toUpperCase()
+
+  return `${ confirmation }${ random }`
+}
+
 // TODO : Add how many times this person has bought tickets in the application for logging purposes
 export const createPerson = async data => {
   const { firstname, lastname, email, phoneNumber } = data
@@ -31,7 +40,10 @@ export const createReceipt = async data => {
     id,
     fee = 0,
     extraFee = 0,
+    to
   } = data
+
+  const confirmationNumber = generateVerificationNumber(to)
 
   try {
     const receipt = await new Receipt({
@@ -44,9 +56,10 @@ export const createReceipt = async data => {
       luggageQty,
       fee,
       extraFee,
+      confirmationNumber
     }).save()
 
-    return receipt._id
+    return receipt
   } catch (e) {
     console.log(e)
     console.log('... @ src/routes/api/utils/index.js@createReceipt')
@@ -101,7 +114,7 @@ export const filterAggregate = async (docs, filterFunc, sortOrder) => {
   const sortedDocuments = newDocs.sort((a,b) => collator.compare(a.datekey, b.datekey))
 
   //newDocs.sort((a, b) => sortOrder === 'asc' ? a.dateKey - b.dateKey : b.dateKey - a.dateKey)
-  console.log(sortedDocuments)
+  // console.log(sortedDocuments)
 
   return sortedDocuments
 }

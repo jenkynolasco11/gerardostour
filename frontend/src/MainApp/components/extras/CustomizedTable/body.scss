@@ -43,15 +43,23 @@
 
           &.body {
             width : 100%;
-            background-color : rgb(237, 156, 156);
+            background-color : rgb(191, 191, 191);
             // background : gray;
             color : white;
             padding : 4px 0;
             transition : height .1s linear, padding .1s linear;
             box-shadow : inset 0px 8px 5px -8px black;
 
+            h5 {
+              color : rgb(0, 49, 93);
+            }
+
             hr {
               background-color : rgb(107, 33, 33);
+            }
+
+            span {
+              color : rgba(1, 1, 1, 0.708);
             }
 
             &.closed {

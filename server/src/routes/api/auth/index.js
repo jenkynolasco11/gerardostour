@@ -32,9 +32,9 @@ const setUserData = async usr => {
 const isAuthenticated = async (ctx, next) => {
   try {
     if(ctx.isAuthenticated()) {
-      console.log('KEWL!')
-      console.log(ctx.session)
-      console.log(ctx.session.passport)
+      // console.log('KEWL!')
+      // console.log(ctx.session)
+      // console.log(ctx.session.passport)
       const { user } = ctx.state
     
       const data = await setUserData(user)
@@ -53,8 +53,8 @@ auth.post('/login', isAuthenticated, ctx =>
   passport.authenticate('local', async (err, user, msg) => {
     const { driverToken } = ctx.request.body
 
-    console.log(`This says that the user was ${ ctx.isAuthenticated() ? '' : 'not ' }authenticated`)
-    console.log(`Testing this: ${ ctx.session.isNew }`)
+    // console.log(`This says that the user was ${ ctx.isAuthenticated() ? '' : 'not ' }authenticated`)
+    // console.log(`Testing this: ${ ctx.session.isNew }`)
 
     if(user) {
       if(driverToken && user.position !== 'DRIVER') return ctx.body = { ok : false, data : null, message : 'Not a valid Driver' }
@@ -87,8 +87,8 @@ auth.post('/login', isAuthenticated, ctx =>
 auth.get('/logout', /* isAuthenticated, */ ctx => {
   // auth.get('/logout/:username', isAuthenticated, ctx => {
   // const { username } = ctx.params
-  console.log('Logging out...')
-  console.log(`User was ${ ctx.isAuthenticated() ? '' : 'not' } authenticated`)
+  // console.log('Logging out...')
+  // console.log(`User was ${ ctx.isAuthenticated() ? '' : 'not' } authenticated`)
 
   if(ctx.state.user) {
     console.log(`${ ctx.state.user.username } is logging out...`)
@@ -102,15 +102,15 @@ auth.get('/logout', /* isAuthenticated, */ ctx => {
 
 auth.get('/check-auth', isAuthenticated, async ctx => {
   // console.log(`User is ${ ctx.isAuthenticated() ? '' : 'not' } authenticated`)
-  console.log(ctx.session)
-  console.log(ctx.session.passport)
+  // console.log(ctx.session)
+  // console.log(ctx.session.passport)
 
   if(ctx.isAuthenticated()) {
   // if(ctx.session.user = ctx.session.passport.user.user) {
   //   ctx.state.user = ctx.session.passport.user.user
 
 
-    console.log('Inside, boys!')
+    // console.log('Inside, boys!')
 
     const data = await setUserData(ctx.state.user)
     // const data = {

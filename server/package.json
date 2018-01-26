@@ -7,8 +7,8 @@
     "dev": "nodemon --exec babel-node index.js -e *.js*",
     "mockup": "nodemon --exec babel-node ./src/models/mockupData.js -e .js",
     "mockup:one": "babel-node ./src/models/mockupData.js",
-    "test": "nodemon --exec mocha ./test --timeout 4000 --require babel-polyfill --require babel-register -e .js",
-    "test:one": "mocha ./test --timeout 4000 --require babel-polyfill --require babel-register"
+    "test": "nodemon --exec mocha ./test --timeout 6000 --require babel-polyfill --require babel-register -e .js",
+    "test:one": "mocha ./test --timeout 6000 --require babel-polyfill --require babel-register"
   },
   "keywords": [],
   "author": "",
@@ -33,6 +33,7 @@
     "mongoose": "^4.13.4",
     "passport-local": "^1.0.0",
     "socket.io": "^2.0.4",
+    "twilio": "^3.11.1",
     "uuid": "^3.1.0"
   },
   "devDependencies": {
