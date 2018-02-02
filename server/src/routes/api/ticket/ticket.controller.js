@@ -1,6 +1,10 @@
-import { twilio } from '../../../modules'
+import { twilio, Mailer } from '../../../modules'
 import { Ticket, Receipt, TicketDetail, Person, Meta, Address, Ride } from '../../../models'
 import { filterDoc, createTicketSideData } from '../../../utils'
+
+const mailer = new Mailer()
+
+mailer.sendTicketReceipt({})
 
 // ///////////////// Helper functions
 const eraseData = async objects => {
@@ -243,11 +247,12 @@ export const saveTickets = async data => {
 
     const msg = `Gerardo Trans\n\nThanks for traveling with us.\n\nYour confirmation number is: \n${ confirmation }\n\nYour receipt number is:\n${ receiptNum }`
 
-    const response = await twilio.sendSMS({
-      body : msg,
-      to : phoneNumber,
-      from : '+14134895573'
-    })
+    // Uncomment this part after
+    // const response = await twilio.sendSMS({
+    //   body : msg,
+    //   to : phoneNumber,
+    //   from : '+14134895573'
+    // })
 
     // console.log(response)
 

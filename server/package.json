@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "dev": "nodemon --exec babel-node index.js -e *.js*",
+    "dev": "nodemon -L --exec 'babel-node index.js' -e js",
     "mockup": "nodemon --exec babel-node ./src/models/mockupData.js -e .js",
     "mockup:one": "babel-node ./src/models/mockupData.js",
     "test": "nodemon --exec mocha ./test --timeout 6000 --require babel-polyfill --require babel-register -e .js",
@@ -17,6 +17,7 @@
     "axios": "^0.17.1",
     "bcrypt-nodejs": "^0.0.3",
     "bluebird": "^3.5.1",
+    "cron": "^1.3.0",
     "koa": "next",
     "koa-body": "^2.0.0",
     "koa-generic-session": "^2.0.1",
@@ -31,6 +32,8 @@
     "koa-static": "^4.0.2",
     "koa2-cors": "^2.0.5",
     "mongoose": "^4.13.4",
+    "nodemailer": "^4.4.2",
+    "nodemon": "^1.14.11",
     "passport-local": "^1.0.0",
     "socket.io": "^2.0.4",
     "twilio": "^3.11.1",
@@ -50,7 +53,6 @@
     "chai-as-promised": "^7.1.1",
     "chai-http": "^3.0.0",
     "eslint": "^3.16.1",
-    "mocha": "^4.0.1",
-    "nodemon": "^1.12.1"
+    "mocha": "^4.0.1"
   }
 }

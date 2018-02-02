@@ -18,6 +18,7 @@ import { socketServer } from './socket.io-server'
 import config from './config'
 import routes from './routes'
 import error404 from './routes/404'
+// import cron from './modules/cronjob'
 
 import { createMeta } from './models'
 import './passport'

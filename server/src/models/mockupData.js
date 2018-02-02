@@ -66,15 +66,18 @@ mongoose.connect(config.DBURI, { useMongoClient : true }, async () => {
     // date.setHours(hour)
     date.setHours(0,0,0,0)
     // console.log(date)
+    console.log(date)
     return date.toISOString()
   }
 
   const limit = (lim = 100) => genRand(lim, 1)
   const today = new Date()
   const getAnyDate = () => {
-    const a = genRandDate(today, new Date(today.setDate( today.getDate() + 21)))
+    const a = genRandDate(today, new Date(new Date().setDate( today.getDate() + 31)))
     // console.log(a.toDateString())
-    return new Date(a)
+    const newDate = new Date(a)
+    // console.log(newDate)
+    return newDate
   }
 
   let ticketLimit = genRand(2000, 1000)
@@ -109,18 +112,18 @@ mongoose.connect(config.DBURI, { useMongoClient : true }, async () => {
   const getRandCard = () => cardAffiliates[ genRand(cardAffiliates.length) ]
 
   // ///////////////////////////////////////
-  //#region 
+  //#region
   const createPerson = async (fn, ln, email, num ) => {
     try {
       const phone = num.replace(/\D/g, '')
-      
+
       const person = await new Person({
         firstname : fn,
         lastname : ln,
         phoneNumber : phone,
         email,
       }).save()
-  
+
       return person._id
     } catch (e) {
       // console.log('shit happened at Person')
@@ -137,11 +140,11 @@ mongoose.connect(config.DBURI, { useMongoClient : true }, async () => {
         username : user,
         position : pos
       })
-  
+
       usl.password = usl.generateHash(pass)
       const usr = await usl.save()
 
-      return usr._id 
+      return usr._id
     } catch (e) {
       // console.log('\n')
       // console.log(e)
@@ -192,7 +195,7 @@ mongoose.connect(config.DBURI, { useMongoClient : true }, async () => {
         street,
         zipcode,
       }).save()
-  
+
       return address._id
     } catch (e) {
       console.log('shit happened at Route')
@@ -516,7 +519,7 @@ mongoose.connect(config.DBURI, { useMongoClient : true }, async () => {
         Ride.aggregate([{ $sample : { size : 1 }}])
       ])
     }
-    
+
     function createAReceipt([ person, [ ride ]], total, fee, extra, tckts) {
       const paymentType = payType[ genRand(payType.length) ]
       const isCard = paymentType === 'CARD'
@@ -615,7 +618,7 @@ mongoose.connect(config.DBURI, { useMongoClient : true }, async () => {
           })
         )
       }
-      
+
       return Promise.all(ticketsPromises)
     }
 
@@ -690,7 +693,7 @@ mongoose.connect(config.DBURI, { useMongoClient : true }, async () => {
     } catch(e) {
       console.log(e)
       console.log('something happened....')
-      
+
     }
   }
   // /////////////////////////////////////////////////
@@ -708,7 +711,7 @@ mongoose.connect(config.DBURI, { useMongoClient : true }, async () => {
       await createTickets()
 
       await new Meta(meta).save()
-      
+
       await mongoose.connection.close()
 
       console.log('')
@@ -716,7 +719,7 @@ mongoose.connect(config.DBURI, { useMongoClient : true }, async () => {
       console.log('Process done!')
       console.log('')
     } catch (e) {
-      console.log(e, 'Something happened on data (models/mockupData.js)...') 
+      console.log(e, 'Something happened on data (models/mockupData.js)...')
       process.exit()
     }
   })()
