@@ -40,7 +40,7 @@ rideRouter.get('/all', async ctx => {
 
       if(searchCriteria === 'bus') {
         const bus = await Bus.find({ id : search }, { _id : 1 })
-  
+
         conditions.bus = { $in : [].concat(bus.map(({ _id }) => _id )) }
       // } else conditions.id = search
       } else conditions = { $where : `/^${ search }.*/.test(this.id)` }
@@ -81,7 +81,7 @@ rideRouter.get('/all/:bus', async ctx => {
 
     const rides = await Ride.aggregate([
       { $match : conditions },
-      { 
+      {
         $group : {
           _id : {
             month : { $month : '$date' },
@@ -242,7 +242,7 @@ rideRouter.put('/dispatch', async ctx => {
 
         const rid = await Ride.aggregate([
           { $match : { id }},
-          { 
+          {
             $group : {
               _id : {
                 month : { $month : '$date' },

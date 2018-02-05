@@ -21,6 +21,7 @@ const TicketSchema = new Schema({
   time : { type : Number, required : true, index : true },
   date : { type : Date, required : true, index : true },
   type : { type : String, enum : TICKET_TYPES, index : true, default : 'REGULAR' },
+  reminded : { type : Boolean, default : false },
   createdAt : { type : Date, default : Date.now },
   modifiedAt : { type : Date, default : Date.now },
 })
@@ -31,6 +32,7 @@ const TicketDetailsSchema = new Schema({
   redeemedCount : { type : Number, default : 0 },
   isLocal : { type : Boolean, default : false },
   message : { type : String, default : '' },
+  // reminded : { type : Boolean, default : false },
   // fee : { type : Number, default : 0 },
   // extraFee : { type : Number, default : 0 },
   createdAt : { type : Date, default : Date.now },

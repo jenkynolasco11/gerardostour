@@ -66,14 +66,14 @@ mongoose.connect(config.DBURI, { useMongoClient : true }, async () => {
     // date.setHours(hour)
     date.setHours(0,0,0,0)
     // console.log(date)
-    console.log(date)
+    // console.log(date)
     return date.toISOString()
   }
 
   const limit = (lim = 100) => genRand(lim, 1)
   const today = new Date()
   const getAnyDate = () => {
-    const a = genRandDate(today, new Date(new Date().setDate( today.getDate() + 31)))
+    const a = genRandDate(today, new Date(new Date().setDate( today.getDate() + 3)))
     // console.log(a.toDateString())
     const newDate = new Date(a)
     // console.log(newDate)

@@ -1,6 +1,7 @@
 import { twilio, Mailer } from '../../../modules'
 import { Ticket, Receipt, TicketDetail, Person, Meta, Address, Ride } from '../../../models'
 import { filterDoc, createTicketSideData } from '../../../utils'
+import { TWILIO_PHONE_NUMBER } from '../../../config'
 
 const mailer = new Mailer()
 
@@ -243,15 +244,15 @@ export const saveTickets = async data => {
       }))
 
     const tickets = await Promise.all(promises)
-    const receiptNum = `GA-${ ('00000000' + receipt).slice(-8) }`
+    // const receiptNum = `GA-${ ('00000000' + receipt).slice(-8) }`
 
-    const msg = `Gerardo Trans\n\nThanks for traveling with us.\n\nYour confirmation number is: \n${ confirmation }\n\nYour receipt number is:\n${ receiptNum }`
+    // const msg = `Gerardo Trans\n\nThanks for traveling with us.\n\nYour confirmation number is: \n${ confirmation }\n\nYour receipt number is:\n${ receiptNum }`
 
     // Uncomment this part after
     // const response = await twilio.sendSMS({
     //   body : msg,
     //   to : phoneNumber,
-    //   from : '+14134895573'
+    //   from : TWILIO_PHONE_NUMBER
     // })
 
     // console.log(response)

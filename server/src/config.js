@@ -12,6 +12,8 @@ export const KEY = 'THIS IS MY KEY'
 export const SESSIONID = session
 export const KEYS = ['asdbkjqnwe', 'akhdasjdkajhkasjdn']
 export const ALLOWED_USERS = [ 'SUPERUSER', 'DISPATCHER', 'MANAGER' ]
+export const TWILIO_PHONE_NUMBER = '+14134895573'
+export const HOURS_BEFORE_TO_REMIND = 2
 
 export default {
   PORT,
@@ -19,5 +21,7 @@ export default {
   KEY,
   SESSIONID,
   KEYS,
-  ALLOWED_USERS
+  ALLOWED_USERS,
+  TWILIO_PHONE_NUMBER,
+  HOURS_BEFORE_TO_REMIND
 }
