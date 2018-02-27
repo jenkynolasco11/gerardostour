@@ -1,4 +1,4 @@
-import { CronJob, CronTime } from 'cron'
+import { CronJob } from 'cron'
 
 import { Ticket } from '../../models'
 // import mailer from '../nodemailer'
@@ -8,14 +8,16 @@ import { TWILIO_PHONE_NUMBER, HOURS_BEFORE_TO_REMIND } from '../../config'
 const msg2HrsBefore = `Gerardo Trans\n\nThis is just a reminder that your ride is in about 2 hours from now.\nGet your ticket ready when your driver arrives.`
 const msg10MinsBefore = `GerardoTrans\n\nThis is a reminder that your ride is about to arrive in 10 mins.\nGet your ticket ready!`
 
+// console.log('This is in...')
 const onTickFunction = async () => {
+    // console.log('Cronjob ticking...')
     const tmp = new Date()
     const hour = tmp.getHours() + HOURS_BEFORE_TO_REMIND
     const date = new Date(tmp.setHours(0,0,0,0))
 
     const conditions = {
-        date,
-        time : hour,
+        date, // date,
+        time : { $gte : tmp.getHours, $lte : hour },
         reminded : false
     }
 
@@ -65,10 +67,13 @@ const onTickFunction = async () => {
 
                 process.nextTick(() => {
                     sendSMS({ body : msg2HrsBefore, to : '3479742990', from : TWILIO_PHONE_NUMBER }, true)
-                    const nextDate = new Date(new Date().setHours(new Date().getHours(), new Date().getMinutes() + 2, 30, 0))
+                    console.log('Sent a sms for 2hrs before')
+                    // const nextDate = new Date(new Date().setHours(new Date().getHours(), new Date().getMinutes() + 2, 30, 0))
                     // console.log(nextDate)
+                    const nextDate =  new Date(new Date().setHours(new Date().getHours(), new Date().getMinutes() + 1, 0, 0))
 
                     const newCron = new CronJob(nextDate, () => {
+                        console.log('I\'m about to send you a text message for 10 mins before')
                         sendSMS({ body : msg10MinsBefore, to : '3479742990', from : TWILIO_PHONE_NUMBER }, true)
                         // return newCron.stop()
                     })
@@ -82,7 +87,6 @@ const onTickFunction = async () => {
                 })
             }).catch(console.log)
         )
-        // console.log(tckts)
     } catch (e) {
         console.log(e)
     }
@@ -95,7 +99,7 @@ const cronOptions = {
     // cronTime,
     onTick : onTickFunction,
     start : true,
-    // runOnInit : true
+    runOnInit : true
 }
 
 const cron = new CronJob(cronOptions)

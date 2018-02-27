@@ -89,7 +89,7 @@ class Ride extends Component {
 
   constructor(props) {
     super(props)
-    
+
     this._getSelectedRides = this._getSelectedRides.bind(this)
     this._onSearchChange = this._onSearchChange.bind(this)
     this._dispatchToBus = this._dispatchToBus.bind(this)
@@ -117,7 +117,7 @@ class Ride extends Component {
 
   _onAssignBus(bus) {
     const { sortBy, sortOrder, skip, limit } = this.state
-   
+
     const selectedRides = this._getSelectedRides()
 
     const query = {
@@ -129,7 +129,7 @@ class Ride extends Component {
     }
 
     this.props.assignBus(bus, selectedRides, query)
-    return this._requestRides()
+    return setTimeout(this._requestRides, 500)
   }
 
   _getStatus() {
@@ -140,7 +140,7 @@ class Ride extends Component {
       'ON-THE-WAY' : onTheWay,
       'FINISHED' : finished,
       'ASSIGNED' : assigned,
-      'PENDING' : pending 
+      'PENDING' : pending
     }
 
     const status = Object
@@ -158,7 +158,7 @@ class Ride extends Component {
     const {  /*onTheWay, finished, assigned, pending,*/ future } = settings
 
     const skip = oldSkip * limit
-    
+
     const status = this._getStatus()
 
     const sort = `${ sortBy } ${ sortOrder }`
@@ -198,8 +198,6 @@ class Ride extends Component {
     let rideToModify = null
     const { selected } = this.state
 
-    // console.log(selected)
-
     // 'if' opens the form, 'else' closes it
     if(which === 'showForm' && willShow && selected.length === 1) {
       const { rides } = this.props
@@ -213,7 +211,7 @@ class Ride extends Component {
   _dispatchToBus() {
     const selectedRides = this._getSelectedRides()
 
-    console.log(selectedRides)
+    // console.log(selectedRides)
 
     return this.props.dispatchBus(selectedRides)
   }
@@ -222,16 +220,13 @@ class Ride extends Component {
     if(this.timeout) clearTimeout(this.timeout)
 
     return this.setState({ searchString : val}, () => {
-      this.timeout = setTimeout(() => {
-
-        if(val) this._requestRides()
-      }, 500)
+      this.timeout = setTimeout(this._requestRides, 500)
     })
   }
 //#endregion
 
-  //#region Lifecycle functions
-  componentWillMount() {
+//#region Lifecycle functions
+  componentDidMount() {
     return this._requestRides()
   }
 
@@ -254,62 +249,66 @@ class Ride extends Component {
       searchString,
     } = this.state
 
-    console.log(searchString)
+    // console.log(searchString)
 
     const { rides, count, settings, setQueryOption } = this.props
     const data = formatData(rides)
     const disableDispatch = !selected.every(i => rides[ i ].status === 'ASSIGNED')
 
     return (
-      <div className="ride-consult">
-        <CustomTable
-          className="ride-consult-table"
-          selected={ selected }
-          onRowSelect={ this._onRowSelected }
-          onPaginate={ this._onPaginate }
-          onSort={ this._onSort }
-          data={ data }
-          skip={ skip }
-          limit={ limit }
-          total={ count }
-          template={ <DetailTemplate /> }
-          headerProps={ tableData.headers }
-          colorProps={ tableData.colors }
-          colorPropToMatch={ tableData.colorsPropToMatch }
-          searchString={ searchString }
-          onSearchChange={ this._onSearchChange }
-          onSearchEnter={ console.log }
-          searchPlaceholderText={ `Check on server for ${ searchCriteria }` }
-          rightDropDown={
-            <Dropdown
-              auto
-              source={ tableData.dropdownData }
-              value={ searchCriteria }
-              onChange={ e => this.setState({ searchCriteria : e }) }
-            /> 
-          }
-          sortOptions={{ sortBy, sortOrder }}
-        />
-        <RideSettings
-          selected={ selected }
-          requestRides={ this._requestRides }
-          showForm={ this._showForm }
-          dispatchToBus={ this._dispatchToBus }
-          shouldDisableDispatch={ selected.length === 0 || disableDispatch }
-          onChange={ setQueryOption }
-          { ...settings }
-        />
-        <RideForm
-          active={ showForm }
-          closeForm={ () => this._showForm('showForm', false) }
-          ride={ rideToModify }
-          onSubmitData={ this._requestRides }
-        />
-        <RideBusModal
-          active={ showBusForm }
-          onDialogClose={ () => this._showForm('showBusForm', false) }
-          onAccept={ this._onAssignBus }
-        />
+      <div>
+        {/* <h1>Rides</h1> */}
+        <div className="ride-consult">
+          <CustomTable
+            className="ride-consult-table"
+            selected={ selected }
+            onRowSelect={ this._onRowSelected }
+            onPaginate={ this._onPaginate }
+            onSort={ this._onSort }
+            data={ data }
+            skip={ skip }
+            limit={ limit }
+            total={ count }
+            template={ <DetailTemplate /> }
+            headerProps={ tableData.headers }
+            colorProps={ tableData.colors }
+            colorPropToMatch={ tableData.colorsPropToMatch }
+            searchString={ searchString }
+            onSearchChange={ this._onSearchChange }
+            onSearchEnter={ console.log }
+            searchPlaceholderText={ `Check on server for ${ searchCriteria }` }
+            rightDropDown={
+              <Dropdown
+                auto
+                source={ tableData.dropdownData }
+                value={ searchCriteria }
+                onChange={ e => this.setState({ searchCriteria : e }) }
+              />
+            }
+            sortOptions={{ sortBy, sortOrder }}
+            shouldShowSkeleton={ this.props.isLoading }
+          />
+          <RideSettings
+            selected={ selected }
+            requestRides={ this._requestRides }
+            showForm={ this._showForm }
+            dispatchToBus={ this._dispatchToBus }
+            shouldDisableDispatch={ selected.length === 0 || disableDispatch }
+            onChange={ setQueryOption }
+            { ...settings }
+          />
+          <RideForm
+            active={ showForm }
+            closeForm={ () => this._showForm('showForm', false) }
+            ride={ rideToModify }
+            onSubmitData={ this._requestRides }
+          />
+          <RideBusModal
+            active={ showBusForm }
+            onDialogClose={ () => this._showForm('showBusForm', false) }
+            onAccept={ this._onAssignBus }
+          />
+        </div>
       </div>
     )
   }
@@ -318,8 +317,9 @@ class Ride extends Component {
 // TODO : Refactor this part. All the connects should be send by the higher component
 const mapStateToProps = state => {
   const { rides, count, searchOptions } = state.ride
+  const { isLoading } = state.app
 
-  return { rides, count, settings : searchOptions }
+  return { rides, count, settings : searchOptions, isLoading }
 }
 
 const mapDispatchToProps = dispatch => bindActionCreators({

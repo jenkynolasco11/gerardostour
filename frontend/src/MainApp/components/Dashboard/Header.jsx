@@ -14,14 +14,17 @@ const LogoutButton = props => (
 )
 
 const Header = props => {
-  const { onMenuClick, logout } = props
-  
+  const { onMenuClick, logout, headerTitle = '' } = props
+
+  // console.log(headerTitle)
+
   return (
     <AppBar
       title="Dashboard"
       onLeftIconClick={ onMenuClick }
       leftIcon={ <MdMenu /> }
     >
+      <h3 className="app-bar__title">{ headerTitle }</h3>
       <LogoutButton logout={ logout } />
     </AppBar>
   )

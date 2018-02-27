@@ -17,7 +17,7 @@ import { url } from '../../config/config-values.json'
 
 /*export */ const setTicketQueryOption = payload => ({ type : SET_TICKETS_OPTION, payload })
 
- export const clearTickets = payload => ({ type : CLEAR_TICKETS, payload })
+export const clearTickets = payload => ({ type : CLEAR_TICKETS, payload })
 
 
 // ///////////////////////

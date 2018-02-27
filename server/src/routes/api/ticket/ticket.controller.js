@@ -88,6 +88,8 @@ export const getTicketData = async tckt => {
 
     const isAssigned = tckt.ride !== null
 
+    // console.log(tckt._doc)
+
     const data = {
       id : tckt.id,
       willDrop : tckt.willDrop,
@@ -109,6 +111,7 @@ export const getTicketData = async tckt => {
       type : tckt.type,
       message : details.message,
       isAssigned,
+      confirmed : tckt.confirmed
     }
 
     return data
@@ -213,6 +216,8 @@ export const saveTickets = async data => {
 
     meta = await Meta.findOne({})
 
+    // console.log(meta)
+
     const [ prsn, pckup, drpff, rcpt ] = await createTicketSideData({
       ...data,
       id : meta.lastReceiptId++
@@ -244,16 +249,20 @@ export const saveTickets = async data => {
       }))
 
     const tickets = await Promise.all(promises)
-    // const receiptNum = `GA-${ ('00000000' + receipt).slice(-8) }`
+    const receiptNum = `GA-${ ('00000000' + receipt).slice(-8) }`
 
-    // const msg = `Gerardo Trans\n\nThanks for traveling with us.\n\nYour confirmation number is: \n${ confirmation }\n\nYour receipt number is:\n${ receiptNum }`
+    const msg = `Gerardo Trans\n\nThanks for traveling with us.\n\nYour confirmation number is: \n${ confirmation }\n\nYour receipt number is:\n${ receiptNum }`
 
     // Uncomment this part after
-    // const response = await twilio.sendSMS({
-    //   body : msg,
-    //   to : phoneNumber,
-    //   from : TWILIO_PHONE_NUMBER
-    // })
+    const smsBody = {
+      body : msg,
+      to : phoneNumber,
+      from : TWILIO_PHONE_NUMBER
+    }
+    /*const response = await */
+    twilio.sendSMS(smsBody).then(res => {
+      console.log(res)
+    }).catch(console.error)
 
     // console.log(response)
 

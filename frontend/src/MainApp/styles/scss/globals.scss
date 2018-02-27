@@ -6,9 +6,48 @@ body {
   #root {
     // --preferred-font : Lato,Helvetica,Arial,sans-serif;
     // font-family : var(--preferred-font) !important;
-    background : var(--palette-blue-100);
+    // background : var(--palette-blue-100);
+    background-color : rgb(243, 243, 243);
+    // background-image : url('http://buzzerg.com/wp-content/uploads/8589130515243-new-york-black-and-white-skyline-wallpaper-hd.jpg');
+    // background-size: cover;
+    // background-position : 0 50%;
+
+    // &:after {
+    //   position : absolute;
+    //   content : '';
+    //   background : rgba(0,0,0,0.5);
+    //   @include hw();
+    //   top : 0;
+    //   left : 0;
+    //   // z-index : -1;
+    // }
+    // background : -webkit-linear-gradient(top right, blue,var(--palette-blue-500) 75%);
 
     @include hw();
+
+    & header[data-react-toolbox=app-bar] {
+      // position : absolute;
+      // z-index : 1;
+      background-color : rgb(82, 82, 82);
+
+      div {
+        h1 {
+          flex-grow : 0;
+        }
+        .app-bar__title {
+          text-transform : uppercase;
+          text-align : center;
+          flex : 1
+        }
+
+        .logout-button {
+          font-weight : bold;
+          text-transform : capitalize;
+          border : 1px solid rgb(141, 141, 141);
+          // padding : 10px;
+        }
+      }
+    }
     // @include alignCenter();
   }
 

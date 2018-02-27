@@ -5,7 +5,7 @@ import { Card, /*CardActions, /*CardMedia,*/ CardTitle } from 'react-toolbox/lib
 import { MdDirectionsBus, MdBuild, MdAdd, MdPublish } from 'react-icons/lib/md'
 
 const RideSettings = props => {
-  const { 
+  const {
     selected,
     pending,
     assigned,
@@ -29,7 +29,7 @@ const RideSettings = props => {
       <List>
         <CardTitle title="Actions" />
         <ListDivider />
-        <ListItem 
+        <ListItem
           avatar={ <MdDirectionsBus /> }
           caption="Set To Bus"
           onClick={ () => showForm('showBusForm', true) }
@@ -63,7 +63,7 @@ const RideSettings = props => {
       </List>
       <CardTitle title="Dispatch" />
       <ListDivider />
-      <ListItem 
+      <ListItem
         avatar={ <MdPublish /> }
         caption="Dispatch to Bus"
         onClick={ dispatchToBus }

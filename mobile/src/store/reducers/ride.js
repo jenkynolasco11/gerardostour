@@ -1,3 +1,5 @@
+import { showMessage } from '../../utils'
+
 const defaultState = {
   rides : []
 }
@@ -5,11 +7,11 @@ const defaultState = {
 export const ride = (state=defaultState, { type, payload }) => {
   switch(type) {
     case 'ADD_RIDES':
-      return { ...state, rides : [].concat(payload) }
+      return { ...state, rides : [].concat(payload || []) }
     case 'REMOVE_RIDE':
-      const oldRides = state.rides
+      const oldRidesToRemove = state.rides
 
-      const newRides = [].concat(oldRides.filter(rid => rid.id !== payload ))
+      const rides = [].concat(oldRidesToRemove.filter(rid => rid.id !== payload ))
 
       return { ...state, rides }
     case 'REMOVE_RIDES':

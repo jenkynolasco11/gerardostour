@@ -24,6 +24,7 @@ const TicketSchema = new Schema({
   reminded : { type : Boolean, default : false },
   createdAt : { type : Date, default : Date.now },
   modifiedAt : { type : Date, default : Date.now },
+  confirmed : { type : Boolean, default : () => false },
 })
 
 const TicketDetailsSchema = new Schema({
@@ -32,9 +33,8 @@ const TicketDetailsSchema = new Schema({
   redeemedCount : { type : Number, default : 0 },
   isLocal : { type : Boolean, default : false },
   message : { type : String, default : '' },
-  // reminded : { type : Boolean, default : false },
-  // fee : { type : Number, default : 0 },
-  // extraFee : { type : Number, default : 0 },
+  fee : { type : Number, default : 0 },
+  extraFee : { type : Number, default : 0 },
   createdAt : { type : Date, default : Date.now },
   modifiedAt : { type : Date, default : Date.now },
 })

@@ -32,8 +32,8 @@ class RideBusModal extends Component {
   }
 
   onAccept() {
-    setTimeout(() => this.props.onAccept(this.state.selected, this.props.isDispatch), 1000)
-    this.props.onDialogClose()
+    setTimeout(this.props.onDialogClose, 400)
+    this.props.onAccept(this.state.selected, this.props.isDispatch)
   }
 
   async makeRequest() {
@@ -44,7 +44,7 @@ class RideBusModal extends Component {
 
       if(data.ok) {
         const { busses } = data.data
-  
+
         const busFormatted = busses.map(dropDownData)
 
         this.setState({ busses : [].concat(busFormatted), selected : busFormatted[ 0 ].value })

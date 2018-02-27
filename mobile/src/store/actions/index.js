@@ -2,7 +2,7 @@ import Auth from './auth'
 import App from './app'
 import Ride from './ride'
 
-export const { 
+export const {
   requestLogin,
   requestLogout,
   disableLoginButton,
@@ -17,9 +17,12 @@ export const {
 } = App
 
 export const {
+  // addRide,
   addRides,
+  removeRide,
   removeRides,
-  requestRides
+  requestRides,
+  addDispatchedRides,
 } = Ride
 
 export default {

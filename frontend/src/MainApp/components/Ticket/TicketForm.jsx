@@ -16,7 +16,7 @@ const defaultState = {
     ticketType : 'REGULAR',
 
     ride : -1,
-    
+
     // Person details
     person : {
       firstname : '',
@@ -24,7 +24,7 @@ const defaultState = {
       phoneNumber : '',
       email : '',
     },
-  
+
     // Trip details
     willPick : false,
     willDrop : false,
@@ -44,7 +44,7 @@ const defaultState = {
     to : 'PA',
     date : new Date(new Date().setHours(0,0,0,0)),
     time : 3,
-  
+
     // Receipt details
     payment : {
       fee : 0,
@@ -54,7 +54,7 @@ const defaultState = {
       cardBrand : '',
       cardLastDigits : '',
     },
-  
+
     // Special Info
     message : '',
     specialFee : 0,
@@ -156,7 +156,7 @@ const checkValidation = state => {
 }
 
 class TicketForm extends Component {
-  state = { ...defaultState/*, ...myInfo*/ }
+  state = { ...defaultState }
 
   constructor(props) {
     super(props)
@@ -220,7 +220,7 @@ class TicketForm extends Component {
     // extraFee += hasPackage ? packFee : 0
 
     const fees = { totalAmount, fee, extraFee }
-    
+
     return fees
   }
 
@@ -292,9 +292,17 @@ class TicketForm extends Component {
   }
 
   componentWillMount() {
+    this.setState({ ...defaultState })
+  }
+
+  componentDidMount() {
     const { payment } = this.state
 
     return this.setState({ payment : { ...payment, ...this._calculateFees() }})
+  }
+
+  componentWillUnmount() {
+    this.setState({ ...defaultState })
   }
 
   render() {

@@ -56,7 +56,7 @@ class UserPassInputs extends Component{
               placeholder="username"
               value={ user }
               onChangeText={ v => onChange(v, 'user') }
-              clearTextOnFocus
+              // clearTextOnFocus
             />
           </Item>
           <Item underline last style={ styles.underline }>
@@ -71,7 +71,7 @@ class UserPassInputs extends Component{
               placeholder="password"
               value={ pass }
               onChangeText={ v => onChange(v, 'pass') }
-              clearTextOnFocus
+              // clearTextOnFocus
             />
           </Item>
           <Button

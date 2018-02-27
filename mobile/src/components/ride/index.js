@@ -9,7 +9,7 @@ import Header from './Header'
 import Content from './Content'
 import Footer from './Footer'
 
-import { retrieveRide, retriveTicketsByRide } from '../../utils'
+import { retrieveRide, retrieveTicketsByRide } from '../../utils'
 // import CustomStatusBar from '../extras-components/CustomStatusBar'
 // import Fab from './Fab'
 // import Body from './Body'
@@ -18,7 +18,7 @@ import styles from './styles'
 
 class RideComponent extends Component{
   state = { ride : null, tickets : [] }
-  
+
   async componentWillMount() {
     const { rideId } = this.props
 
@@ -26,8 +26,8 @@ class RideComponent extends Component{
       this.setState({ ride })
     }).catch(console.error)
 
-    retriveTicketsByRide(rideId).then(tickets => {
-      console.log(tickets)
+    retrieveTicketsByRide(rideId).then(tickets => {
+      // console.log(tickets)
       this.setState({ tickets })
     }).catch(console.error)
 

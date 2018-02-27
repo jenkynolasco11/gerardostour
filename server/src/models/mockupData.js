@@ -286,8 +286,8 @@ mongoose.connect(config.DBURI, { useMongoClient : true }, async () => {
       type,
       message,
       // isPackage,
-      // fee,
-      // extraFee
+      fee,
+      extraFee
     } = ticketData
 
     try {
@@ -298,8 +298,8 @@ mongoose.connect(config.DBURI, { useMongoClient : true }, async () => {
         dropOffAddress : drop,
         redeemedCount : 0,
         isLocal,
-        // fee,
-        // extraFee,
+        fee,
+        extraFee,
         message : type !== 'REGULAR' ? message : ''
       }).save()
 
@@ -316,7 +316,8 @@ mongoose.connect(config.DBURI, { useMongoClient : true }, async () => {
         willDrop : Boolean(drop),
         frm,
         to,
-        type
+        type,
+        confirmed : !!genRand(2)
         // isPackage,
         // package : pack,
       }).save()
@@ -614,7 +615,9 @@ mongoose.connect(config.DBURI, { useMongoClient : true }, async () => {
             time,
             isLocal,
             type : ticketType,
-            message
+            message,
+            fee : 30,
+            extraFee : genRand(0,20)
           })
         )
       }
@@ -705,10 +708,10 @@ mongoose.connect(config.DBURI, { useMongoClient : true }, async () => {
       await createSuperUser()
       await createPeople()
       await createUsers()
-      await createAddresses()
+      // await createAddresses()
       await createBusses()
-      await createRides()
-      await createTickets()
+      // await createRides()
+      // await createTickets()
 
       await new Meta(meta).save()
 

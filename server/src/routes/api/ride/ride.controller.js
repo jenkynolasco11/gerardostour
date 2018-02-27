@@ -26,7 +26,7 @@ export const createRide = async data => {
       bus : bus ? tempBus._id : null,
       to,
       frm,
-      status,
+      status : tempBus ? 'ASSIGNED' : 'PENDING',
       time : parseInt(time),
       date : new Date(new Date(date).setHours(0,0,0,0)),
     }).save()
@@ -52,15 +52,14 @@ export const createRide = async data => {
 export const updateRide = async (rid, body) => {
   try {
     const { _id, status, id, bus, ...ride } = filterDoc(rid._doc)
-    // const { _id, __v, createdAt, modifiedAt, status, id, bus, ...ride } = rid.toObject()
 
     const stts = bus
                   ? status === 'PENDING'
                   ? 'ASSIGNED'
-                  : status 
+                  : status
                   : 'PENDING'
 
-    const data = { ...ride, bus, status : stts, ...body }
+    const data = { ...ride, status : stts, ...body, bus }
 
     const rde = await Ride.findOneAndUpdate({ id }, data, { new : true })
     const details = await RideDetail.findOneAndUpdate({ ride : _id }, data)

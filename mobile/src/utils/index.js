@@ -64,7 +64,7 @@ export const retrieveRide = async id => {
   return null
 }
 
-export const retriveTicketsByRide = async rideId => {
+export const retrieveTicketsByRide = async rideId => {
   try {
     const { data } = await axios.get(`${ APIURL }/ticket/all/${ rideId }`)
 

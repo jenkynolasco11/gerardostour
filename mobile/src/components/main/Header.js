@@ -7,9 +7,7 @@ import { showActionSheet } from '../../utils'
 import styles from './styles'
 
 const BUTTONS = ['Log out', 'Cancel']
-const onPress = logout => {
-  return showActionSheet(BUTTONS, { 0 : logout })
-}
+const onPress = logout => showActionSheet(BUTTONS, { 0 : logout })
 
 const HeaderComponent = props => {
   const { active, setActive, bus,/* fetchRides,*/ logout } = props
@@ -21,8 +19,7 @@ const HeaderComponent = props => {
       noShadow
       style={[ styles.header, styles.color3 ]}
     >
-    
-      <Left> 
+      <Left>
         {/*
           active &&
           <Button
@@ -36,11 +33,17 @@ const HeaderComponent = props => {
       </Left>
       <Body>
         <Button
-          style={[ active ? styles.color5 : styles.color2, styles.activeButton ]}
+          style={[
+            active ? styles.color5 : styles.color2,
+            styles.activeButton
+          ]}
           active={ active }
           onPress={ () => setActive(bus, !active) }
         >
-          <Icon name="power" style={ active ? styles.textWhite : styles.textColor5 }/>
+          <Icon
+            name="power"
+            style={ active ? styles.textWhite : styles.textColor5 }
+          />
           <Text>{ active ? 'Active' : 'Inactive' }</Text>
         </Button>
       </Body>

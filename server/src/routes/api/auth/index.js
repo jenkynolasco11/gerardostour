@@ -36,9 +36,9 @@ const isAuthenticated = async (ctx, next) => {
       // console.log(ctx.session)
       // console.log(ctx.session.passport)
       const { user } = ctx.state
-    
+
       const data = await setUserData(user)
-    
+
       return ctx.body = { ok : true, data : { userInfo : data }, message : '' }
     }
   } catch (e) {
@@ -74,7 +74,7 @@ auth.post('/login', isAuthenticated, ctx =>
   })(ctx)
 )
 
-// auth.post('/login/driver', isAuthenticated, async ctx => 
+// auth.post('/login/driver', isAuthenticated, async ctx =>
 //   passport.authenticate('local', async (err, user, msg) => {
 //     if(user) {
 

@@ -45,7 +45,8 @@ class Body extends Component{
       searchString = '',
       searchPlaceholderText = '',
       rightDropDown = null,
-      headerProps = [0,1,2,3]
+      headerProps = [0,1,2,3],
+      shouldShowSkeleton = false
     } = this.props
 
     return (
@@ -56,14 +57,16 @@ class Body extends Component{
           {
             data &&
             data.map(
-              (item, i) => <TableRow key={ i } index={ i } item={ item } { ...this.props }/> 
+              (item, i) => <TableRow key={ i } index={ i } item={ item } { ...this.props }/>
             )
           }
-          { 
+          {
             data &&
             data.length
             ? null
-            : skeletonRender(limit, headerProps)
+            : shouldShowSkeleton
+            ? skeletonRender(limit, headerProps)
+            : <div className="table-row table-row-content header"> There is nothing to show here </div>
           }
         </div>
         <TablePaginate {...{ total, limit, skip, onPaginate }} />

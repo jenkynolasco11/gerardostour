@@ -3,6 +3,17 @@ import tooltip from 'react-toolbox/lib/tooltip'
 
 import Checkmark from './Checkmark'
 
+const ToolTipSpan = tooltip(props => <span { ...props } /> )
+
+const Span = ({ item, style }) => (
+  <ToolTipSpan
+    tooltipPosition="left"
+    className="colormark"
+    style={ style }
+    tooltip={ item.type ? item.type : item.status }
+  />
+)
+
 class Row extends Component{
   state = { isClosed : true }
 
@@ -35,32 +46,19 @@ class Row extends Component{
       colorProps,
       colorPropToMatch,
       tooltipText = '',
+      badge
     } = this.props
 
     const { isClosed } = this.state
 
     const isSelected = selected.includes(index)
-    const colorSign = colorProps && colorPropToMatch 
-                      ? colorProps[ '' + item[colorPropToMatch] ] 
+    const colorSign = colorProps && colorPropToMatch
+                      ? colorProps[ '' + item[colorPropToMatch] ]
                       ? colorProps[ '' + item[colorPropToMatch] ]
                       : 'transparent'
                       : null
 
-    const ToolTipSpan = tooltip(props => <span { ...props } /> )
     const spanStyle = { backgroundColor : colorSign }
-
-    const Span = () => (
-      <ToolTipSpan
-        tooltipPosition="left"
-        className="colormark"
-        style={ spanStyle }
-        tooltip={ item.type ? item.type : item.status }
-      />
-    )
-
-    // console.log(Span)
-
-    // const Span = () => <span />
     const rowColor = item[ rowToMatchProp ] ? { backgroundColor : colorToMatchRow } : {}
 
     return (
@@ -69,24 +67,41 @@ class Row extends Component{
           <Checkmark onSelect={ () => onSelectRow(index) } isChecked={ isSelected } />
           <div className="header" onClick={ this._toggleContent }>
             {
-              headerProps.map((obj, i) => (
-                <div 
-                  key={ i } 
-                  className="header-item"
-                  style={
-                    obj.flex
-                    ? { flex : obj.flex }
-                    : {}
+              headerProps.map((obj, i) => {
+                return (
+                  <div
+                    key={ i }
+                    className="header-item"
+                    style={
+                      obj.flex
+                      ? { flex : obj.flex }
+                      : {}
+                    }
+                  >
+                  {
+                    badge &&
+                    badge.id === obj.value
+                    ?
+                      <span
+                        className="row-badge"
+                        style={{
+                          backgroundColor : badge.colors[ '' + item[ obj.value ]].bgColor || 'transparent',
+                          color : badge.colors[ '' + item[ obj.value ]].textColor || 'black'
+                        }}
+                      >
+                      { badge.colors[ '' + item[ obj.value ] ].caption }
+                      </span>
+                    : item[ obj.value ]
+                    // : item[ obj.value ]
                   }
-                >
-                { item[ obj.value ] }
-                </div>
-              ))
+                  </div>
+                )
+              })
             }
           </div>
           {
             colorSign &&
-            <Span />
+            <Span style={ spanStyle } item={ item } />
           }
         </div>
         <div className={ `table-row-content body${ isClosed ? ' closed' : '' }` }>

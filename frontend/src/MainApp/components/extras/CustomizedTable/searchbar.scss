@@ -4,7 +4,7 @@
   .table {
     .search-bar {
       background : white;
-      height : $componentHeight;
+      height : $componentHeight * 1.4;
       border-bottom : 1px solid #eee;
       display : flex;
 
@@ -71,7 +71,7 @@
           line-height : 40px;
           border : none;
           border-bottom : 1px solid #eee;
-          width : 90%;
+          width : 85%;
           margin-left : 40px;
           padding-top : 18px;
           padding-left : 4px;
@@ -83,16 +83,16 @@
 
         .search-bar_placeholder {
           position : absolute;
-          bottom : 3px;
+          bottom : 24px;
           color : rgb(145, 145, 145);
           left : 45px;
           margin-left : 6px;
-          font-size : 1.6em;
+          font-size : 1.2em;
           transition : bottom .12s linear, color .12s linear, font-size .12s linear, margin .12s linear;
 
           &.top {
             // margin : 0;
-            bottom : 28px;
+            bottom : 44px;
             font-size : 0.8em;
             color : #ccc;
           }
@@ -104,17 +104,17 @@
         height : $componentHeight;
         display : flex;
 
-        span {
-          flex : 1;
+        & > span {
+          flex : 0.8;
           white-space : nowrap;
           margin-right : 10px;
-          margin-top : 14px;
-          font-size : 1.2em;
+          margin-top : 20px;
+          font-size : 1em;
           color : #ccc;
         }
 
         [data-react-toolbox=input] {
-          padding : 9px 4px;
+          padding : 6px 4px;
         }
       }
     }

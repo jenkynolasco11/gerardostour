@@ -45,19 +45,18 @@ export const retrieveRides = query => async dispatch => {
 }
 
 export const submitRideData = data => async dispatch => {
-
   const { id, ...body } = data
 
   try {
     dispatch(showLoader(true))
 
     let data = null
-    
+
     if(id) data = await axios.put(`${ url }/ride/${ id }/modify`, body)
     else data = await axios.post(`${ url }/ride/save`, body)
 
 
-    if(data.data.ok) dispatch(showSnackBarWithMessage('Saved successfuly!'))
+    if(data.data.ok) dispatch(showSnackBarWithMessage('Saved successfully!'))
     else dispatch(showSnackBarWithMessage(`Couldn't save your ride... => ${ data.data.message }`))
   } catch (e) {
     console.error(e)

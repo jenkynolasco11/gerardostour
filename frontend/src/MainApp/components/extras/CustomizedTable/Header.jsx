@@ -22,13 +22,13 @@ const Header = props => (
             className={ `table-header-item${ headerClassName }` }
             onClick={ () => props.onSort(header.value) }
             style={
-              header.flex 
+              header.flex
               ? { flex : header.flex }
               : {}
             }
           >
             <strong>
-              { 
+              {
                 header.label
                 ? header.label
                 : header.value

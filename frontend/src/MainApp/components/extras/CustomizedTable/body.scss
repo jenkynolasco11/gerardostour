@@ -1,7 +1,7 @@
 @import '../../../styles/scss/globals.scss';
 
 .custom-table {
-  .table {    
+  .table {
     &-body {
       .table-row {
         background-color : white;
@@ -43,7 +43,7 @@
 
           &.body {
             width : 100%;
-            background-color : rgb(191, 191, 191);
+            background-color : rgb(228, 237, 245);
             // background : gray;
             color : white;
             padding : 4px 0;

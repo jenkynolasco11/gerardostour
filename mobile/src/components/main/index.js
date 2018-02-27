@@ -1,39 +1,44 @@
 import React, { PureComponent as Component } from 'react'
 import { bindActionCreators } from 'redux'
 import { connect } from 'react-redux'
-import { BackHandler } from 'react-native'
+import { BackHandler, AsyncStorage } from 'react-native'
 
-import socketConnect from '../../utils/socket'
 import MainScreen from './MainScreen'
 import styles from './styles'
 
-import { requestRides, requestLogout, setActiveStatusTo } from '../../store/actions'
+import { requestRides, requestLogout, setActiveStatusTo, addRides } from '../../store/actions'
 
 class MainComponent extends Component {
-  socket = null
   handleBackBtn = () => true
 
-  componentWillMount() {
-    const { bus, user } = this.props
+  async componentDidMount() {
+    try {
+      // await AsyncStorage.clear()
+      const rides = await AsyncStorage.getItem('rides')
 
-    this.socket = socketConnect({ bus, user })
+      this.props.addRides(JSON.parse(rides))
+    } catch(e) {
+      console.log(e)
+    }
 
     BackHandler.addEventListener('hardwareBackPress', this.handleBackBtn)
+
   }
 
   componentWillUnmount() {
-    if(this.socket) this.socket.destroy()
+    this.props.addRides([])
 
     BackHandler.removeEventListener('hardwareBackPress', this.handleBackBtn)
   }
 
   render() {
-    return (
-      <MainScreen { ...this.props } />
-      // <Stack initial hideNavBar>
-      //   <Scene key="main" initial component={ MainScreen }/>
-      // </Stack>
-    )
+    return <MainScreen { ...this.props } />
+    // return (
+    //   <MainScreen { ...this.props } />
+    //   // <Stack initial hideNavBar>
+    //   //   <Scene key="main" initial component={ MainScreen }/>
+    //   // </Stack>
+    // )
   }
 }
 
@@ -52,6 +57,7 @@ const mapDispatchToProps = dispatch => bindActionCreators({
   logout : () => requestLogout(),
   setActive : (bus, status) => setActiveStatusTo(bus, status),
   fetchRides : bus => requestRides(bus),
+  addRides : (rides = []) => addRides(rides)
 }, dispatch)
 
 export default connect(mapStateToProps, mapDispatchToProps)(MainComponent)

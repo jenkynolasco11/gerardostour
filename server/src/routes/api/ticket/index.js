@@ -32,7 +32,7 @@ ticketRouter.post('/save', reformatTicket, async ctx => {
   try {
     // console.log(body)
     const data = await saveTickets(body)
-    // console.log(data)
+    console.log(data)
     if(data) return ctx.body = { ok : true, data : { tickets : data }, message : '' }
 
     return ctx.body = { ok : false, data : null, message : 'Couldn\'t save the ticket. Contact your system administrator.' }
@@ -193,14 +193,14 @@ ticketRouter.get('/all', async ctx => {
   if(srt === 'time') sortCondition.date = asc < 0 ? -1 : 1
 
   if(unassigned === 'true') conditions.ride = null
-  if(onlypackage === 'true') conditions.isPackage = true
+  if(onlypackage === 'true') conditions.type = 'PACKAGE'
 
   try {
     if(search) {
-      delete conditions.status 
+      delete conditions.status
       const regex = new RegExp(`^${ search }`, 'i')
 
-      if(searchCriteria !== 'id') {  
+      if(searchCriteria !== 'id') {
         const person = await Person.find({ [ searchCriteria ] : { $regex : regex }}, { _id : 1 })
 
         conditions.person = { $in : [].concat(person.map(({ _id }) => _id )) }
@@ -240,15 +240,100 @@ ticketRouter.get('/all/:ride', async ctx => {
   try {
     const rid = await Ride.findOne({ id : ride }, { _id : 1 })
     // Ticket.find({}, console.log)
-
-    const tickets = await Ticket
-                          .find({ ride : rid._id, status : { $ne : 'DELETED' }})
-                          .sort({ id : -1 })
-                          .exec()
+//*
+    const tickets = await Ticket.aggregate([
+      { $match : { ride : rid._id, status : { $ne : 'DELETED' }}},
+      {
+        $lookup : {
+          from: 'ticketDetails',
+          localField: 'details',
+          foreignField: '_id',
+          as: 'details'
+        }
+      },
+      { $unwind : '$details' },
+      {
+        $lookup : {
+          from: 'address',
+          localField: 'details.dropOffAddress',
+          foreignField: '_id',
+          as: 'dropOffAddress'
+        }
+      },
+      {
+        $unwind : {
+          path : '$dropOffAddress',
+          preserveNullAndEmptyArrays : true
+        }
+      },
+      {
+        $lookup : {
+          from: 'address',
+          localField: 'details.pickUpAddress',
+          foreignField: '_id',
+          as: 'pickUpAddress'
+        }
+      },
+      {
+        $unwind : {
+          path : '$pickUpAddress',
+          preserveNullAndEmptyArrays : true
+        }
+      },
+      {
+        $project : {
+          id : 1,
+          person : 1,
+          date : 1,
+          time : 1,
+          // receipt : 1,
+          status : 1,
+          details : 1,
+          frm : 1,
+          to : 1,
+          // confirmed : 1,
+          reminded : 1,
+          type : 1,
+          willDrop : 1,
+          willPick : 1,
+          dropOffAddress : 1,
+          pickUpAddress : 1,
+          packages : { $cond: [ { $eq : [ 'type', 'PACKAGE' ] }, 1, 0 ] },
+          confirmed : { $cond : [ '$confirmed', 1, 0 ] },
+          package : { $cond : [ '$confirmed', 0, 1 ] }
+        }
+      },
+      {
+        $group : {
+          _id : { person : '$person', dropOffAddress : '$dropOffAddress', pickUpAddress : '$pickUpAddress' },
+          // tickets : { $push : '$$ROOT' },
+          total : { $sum : 1 },
+          confirmed : { $sum : '$confirmed' },
+          notConfirmed : { $sum : '$notConfirmed' },
+          packages : { $sum : '$package' }
+        }
+      },
+      {
+        $lookup : {
+          from: 'person',
+          localField: '_id.person',
+          foreignField: '_id',
+          as: 'person'
+        }
+      },
+      { $unwind : '$person' },
+    ])
+// */
+    // console.log(JSON.stringify(tickets, null, 3))
+    // const tickets = await Ticket
+    //                       .find({ ride : rid._id, status : { $ne : 'DELETED' }})
+    //                       .sort({ id : -1 })
+    //                       .exec()
 
     if(tickets.length) {
       // console.log(tickets)
-      const data = await Promise.all(tickets.map(getTicketData))
+      const data = tickets// await Promise.all(tickets.map(getTicketData))
+      // const data = await Promise.all(tickets.map(getTicketData))
 
       return ctx.body = { ok : true, data : { tickets : data }, message : '' }
     }

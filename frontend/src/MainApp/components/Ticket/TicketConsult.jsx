@@ -33,7 +33,8 @@ const formatData = data => {
       pickUpAddress,
       receipt,
       isAssigned,
-      type
+      type,
+      confirmed
     } = item
 
     return {
@@ -51,7 +52,8 @@ const formatData = data => {
       pickUpAddress,
       receipt,
       isAssigned,
-      type
+      type,
+      confirmed
     }
   })
 }
@@ -63,6 +65,7 @@ const tableData = {
     { value : 'time', label : 'Time', flex : 1 },
     { value : 'date', label : 'Date', flex : 2 },
     { value : 'phoneNumber', label : 'Phone Number', flex : 2 },
+    { value : 'confirmed', label : 'Confirmed' }
   ] ,
   colors : {
     'REGULAR' : 'orange',
@@ -73,48 +76,55 @@ const tableData = {
   },
   colorsPropToMatch : 'type',
   rowToMatch : 'isAssigned',
-  colorRowToMatch : '#B7F39E',
+  colorRowToMatch : '#E6F7DF',
   dropdownData : [
     { value : 'id', label : 'ID' },
     { value : 'firstname', label : 'First Name' },
     { value : 'lastname', label : 'Last Name' },
     { value : 'phoneNumber', label : 'Phone Number' },
-  ]
+  ],
+  badge : {
+    id : 'confirmed',
+    colors : {
+      true : { textColor : '#fefefe', bgColor : '#58DA1F', caption : 'Positive' },
+      false : { textColor : '#806060', bgColor : '#F8828A', caption : 'Negative' }
+    }
+  }
 }
 
 const TicketTemplate = props => {
-  
+
   // console.log(props)
 
   return (
-  <List className="detail-template">
-    <CardTitle title="Ticket Details" />
-    <ListDivider />
-    <ListItem ripple={ false } selectable={ false } caption={ `From :  ${ props.frm }` } />
-    <ListItem ripple={ false } selectable={ false } caption={ `To :  ${ props.to }` } />
-    {/*
-      <ListItem ripple={ false } selectable={ false } caption={ `Will Pick? ${ props.willPick }` } />
-      <ListItem ripple={ false } selectable={ false } caption={ `Will Drop? ${ props.willDrop }` } />
-    */}
-    <List className="address-location">
-      {
-        props.willPick === 'YES' &&
-        <List className="detail-template pick-up-items">
-          <CardTitle title="Pick Up Location" />
-          <ListDivider />
-          <ListItem ripple={ false } selectable={ false } caption={ `Address: ${ props.pickUpAddress.street }, ${ props.pickUpAddress.city }, ${ props.pickUpAddress.state } ${ props.pickUpAddress.zipcode }` } />
-        </List>
-      }
-      {
-        props.willDrop === 'YES' &&
-        <List className="detail-template drop-off-items">
-          <CardTitle title="Drop Off Location" />
-          <ListDivider />
-          <ListItem ripple={ false } selectable={ false } caption={ `Address: ${ props.dropOffAddress.street }, ${ props.dropOffAddress.city }, ${ props.dropOffAddress.state } ${ props.dropOffAddress.zipcode }` } />
-        </List>
-      }
+    <List className="detail-template">
+      <CardTitle title="Ticket Details" />
+      <ListDivider />
+      <ListItem ripple={ false } selectable={ false } caption={ `From :  ${ props.frm }` } />
+      <ListItem ripple={ false } selectable={ false } caption={ `To :  ${ props.to }` } />
+      {/*
+        <ListItem ripple={ false } selectable={ false } caption={ `Will Pick? ${ props.willPick }` } />
+        <ListItem ripple={ false } selectable={ false } caption={ `Will Drop? ${ props.willDrop }` } />
+      */}
+      <List className="address-location">
+        {
+          props.willPick === 'YES' &&
+          <List className="detail-template pick-up-items">
+            <CardTitle title="Pick Up Location" />
+            <ListDivider />
+            <ListItem ripple={ false } selectable={ false } caption={ `Address: ${ props.pickUpAddress.street }, ${ props.pickUpAddress.city }, ${ props.pickUpAddress.state } ${ props.pickUpAddress.zipcode }` } />
+          </List>
+        }
+        {
+          props.willDrop === 'YES' &&
+          <List className="detail-template drop-off-items">
+            <CardTitle title="Drop Off Location" />
+            <ListDivider />
+            <ListItem ripple={ false } selectable={ false } caption={ `Address: ${ props.dropOffAddress.street }, ${ props.dropOffAddress.city }, ${ props.dropOffAddress.state } ${ props.dropOffAddress.zipcode }` } />
+          </List>
+        }
+      </List>
     </List>
-  </List>
 )}
 
 class TicketConsult extends Component {
@@ -237,19 +247,18 @@ class TicketConsult extends Component {
     //   const { tickets } = this.props
     //   ticketToModify = tickets[ selected[ 0 ] ]
     // } else setTimeout(this._requestTickets, 100)
-    
+
     if(!willShow) this._requestTickets()
 
     return this.setState({ [ which ] : willShow, /*ticketToModify*/ })
   }
-  
+
   _onSearchChange(val) {
     if(this.timeout) clearTimeout(this.timeout)
 
-    return this.setState({ searchString : val}, () => {
+    return this.setState({ searchString : val }, () => {
       this.timeout = setTimeout(() => {
-  
-        if(val) this._requestTickets()
+        this._requestTickets()
       }, 500)
     })
   }
@@ -283,56 +292,61 @@ class TicketConsult extends Component {
     const data = formatData(tickets)
 
     return (
-      <div className="ticket-consult">
-        <CustomTable
-          className="ticket-consult-table"
-          selected={ selected }
-          onRowSelect={ this._onRowSelected }
-          onPaginate={ this._onPaginate }
-          onSort={ this._onSort }
-          data={ data }
-          skip={ skip }
-          limit={ limit }
-          total={ count }
-          headerProps={ tableData.headers }
-          template={ <TicketTemplate /> }
-          colorProps={ tableData.colors }
-          colorPropToMatch={ tableData.colorsPropToMatch }
-          colorToMatchRow={ tableData.colorRowToMatch }
-          rowToMatchProp={ tableData.rowToMatch }
-          searchString={ searchString }
-          onSearchChange={ this._onSearchChange }
-          onSearchEnter={ console.log }
-          searchPlaceholderText={ `Check on server for ${ searchCriteria }` }
-          rightDropDown={
-            <Dropdown
-              auto
-              source={ tableData.dropdownData }
-              value={ searchCriteria }
-              onChange={ e => this.setState({ searchCriteria : e }) }
-            /> 
-          }
-          sortOptions={{ sortBy, sortOrder }}
-        />
-        <TicketSettings
-          selected={ selected }
-          showForm={ this._showForm }
-          requestTickets={ this._requestTickets }
-          onChange={ setQueryOption }
-          { ...settings }
-        />
-        <TicketForm
-          active={ showForm }
-          closeForm={ () => this._showForm('showForm', false) }
-          ticket={ ticketToModify }
-          onSubmitData={ this._requestTickets }
-          submitTicket={ submitTicket }
-        />
-        <TicketRideModal
-          active={ showRidesModal }
-          onDialogClose={ () => this._showForm('showRidesModal', false) }
-          onAccept={ this._onAssignRide }
-        />
+      <div>
+        {/* <h1>Tickets</h1> */}
+        <div className="ticket-consult">
+          <CustomTable
+            className="ticket-consult-table"
+            selected={ selected }
+            onRowSelect={ this._onRowSelected }
+            onPaginate={ this._onPaginate }
+            onSort={ this._onSort }
+            data={ data }
+            skip={ skip }
+            limit={ limit }
+            total={ count }
+            headerProps={ tableData.headers }
+            template={ <TicketTemplate /> }
+            colorProps={ tableData.colors }
+            colorPropToMatch={ tableData.colorsPropToMatch }
+            colorToMatchRow={ tableData.colorRowToMatch }
+            rowToMatchProp={ tableData.rowToMatch }
+            searchString={ searchString }
+            onSearchChange={ this._onSearchChange }
+            onSearchEnter={ console.log }
+            searchPlaceholderText={ `Check on server for ${ searchCriteria }` }
+            rightDropDown={
+              <Dropdown
+                auto
+                source={ tableData.dropdownData }
+                value={ searchCriteria }
+                onChange={ e => this.setState({ searchCriteria : e }) }
+              />
+            }
+            sortOptions={{ sortBy, sortOrder }}
+            badge={ tableData.badge }
+            shouldShowSkeleton={ this.props.isLoading }
+          />
+          <TicketSettings
+            selected={ selected }
+            showForm={ this._showForm }
+            requestTickets={ this._requestTickets }
+            onChange={ setQueryOption }
+            { ...settings }
+          />
+          <TicketForm
+            active={ showForm }
+            closeForm={ () => this._showForm('showForm', false) }
+            ticket={ ticketToModify }
+            onSubmitData={ this._requestTickets }
+            submitTicket={ submitTicket }
+          />
+          <TicketRideModal
+            active={ showRidesModal }
+            onDialogClose={ () => this._showForm('showRidesModal', false) }
+            onAccept={ this._onAssignRide }
+          />
+        </div>
       </div>
     )
   }
@@ -348,6 +362,7 @@ const mapDispatchToProps = dispatch => bindActionCreators({
 
 const mapStateToProps = state => {
   const { tickets, searchOptions, count } = state.ticket
+  const { isLoading } = state.app
   const { used, redeemed, tnull, tnew, deleted, unassigned } = searchOptions
 
   return {
@@ -359,7 +374,8 @@ const mapStateToProps = state => {
     tnew,
     deleted,
     unassigned,
-    count
+    count,
+    isLoading
   }
 }
 

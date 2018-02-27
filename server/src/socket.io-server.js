@@ -4,9 +4,11 @@ import { Bus } from './models'
 export const sockets = {}
 
 export const socketServer = app => {
-  const sckts = new SocketIo(app)
+  const server = new SocketIo(app)
 
-  sckts.on('connection', socket => {
+  server.on('connection', socket => {
+    // console.log('connecting...')
+    // socket.emit('test', { data : true })
     socket.on('new connection', async msg => {
       const { bus, user, active } = msg
 
@@ -19,15 +21,19 @@ export const socketServer = app => {
         const bs = await Bus.findOneAndUpdate({ id : bus }, { active }, { new : true })
 
         if(bs) sockets[ bus ] = { socket, user }
-
         else console.log(`Bus with ID ${ bus } does not exist...`)
+
+        return sockets[ bus ].socket.emit('added', { this : 'works' })
       } catch(e) {
         console.log(e)
       }
-      // sockets[ bus ].send('added', { this : 'works' })
+
+      return socket.send('error', { msg : 'Problems adding you to the server... Are you a valid driver/bus?' })
     })
 
     socket.on('disconnect', async () => {
+      console.log('Shit got disconnected......')
+
       for(const id in sockets)
         if(socket.id === sockets[ id ].socket.id) {
           try {
@@ -36,6 +42,7 @@ export const socketServer = app => {
           } catch (e) {
             console.log(e)
           }
+
           delete sockets[ id ]
         }
     })

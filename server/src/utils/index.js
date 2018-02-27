@@ -61,7 +61,7 @@ export const createReceipt = async data => {
 
     return receipt
   } catch (e) {
-    console.log(e)
+    // console.log(e)
     console.log('... @ src/routes/api/utils/index.js@createReceipt')
   }
 
@@ -109,11 +109,11 @@ export const filterAggregate = async (docs, filterFunc, sortOrder) => {
   })
 
   const newDocs = await Promise.all(promises)
-  const collator = new  Intl.Collator(undefined, { numeric : true, sensitivity : 'base' }) 
+  const collator = new Intl.Collator(undefined, { numeric : true, sensitivity : 'base' }) 
 
   const sortedDocuments = newDocs.sort((a,b) => collator.compare(a.datekey, b.datekey))
 
-  //newDocs.sort((a, b) => sortOrder === 'asc' ? a.dateKey - b.dateKey : b.dateKey - a.dateKey)
+  // newDocs.sort((a, b) => sortOrder === 'asc' ? a.dateKey - b.dateKey : b.dateKey - a.dateKey)
   // console.log(sortedDocuments)
 
   return sortedDocuments

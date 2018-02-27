@@ -36,8 +36,8 @@ class Auth extends Component{
     const { user, pass } = this.state
     const { disabled, isAuth } = this.props
 
-    console.log('isAuth has been set to -> ' + isAuth + '.... Auth/index.js')
-    
+    // console.log('isAuth has been set to -> ' + isAuth + '.... Auth/index.js')
+
     return (
       <Container style={ styles.login }>
         { !isAuth && <StatusBar hidden /> }

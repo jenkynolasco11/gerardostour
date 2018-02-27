@@ -5,6 +5,7 @@ import axios from 'axios'
 
 import { showSpinner } from './app'
 import { showMessage } from '../../utils'
+import Socket from '../../utils/socket'
 import { APIURL, TIMEOUT } from '../../../config'
 
 const { REPLACE } = ActionConst
@@ -17,13 +18,15 @@ export const logUserOut = payload => ({ type : 'LOG_USER_OUT', payload })
 export const disableLoginButton = payload => ({ type : 'DISABLE_LOGIN_BUTTON', payload })
 
 export const setActive = payload => ({ type : 'SET_ACTIVE_STATUS', payload })
+
+export const setSocket = payload => ({ type : 'SET_SOCKET', payload })
 // export const unsetActive = payload => ({ type : 'SET_ACTIVE_STATUS', payload : false })
 
 // thunks
 // userInfo => { user : String, pass : String }
 export const requestLogin = userInfo => async dispatch => {
   const method = 'POST'
-  
+
   clearTimeout(timeoutPromise)
 
   const timeout = t => {
@@ -53,9 +56,13 @@ export const requestLogin = userInfo => async dispatch => {
       //   // There is no bus assigned to this user. Talk to management
       if(busId !== -1) {
         dispatch(logUserIn({ user : username, isAuth : true, bus : busId }))
+
+        const socket = Socket({ bus : busId, user })
+
+        dispatch(setSocket({ socket }))
         showMessage(`Welcome, ${ username }`)
 
-        Actions.replace('app')
+        Actions.push('app')
 
       } else {
         showMessage('No bus assigned to this user. Contact management.', 'warning')
@@ -68,18 +75,19 @@ export const requestLogin = userInfo => async dispatch => {
     showMessage('Error while authenticating.', 'danger')
     dispatch(logUserOut()) // Just in case
   }
-  
+
   timeoutPromise = setTimeout(() => dispatch(disableLoginButton(false)), TIMEOUT)
   return dispatch(showSpinner(false))
 }
 
-export const requestLogout = () => async dispatch => {
+export const requestLogout = () => async (dispatch, getState) => {
   // const body = { username : user, password : pass }
   const url = `${ APIURL }/auth/logout`
 
   clearTimeout(timeoutPromise)
 
   try {
+    // const { socket } = getState()
     dispatch(showSpinner(true))
 
     const { data } = await axios.get(url)
@@ -87,7 +95,14 @@ export const requestLogout = () => async dispatch => {
     if(data.ok) showMessage('Logged out successfully!')
     else console.log('Guess the sessions aren\'t getting saved...')
 
-    console.log(data.ok)
+    // if(socket) {
+    //   socket.destroy()
+    //   dispatch(setSocket({ socket : null }))
+
+    //   console.log('\nSocket destroyed!\n')
+    // }
+
+    // console.log(data.ok)
 
     Actions.reset('login') //Actions.popTo('landing')
   } catch (e) {

@@ -87,14 +87,25 @@ rideRouter.get('/all/:bus', async ctx => {
             month : { $month : '$date' },
             date : { $dayOfMonth : '$date' },
             year : { $year : '$date' }
-        },
+          },
           body : { $push : '$$ROOT' }
         }
       },
+      // {
+      //   $lookup : {
+
+      //   }
+      // }
     ])
 
     if(rides.length) {
       const data = await Promise.all(filterAggregate(rides, getRideData, 'asc'))
+      // const data = Promise.all(filteredData.map(async data => {
+      //   console.log(data)
+
+      //   return data
+      // }))
+      // console.log(data)
 
       if(data.length) return ctx.body = { ok : true, data : { rides : data }, message : '' }
     }
@@ -168,7 +179,7 @@ rideRouter.put('/assign-bus', async ctx => {
 
     if(bs) {
       rides.forEach(id => {
-        promises.push(Ride.findOneAndUpdate({ id }, { bus : bs._id, status : 'ASSIGNED' }))
+        promises.push(Ride.findOneAndUpdate({ id }, { bus : bs._id, status : 'ASSIGNED' }, { new : true }))
       })
 
       const rids = await Promise.all(promises)
@@ -233,10 +244,14 @@ rideRouter.put('/dispatch', async ctx => {
 
   try {
     const rides = await Promise.all(
-      rids.map(id => Ride.findOne({ id }, { id : 1, bus : 1 }).populate('bus', { id : 1, status : 1, _id : 0 }).exec())
+      rids.map(id => Ride
+                        .findOne({ id }, { id : 1, bus : 1 })
+                        .populate('bus', { id : 1, status : 1, _id : 0 })
+                        .exec())
     )
 
     rides.forEach(async ({ id, bus }) => {
+      // console.log(sockets)
       if(sockets[ bus.id ]) {
         console.log(`It's about to send ride => ${ id } to bus => ${ bus.id }`)
 
@@ -254,9 +269,9 @@ rideRouter.put('/dispatch', async ctx => {
           },
         ])
 
-        const d = filterAggregate(rid, getRideData, 'asc')
+        const d = await filterAggregate(rid, getRideData, 'asc')
 
-        sockets[ bus.id ].emit('new ride', { ride : d })
+        sockets[ bus.id ].socket.emit('new ride', { ride : d })
       }
     })
 
