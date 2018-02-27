@@ -66,15 +66,17 @@ const onTickFunction = async () => {
                 // )
 
                 process.nextTick(() => {
-                    sendSMS({ body : msg2HrsBefore, to : '3479742990', from : TWILIO_PHONE_NUMBER }, true)
-                    console.log('Sent a sms for 2hrs before')
+                    // sendSMS({ body : msg2HrsBefore, to : '3479742990', from : TWILIO_PHONE_NUMBER }, true)
+                    sendSMS({ body : msg2HrsBefore, to : '3477404233', from : TWILIO_PHONE_NUMBER }, true)
+                    // console.log('Sent a sms for 2hrs before')
                     // const nextDate = new Date(new Date().setHours(new Date().getHours(), new Date().getMinutes() + 2, 30, 0))
                     // console.log(nextDate)
                     const nextDate =  new Date(new Date().setHours(new Date().getHours(), new Date().getMinutes() + 1, 0, 0))
 
                     const newCron = new CronJob(nextDate, () => {
                         console.log('I\'m about to send you a text message for 10 mins before')
-                        sendSMS({ body : msg10MinsBefore, to : '3479742990', from : TWILIO_PHONE_NUMBER }, true)
+                        // sendSMS({ body : msg10MinsBefore, to : '3479742990', from : TWILIO_PHONE_NUMBER }, true)
+                        sendSMS({ body : msg10MinsBefore, to : '3477404233', from : TWILIO_PHONE_NUMBER }, true)
                         // return newCron.stop()
                     })
 

@@ -20,7 +20,7 @@ import routes from './routes'
 import error404 from './routes/404'
 
 import { createMeta } from './models'
-// import './modules/cronjob'
+import './modules/cronjob'
 import './passport'
 
 // Assign better Promise to global/mongoose
