@@ -1,18 +1,33 @@
 import React, { Component } from 'react'
 import tooltip from 'react-toolbox/lib/tooltip'
 
+import { formatDate, formatHour } from '../../../utils'
 import Checkmark from './Checkmark'
 
 const ToolTipSpan = tooltip(props => <span { ...props } /> )
 
 const Span = ({ item, style }) => (
   <ToolTipSpan
-    tooltipPosition="left"
     className="colormark"
     style={ style }
+    tooltipPosition="left"
     tooltip={ item.type ? item.type : item.status }
   />
 )
+
+const getRowToMatchColor = (conditions, props, item) => {
+  const args = props.split(',').reduce((p,n) => ({ ...p, [ n ] : item[ n ] }), {})
+
+  const defaultColor = conditions.defaultColor || 'white'
+
+  for(const key in conditions) {
+    if(typeof conditions[ key ] === 'function' && conditions[ key ](args)) {
+      return { backgroundColor : key }
+    }
+  }
+
+  return { backgroundColor : defaultColor }
+}
 
 class Row extends Component{
   state = { isClosed : true }
@@ -37,6 +52,7 @@ class Row extends Component{
     const {
       colorToMatchRow = 'white',
       rowToMatchProp = null,
+      rowConditionsToMatch = {},
       selected,
       onSelectRow,
       item,
@@ -59,7 +75,12 @@ class Row extends Component{
                       : null
 
     const spanStyle = { backgroundColor : colorSign }
-    const rowColor = item[ rowToMatchProp ] ? { backgroundColor : colorToMatchRow } : {}
+    const rowColor =
+        Object.keys(rowConditionsToMatch).length
+        ? getRowToMatchColor(rowConditionsToMatch, rowToMatchProp, item)
+        : item[ rowToMatchProp ]
+        ? { backgroundColor : colorToMatchRow }
+        : {}
 
     return (
       <div className={ `table-row${ isSelected ? ' selected' : '' }` }>
@@ -91,6 +112,10 @@ class Row extends Component{
                       >
                       { badge.colors[ '' + item[ obj.value ] ].caption }
                       </span>
+                    : obj.value === 'time'
+                    ? formatHour(item[ obj.value ])
+                    : obj.value === 'date'
+                    ? formatDate(item[ obj.value ])
                     : item[ obj.value ]
                     // : item[ obj.value ]
                   }

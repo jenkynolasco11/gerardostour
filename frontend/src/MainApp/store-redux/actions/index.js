@@ -32,6 +32,7 @@ export const {
   showLoader,
   showSnackBar,
   showSnackBarWithMessage,
+  setHeader
 } = App
 
 export const {

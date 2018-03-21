@@ -1,4 +1,4 @@
-import { SHOW_LOADER, SHOW_SNACKBAR, TOGGLE_DRAWER  } from '../constants'
+import { SHOW_LOADER, SHOW_SNACKBAR, TOGGLE_DRAWER, SET_HEADER  } from '../constants'
 // ///////////////////////
 // App
 // ///////////////////////
@@ -18,6 +18,8 @@ export const showSnackBar = payload => ({ type : SHOW_SNACKBAR, payload })
 
 export const showLoader = payload => ({ type : SHOW_LOADER, payload })
 
+export const setHeader = payload => ({ type : SET_HEADER, payload })
+
 
 // ///////////////////////
 // Thunks
@@ -32,6 +34,7 @@ export default {
   showLoader,
   showSnackBar,
   showSnackBarWithMessage,
+  setHeader,
   // savingStatus,
   // fetchingStatus,
   toggleDrawer,

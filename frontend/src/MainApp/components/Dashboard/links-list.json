@@ -1,10 +1,10 @@
 {
   "links" : [
     {
-      "header" : "Sections",
+      "header" : "Menu",
       "items" : [
-        { "name" : "Rides", "route" : "/ride" },
-        { "name" : "Tickets", "route" : "/ticket" }
+        { "name" : "Tickets", "route" : "/ticket" },
+        { "name" : "Rides", "route" : "/ride" }
       ]
     }
   ]

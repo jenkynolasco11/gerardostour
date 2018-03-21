@@ -30,5 +30,22 @@
     @media (min-width : 1024px){
       margin-left : 10px;
     }
+
+    &__filter {
+      display : flex;
+      flex-flow : row wrap;
+
+      &-options {
+        flex : 1;
+
+        h3 {
+          padding-left : 10px;
+        }
+
+        [data-react-toolbox="radio-group"] {
+          padding-left : 20px;
+        }
+      }
+    }
   }
 }

@@ -19,6 +19,75 @@
     // width : 500px;
   }
 
+  [data-react-toolbox=list] {
+    padding : 0;
+    h3 {
+      width : 100;
+      text-align : center;
+      color : #212121;
+      // color : #212121;
+    }
+
+    & > div {
+      height : 45px;
+      color :#573737;
+      display : flex;
+
+      .td, .th {
+        flex-wrap : wrap;
+        text-align : center;
+        // align-self : center;
+        // background-color : gray;
+        align-self : stretch;
+        // outline : 1px solid red;
+        border-bottom : 1px solid #d5d5d5;
+        display : flex;
+        align-items : center;
+        justify-content : center;
+        padding : 4px;
+        // flex : 1
+      }
+
+      .th {
+        color : #5c5c5c;
+        font-weight : bold;
+      }
+
+      .td:last-child {
+        span {
+          cursor : pointer;
+        }
+      }
+    }
+
+
+    .details-data {
+      &:hover {
+        color : white;
+        background-color : rgb(200, 202, 220);
+      }
+    }
+    box-shadow : 0 0 -5px 0px black;
+  }
+
+  .list-header {
+    & > span {
+      display : flex;
+
+      & > span {
+        // display : flex;
+        // justify-content : space-between;
+        width : 100%;
+
+        & > span {
+          // flex : 1;
+          text-align : center;
+        }
+      }
+
+    }
+  }
+
   .ride-settings {
     // display : none;
     flex : 1;

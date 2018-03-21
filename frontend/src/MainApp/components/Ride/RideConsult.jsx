@@ -9,34 +9,43 @@ import RideForm from './RideForm'
 
 import { ListDivider, ListItem, List } from 'react-toolbox/lib/list'
 import { CardTitle } from 'react-toolbox/lib/card'
+import FontIcon from 'react-toolbox/lib/font_icon/FontIcon'
+import tooltip from 'react-toolbox/lib/tooltip'
+// import Button from 'react-toolbox/lib/button/Button'
 
-import { retrieveRides, assignBusToRides, setRideQueryOption, dispatchToBus, clearRides } from '../../store-redux/actions'
-import { formatDate, formatHour } from '../../utils'
+import { retrieveRides, assignBusToRides, setRideQueryOption, dispatchToBus, clearRides, setHeader } from '../../store-redux/actions'
+import { formatPhone } from '../../utils'
 
 import './ride-consult.scss'
-import { Dropdown } from 'react-toolbox/lib/dropdown';
+import { Dropdown } from 'react-toolbox/lib/dropdown'
 
-const formatData = data => {
-  return data.map(item => {
-    const { time, date } = item
+// const formatData = data => {
+//   return data.map(item => {
+//     const { time, date } = item
 
-    return {
-      ...item,
-      time : formatHour(time),
-      date : formatDate(date),
-    }
-  })
-}
+//     return {
+//       ...item,
+//       time : formatHour(time),
+//       date : formatDate(date),
+//     }
+//   })
+// }
 
 const tableData = {
   headers : [
-    { value : "id", label : "Ride ID", flex : 1 },
-    { value : "frm", label : "From", flex : 1 },
-    { value : "to", label : "To", flex : 1 },
-    // { value : "status", label : "Status", flex : 1 },
-    { value : "time", label : "Time", flex : 2 },
-    { value : "date", label : "Date", flex : 2 },
+    { value : 'id', label : 'Ride ID', flex : 1 },
+    { value : 'frm', label : 'From', flex : 1 },
+    { value : 'to', label : 'To', flex : 1 },
+    { value : 'busName', label : 'Bus', flex : 1, ifNone : 'None' },
+    { value : 'ticketsCount', label : 'Used Seats', flex : 1 },
+    { value : 'time', label : 'Time', flex : 1.5 },
+    { value : 'date', label : 'Date', flex : 1.5 },
   ],
+  rowToMatch : 'time,date',
+  rowConditionToMatch : {
+    '#edb1b1' : ({ time, date }) => (new Date() - (1000 * 60 * 60 * 2)) > new Date(new Date(date).setHours(time+1,0,0,0)),
+    default : 'blue'
+  },
   colors : {
     'PENDING' : 'red',
     'ASSIGNED' : 'orange',
@@ -47,28 +56,59 @@ const tableData = {
   dropdownData : [
     { value : 'id', label : 'ID' },
     { value : 'bus', label : 'Bus' },
-  ]
+  ],
 }
 
-const DetailTemplate = props => (
-  <List className="detail-template">
-    <CardTitle title="Ride Details" />
-    <ListDivider />
-    <ListItem ripple={ false } selectable={ false } caption={ `Seats Used: ${ props.seatsOccupied }` } />
-    <ListItem ripple={ false } selectable={ false } caption={ `Luggage: ${ props.luggage }` } />
-    {
-      props.bus &&
-      <List className="detail-template bus-items">
-        <CardTitle title="Bus Details" />
-        <ListDivider />
-        <ListItem ripple={ false } selectable={ false } caption={ `Tickets Assigned: ${ props.ticketsCount }` } />
-        <ListItem ripple={ false } selectable={ false } caption={ `Bus Name: ${ props.bus.name }` } />
-        <ListItem ripple={ false } selectable={ false } caption={ `Seats: ${ props.bus.seats }` } />
-        <ListItem ripple={ false } selectable={ false } caption={ `Luggage: ${ props.bus.luggage }` } />
-      </List>
-    }
-  </List>
-)
+const ToolTipIcon = tooltip(FontIcon)
+
+const DetailTemplate = props => {
+  const { removeFromRide, deleteTicket, ticket } = props
+
+  return (
+    <List className="detail-template">
+      {
+        props.tickets.length ?
+        <React.Fragment>
+          <h3>Tickets</h3>
+          <div className="details-header">
+              <div className="th" style={{ flex : 0.4 }}>ID</div>
+              <div className="th" style={{ flex : 1 }}>Person</div>
+              <div className="th" style={{ flex : 1.5 }}>Phone Number</div>
+              <div className="th" style={{ flex : 1 }}>Confirmed</div>
+              <div className="th" style={{ flex : 0.5 }}>Status</div>
+              <div className="th" style={{ flex : 0.6 }}>Type</div>
+              <div className="th" style={{ flex : 0.5 }}>Pick?</div>
+              <div className="th" style={{ flex : 0.5 }}>Drop?</div>
+              <div className="th" style={{ flex : 0.5 }} />
+              {/* <div className="th" style={{ flex : 0.5 }} /> */}
+          </div>
+          {
+            props.tickets.map(
+              ({ _id, id, confirmed, person, details, reminded, status, type, willPick, willDrop }) => (
+                <div className="details-data" key={ _id }>
+                  <div className="td" style={{ flex : 0.4 }}>{ id }</div>
+                  <div className="td" style={{ flex : 1 }}>{ `${ person.firstname } ${ person.lastname }` }</div>
+                  <div className="td" style={{ flex : 1.5 }}>{ formatPhone(person.phoneNumber) }</div>
+                  <div className="td" style={{ flex : 1 }}>{ confirmed ? 'Yes' : 'No' }</div>
+                  <div className="td" style={{ flex : 0.5}}>{ status.charAt(0).toUpperCase() + status.slice(1).toLowerCase() }</div>
+                  <div className="td" style={{ flex : 0.6 }}>{ type.charAt(0).toUpperCase() + type.slice(1).toLowerCase() }</div>
+                  <div className="td" style={{ flex : 0.5 }}>{ willDrop ? 'Yes' : 'No' }</div>
+                  <div className="td" style={{ flex : 0.5 }}>{ willPick ? 'Yes' : 'No' }</div>
+                  <div className="td" style={{ flex : 0.5 }}>
+                    <ToolTipIcon onClick={ () => props.removeFromRide(props.id,id) } tooltip="Remove" tooltipPosition="bottom" style={{ color : 'hotpink' }} value="delete_sweep" />
+                    <ToolTipIcon onClick={ () => props.deleteTicket(id) } tooltip="Delete" tooltipPosition="bottom" style={{ color : 'red' }} value="delete_forever" />
+                  </div>
+                  {/* <div className="td" style={{ flex : 0.5 }}></div> */}
+                </div>
+              )
+            )
+          }
+        </React.Fragment>
+        : <ListItem caption="There is nothing to show here yet"/>
+      }
+    </List>
+  )
+}
 
 class Ride extends Component {
   state = {
@@ -91,10 +131,12 @@ class Ride extends Component {
     super(props)
 
     this._getSelectedRides = this._getSelectedRides.bind(this)
+    this._removeFromRide = this._removeFromRide.bind(this)
     this._onSearchChange = this._onSearchChange.bind(this)
     this._dispatchToBus = this._dispatchToBus.bind(this)
     this._onRowSelected = this._onRowSelected.bind(this)
     this._clearSelected = this._clearSelected.bind(this)
+    this._deleteTicket = this._deleteTicket.bind(this)
     this._requestRides = this._requestRides.bind(this)
     this._onAssignBus = this._onAssignBus.bind(this)
     this._onPaginate = this._onPaginate.bind(this)
@@ -150,6 +192,14 @@ class Ride extends Component {
       .join(',')
 
     return status
+  }
+
+  _removeFromRide(ride, ticket) {
+    console.log(ride, ticket)
+  }
+
+  _deleteTicket(ticket) {
+    console.log(ticket)
   }
 
   _requestRides() {
@@ -211,8 +261,6 @@ class Ride extends Component {
   _dispatchToBus() {
     const selectedRides = this._getSelectedRides()
 
-    // console.log(selectedRides)
-
     return this.props.dispatchBus(selectedRides)
   }
 
@@ -227,6 +275,8 @@ class Ride extends Component {
 
 //#region Lifecycle functions
   componentDidMount() {
+    this.props.setHeader()
+
     return this._requestRides()
   }
 
@@ -249,15 +299,14 @@ class Ride extends Component {
       searchString,
     } = this.state
 
-    // console.log(searchString)
-
+    const removeFromRide = this._removeFromRide
+    const deleteTicket = this._deleteTicket
     const { rides, count, settings, setQueryOption } = this.props
-    const data = formatData(rides)
+    const data = rides // formatData(rides)
     const disableDispatch = !selected.every(i => rides[ i ].status === 'ASSIGNED')
 
     return (
       <div>
-        {/* <h1>Rides</h1> */}
         <div className="ride-consult">
           <CustomTable
             className="ride-consult-table"
@@ -269,7 +318,7 @@ class Ride extends Component {
             skip={ skip }
             limit={ limit }
             total={ count }
-            template={ <DetailTemplate /> }
+            template={ <DetailTemplate {...{ removeFromRide, deleteTicket }} /> }
             headerProps={ tableData.headers }
             colorProps={ tableData.colors }
             colorPropToMatch={ tableData.colorsPropToMatch }
@@ -277,6 +326,8 @@ class Ride extends Component {
             onSearchChange={ this._onSearchChange }
             onSearchEnter={ console.log }
             searchPlaceholderText={ `Check on server for ${ searchCriteria }` }
+            rowConditionsToMatch={ tableData.rowConditionToMatch }
+            rowToMatchProp={ tableData.rowToMatch }
             rightDropDown={
               <Dropdown
                 auto
@@ -327,7 +378,8 @@ const mapDispatchToProps = dispatch => bindActionCreators({
   dispatchBus : rides => dispatchToBus(rides),
   setQueryOption : (val, name) => setRideQueryOption({ [ name ] : val }),
   assignBus : (bus, rides, query) => assignBusToRides(bus, rides, query),
-  clearRides : () => clearRides()
+  clearRides : () => clearRides(),
+  setHeader : () => setHeader('Rides')
 }, dispatch)
 
 export default connect(mapStateToProps, mapDispatchToProps)(Ride)

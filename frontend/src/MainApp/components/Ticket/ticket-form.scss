@@ -147,6 +147,10 @@
 
     .review-actions {
       margin-top : 50px;
+
+      [data-react-toolbox=font-icon] {
+        margin-top : -8px;
+      }
     }
   }
 }

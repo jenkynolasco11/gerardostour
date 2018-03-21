@@ -12,7 +12,7 @@ import TicketRideModal from './TicketRideModal'
 import CustomTable from '../extras/CustomizedTable'
 
 import { formatDate, formatHour, formatPhone } from '../../utils'
-import { retrieveTickets, assignTicketsToRide, submitTicketData, setTicketQueryOption, clearTickets } from '../../store-redux/actions'
+import { retrieveTickets, assignTicketsToRide, submitTicketData, setTicketQueryOption, clearTickets, setHeader } from '../../store-redux/actions'
 
 import './ticket-consult.scss'
 
@@ -20,40 +20,18 @@ import './ticket-consult.scss'
 const formatData = data => {
   return data.map( item => {
     const {
-      id,
       willDrop,
       willPick,
-      status,
-      frm,
-      to,
-      time,
-      date,
       person,
-      dropOffAddress,
-      pickUpAddress,
-      receipt,
-      isAssigned,
-      type,
-      confirmed
+      ...rest
     } = item
 
     return {
-      id,
+      ...rest,
       willDrop : willDrop ? 'YES' : 'NO' ,
       willPick : willPick ? 'YES' : 'NO' ,
-      to,
-      frm,
-      time : formatHour(time),
-      date : formatDate(date),
-      status,
       person : `${ person.firstname } ${ person.lastname }`,
       phoneNumber : formatPhone(person.phoneNumber),
-      dropOffAddress,
-      pickUpAddress,
-      receipt,
-      isAssigned,
-      type,
-      confirmed
     }
   })
 }
@@ -138,7 +116,9 @@ class TicketConsult extends Component {
     showRidesModal : false,
     ticketToModify : null,
     searchCriteria : 'id',
-    searchString : ''
+    searchString : '',
+    ticketStatus : 'ALL',
+    ticketType : 'ALL'
   }
 
   timeout = null
@@ -152,7 +132,7 @@ class TicketConsult extends Component {
     this._onRowSelected = this._onRowSelected.bind(this)
     this._onAssignRide = this._onAssignRide.bind(this)
     this._onPaginate = this._onPaginate.bind(this)
-    this._getStatus = this._getStatus.bind(this)
+    // this._getStatus = this._getStatus.bind(this)
     this._showForm = this._showForm.bind(this)
     this._onChange = this._onChange.bind(this)
     this._onSort = this._onSort.bind(this)
@@ -174,46 +154,54 @@ class TicketConsult extends Component {
     return this._requestTickets()
   }
 
-  _getStatus() {
-    const { used, redeemed, tnull, tnew, deleted } = this.props
+  _onDeleteTicket() {
+    // delete selected ticket
 
-    const statusList = {
-      'REDEEMED' : redeemed,
-      'DELETED' : deleted,
-      'USED' : used,
-      'NULL' : tnull,
-      'NEW' : tnew,
-    }
-
-    const status = Object
-      .keys(statusList)
-      .map(stat => statusList[ stat ] ? stat : '')
-      .filter(stat => stat !== '')
-      .join(',')
-
-    return status
+    return this._requestTickets()
   }
 
+  // _getStatus() {
+  //   const { used, redeemed, tnull, tnew, deleted } = this.props
+
+  //   const statusList = {
+  //     'REDEEMED' : redeemed,
+  //     'DELETED' : deleted,
+  //     'USED' : used,
+  //     'NULL' : tnull,
+  //     'NEW' : tnew,
+  //   }
+
+  //   const status = Object
+  //     .keys(statusList)
+  //     .map(stat => statusList[ stat ] ? stat : '')
+  //     .filter(stat => stat !== '')
+  //     .join(',')
+
+  //   return status
+  // }
+
   _requestTickets() {
-    const { skip : oldSkip, limit, sortBy, sortOrder, searchString, searchCriteria } = this.state
-    const { settings } = this.props
-    const { isPackage } = settings
+    const { skip : oldSkip, limit, sortBy, sortOrder, searchString, searchCriteria, ticketStatus : status, ticketType : type } = this.state
 
     const skip = oldSkip * limit
 
-    const status = this._getStatus()
+    // const status = this._getStatus()
 
     const sort = `${ sortBy } ${ sortOrder }`
 
     this.setState({ selected : [] })
-    return this.props.queryTickets({ skip, status, sort, limit, unassigned : false, isPackage, search : searchString, searchCriteria })
+
+    const query = { skip, sort, limit, unassigned : false, search : searchString, searchCriteria, type : type !== 'ALL' ? type : '', status : status !== 'ALL' ? status : '' }
+
+    // console.log(query)
+
+    return this.props.queryTickets(query)
   }
 
   _onChange(val, name) {
-    let { skip } = this.state
-
-    if(name === 'isPackage') skip = 0
-    return this.setState({ [ name ] : val, skip }, this._requestTickets)
+    // console.log(val, name)
+    // console.log(this.state)
+    return this.setState({ [ name ] : val, skip : 0 }, this._requestTickets)
   }
 
   _onRowSelected(rows) {
@@ -240,17 +228,17 @@ class TicketConsult extends Component {
   }
 
   _showForm(which, willShow) {
-    // let ticketToModify = null
-    // const { selected } = this.state
+    let ticketToModify = null
+    const { selected } = this.state
 
     // if(willShow && selected.length === 1) {
-    //   const { tickets } = this.props
-    //   ticketToModify = tickets[ selected[ 0 ] ]
+    const { tickets } = this.props
+    ticketToModify = tickets[ selected[ 0 ] ]
     // } else setTimeout(this._requestTickets, 100)
 
     if(!willShow) this._requestTickets()
 
-    return this.setState({ [ which ] : willShow, /*ticketToModify*/ })
+    return this.setState({ [ which ] : willShow, ticketToModify })
   }
 
   _onSearchChange(val) {
@@ -264,8 +252,8 @@ class TicketConsult extends Component {
   }
 //#endregion
   //#region Lifecycle
-  componentWillMount() {
-    // console.log(this.props.tickets)
+  componentDidMount() {
+    this.props.setHeader()
     return this._requestTickets()
   }
 
@@ -285,10 +273,12 @@ class TicketConsult extends Component {
       searchCriteria,
       sortBy,
       sortOrder,
-      searchString
+      searchString,
+      ticketStatus,
+      ticketType
     } = this.state
 
-    const { tickets, count, submitTicket, setQueryOption, settings } = this.props
+    const { tickets, count, submitTicket } = this.props
     const data = formatData(tickets)
 
     return (
@@ -331,8 +321,10 @@ class TicketConsult extends Component {
             selected={ selected }
             showForm={ this._showForm }
             requestTickets={ this._requestTickets }
-            onChange={ setQueryOption }
-            { ...settings }
+            onChange={ this._onChange }
+            ticketStatus={ ticketStatus }
+            ticketType={ ticketType }
+            // { ...settings }
           />
           <TicketForm
             active={ showForm }
@@ -356,23 +348,24 @@ const mapDispatchToProps = dispatch => bindActionCreators({
   queryTickets : args => retrieveTickets(args),
   assignRide : (tickets, ride) => assignTicketsToRide(tickets, ride),
   submitTicket : data => submitTicketData(data),
-  setQueryOption : (val, name) => setTicketQueryOption({ [ name ] : val }),
-  clearTickets : () => clearTickets()
+  // setQueryOption : (val, name) => setTicketQueryOption({ [ name ] : val }),
+  clearTickets : () => clearTickets(),
+  setHeader : () => setHeader('Tickets')
 }, dispatch)
 
 const mapStateToProps = state => {
-  const { tickets, searchOptions, count } = state.ticket
+  const { tickets, count, unassigned } = state.ticket
   const { isLoading } = state.app
-  const { used, redeemed, tnull, tnew, deleted, unassigned } = searchOptions
+  // const { used, redeemed, tnull, tnew, deleted, unassigned } = searchOptions
 
   return {
-    settings : { ...searchOptions },
+    // settings : { ...searchOptions },
     tickets,
-    used,
-    redeemed,
-    tnull,
-    tnew,
-    deleted,
+    // used,
+    // redeemed,
+    // tnull,
+    // tnew,
+    // deleted,
     unassigned,
     count,
     isLoading

@@ -20,17 +20,26 @@ import routes from './routes'
 import error404 from './routes/404'
 
 import { createMeta } from './models'
-import './modules/cronjob'
+// import './modules/cronjob'
 import './passport'
 
 // Assign better Promise to global/mongoose
 global.Promise = bluebird.Promise
 mongoose.Promise = bluebird.Promise
 
+const dbFunctions = db => {
+  db.on('disconnected', () => {
+    console.log('MongoDB connection failed... Reconnecting...')
+    mongoose.connect(config.DBURI, { useMongoClient : true, autoReconnect : true })
+  })
+}
+
 const server = async (port, done) => {
   try {
-    await mongoose.connect(config.DBURI, { useMongoClient : true })
+    await mongoose.connect(config.DBURI, { useMongoClient : true, autoReconnect : true })
     await createMeta(false)
+
+    dbFunctions(mongoose.connection)
 
     const app = new Koa()
 

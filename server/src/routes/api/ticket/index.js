@@ -24,15 +24,13 @@ ticketRouter.get('/:id/receipt', async ctx => {
 })
 
 // TODO : Check this one when I create the form for ticket creation
-// Saves a(s many) ticket
+// Saves a(s many) ticket(s)
 ticketRouter.post('/save', reformatTicket, async ctx => {
   const { body } = ctx.request
-  const { phoneNumber } = body
 
   try {
-    // console.log(body)
     const data = await saveTickets(body)
-    console.log(data)
+
     if(data) return ctx.body = { ok : true, data : { tickets : data }, message : '' }
 
     return ctx.body = { ok : false, data : null, message : 'Couldn\'t save the ticket. Contact your system administrator.' }
@@ -173,18 +171,21 @@ ticketRouter.get('/all', async ctx => {
     // status = 'NULL,USED,DELETED',
     search = '',
     searchCriteria = '',
-    status = 'NEW,REDEEMED',
+    status = 'NEW,REDEEMED,CANCELLED,USED',
     sort = 'id -1',
     limit = 10,
     skip = 0,
-    onlypackage = 'false',
+    type = 'REGULAR,PACKAGE,VIP,SPECIAL,AIRPORT',
+    // onlypackage = 'false',
     unassigned = 'true'
   } = ctx.query
 
-  // const nonlist = [].concat(nonstatus.split(','))
-  const list = [].concat(status.split(','))
+  console.log(type, status)
 
-  let conditions = { status : { $in : list }}
+  const statuss = [].concat(status.split(','))
+  const types = [].concat(type.split(','))
+
+  let conditions = { status : { $in : statuss }, type : { $in : types }}
 
   const [ srt, asc ] = sort.split(' ')
   const sortCondition = { [ srt ] : asc }
@@ -193,7 +194,6 @@ ticketRouter.get('/all', async ctx => {
   if(srt === 'time') sortCondition.date = asc < 0 ? -1 : 1
 
   if(unassigned === 'true') conditions.ride = null
-  if(onlypackage === 'true') conditions.type = 'PACKAGE'
 
   try {
     if(search) {
@@ -207,8 +207,6 @@ ticketRouter.get('/all', async ctx => {
       // } else conditions.id = { $regex : regex }
       } else conditions = { $where : `/^${ search }.*/.test(this.id)` }
     }
-
-    // console.log(conditions)
 
     const tickets = await Ticket
                           .find(conditions)
@@ -238,9 +236,9 @@ ticketRouter.get('/all/:ride', async ctx => {
   const { ride } = ctx.params
 
   try {
-    const rid = await Ride.findOne({ id : ride }, { _id : 1 })
+    const rid = await Ride.findOne({ id : ride }, { _id : 1, id : 1 })
     // Ticket.find({}, console.log)
-//*
+
     const tickets = await Ticket.aggregate([
       { $match : { ride : rid._id, status : { $ne : 'DELETED' }}},
       {
@@ -323,7 +321,7 @@ ticketRouter.get('/all/:ride', async ctx => {
       },
       { $unwind : '$person' },
     ])
-// */
+
     // console.log(JSON.stringify(tickets, null, 3))
     // const tickets = await Ticket
     //                       .find({ ride : rid._id, status : { $ne : 'DELETED' }})

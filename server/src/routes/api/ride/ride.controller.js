@@ -81,7 +81,29 @@ export const getRideData = async ride => {
 
     const { seatsOccupied, luggage } = await RideDetail.findOne({ ride : _id })
 
-    const ticketsCount = await Ticket.count({ ride : _id })
+    const tickets = await Ticket.aggregate([
+      { $match : { ride : _id }},
+      {
+        $lookup : {
+          from : 'person',
+          localField : 'person',
+          foreignField : '_id',
+          as : 'person'
+        }
+      },
+      { $unwind : '$person' },
+      {
+        $lookup : {
+          from : 'ticketDetails',
+          localField : 'details',
+          foreignField : '_id',
+          as : 'details'
+        }
+      },
+      { $unwind : '$details' },
+    ])
+
+    const ticketsCount = tickets.length
 
     if(bus) {
       buss = await Bus.findById(bus)
@@ -94,21 +116,22 @@ export const getRideData = async ride => {
     //   seatsUsed = seatsOccupied
     }
 
-    const busData = bus 
-                    ? 
+    const busData = bus
+                    ?
                     {
-                      id : buss.id,
-                      name : buss.name,
-                      status : buss.status,
-                      seats : busDetails.seatQty,
-                      luggage : busDetails.luggageQty,
-                    } 
-                    : null
+                      busId : buss.id,
+                      busName : buss.name,
+                      busStatus : buss.status,
+                      busSeats : busDetails.seatQty,
+                      busLuggage : busDetails.luggageQty,
+                    }
+                    : {}
 
     const data = {
       id,
-      bus : busData,
+      // bus : busData,
       ticketsCount,
+      tickets,
       status, // : status === 'ON-THE-WAY' ? status.split('-').join(' ') : status,
       to,
       frm,
@@ -116,6 +139,7 @@ export const getRideData = async ride => {
       date,
       seatsOccupied,
       luggage,
+      ...busData
     }
 
     // TODO : CHECK THIS OUT LATER

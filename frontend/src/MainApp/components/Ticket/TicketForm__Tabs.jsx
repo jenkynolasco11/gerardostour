@@ -33,7 +33,7 @@ class TicketTabs extends Component{
 
     return (
       <Tabs fixed index={ this.state.index } onChange={ this.onTabChange }>
-        <Tab icon={ <MdPerson /> } label="Personal Info"> 
+        <Tab icon={ <MdPerson /> } label="Personal Info">
           <TicketPersonal { ...this.props } onTabNext={ this.onTabNext }/>
         </Tab>
         <Tab icon={ <MdDirectionsBus /> } label="Trip Info" >

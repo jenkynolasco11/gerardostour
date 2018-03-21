@@ -27,7 +27,7 @@ export const reformatTicket = (ctx, next) => {
 
   // If its local, return. No need to reformat data structure
   if(body.isLocal) return next()
-  
+
   /*
   const newBody = {
     frm : body.desde,
@@ -48,7 +48,7 @@ export const reformatTicket = (ctx, next) => {
       city : body.ciudad_origen,
       state : body.estado_origen,
       zipcode : body.zipcode_origen
-    } 
+    }
     : null,
     dropOffAddress : body.dejar === 'checked'
     ? {
@@ -157,7 +157,7 @@ export const getTicketData = async tckt => {
     const ddate = new Date(new Date(date).setHours(0,0,0,0))
     const ttime = Number(time)
 
-    details = await new TicketDetail({ 
+    details = await new TicketDetail({
       isLocal,
       pickUpAddress,
       dropOffAddress,
@@ -215,12 +215,12 @@ export const saveTickets = async data => {
     const { willPick, willDrop, ticketQty, ride : rid = null, phoneNumber } = data
 
     meta = await Meta.findOne({})
-
-    // console.log(meta)
+    // const confirmationNumber = `GA-${ ('00000000' + receipt).slice(-8) }`
 
     const [ prsn, pckup, drpff, rcpt ] = await createTicketSideData({
       ...data,
-      id : meta.lastReceiptId++
+      // confirmationNumber,
+      id : meta.lastReceiptId++,
     })
 
     if(rid && rid !== -1 ) ride = await Ride.findOne({ id : rid }, { _id : 1 })
@@ -232,8 +232,8 @@ export const saveTickets = async data => {
     confirmation = rcpt.confirmationNumber
 
     if(!person
-      || (willDrop && !dropOffAddress) 
-      || (willPick && !pickUpAddress) 
+      || (willDrop && !dropOffAddress)
+      || (willPick && !pickUpAddress)
       || !receipt)
       throw new Error('Shit happened... Rolling back everything!')
 
@@ -249,20 +249,20 @@ export const saveTickets = async data => {
       }))
 
     const tickets = await Promise.all(promises)
-    const receiptNum = `GA-${ ('00000000' + receipt).slice(-8) }`
+    const receiptNumber = `GA-${ ('00000000' + receipt).slice(-8) }`
 
-    const msg = `Gerardo Trans\n\nThanks for traveling with us.\n\nYour confirmation number is: \n${ confirmation }\n\nYour receipt number is:\n${ receiptNum }`
+    // const msg = `Gerardo Trans\n\nThanks for traveling with us.\n\nYour confirmation number is: \n${ confirmation }\n\nYour receipt number is:\n${ receiptNumber }`
 
-    // Uncomment this part after
-    const smsBody = {
-      body : msg,
-      to : phoneNumber,
-      from : TWILIO_PHONE_NUMBER
-    }
-    /*const response = await */
-    twilio.sendSMS(smsBody).then(res => {
-      console.log(res)
-    }).catch(console.error)
+    // // Uncomment this part after
+    // const smsBody = {
+    //   body : msg,
+    //   to : phoneNumber,
+    //   from : TWILIO_PHONE_NUMBER
+    // }
+    // /*const response = await */
+    // twilio.sendSMS(smsBody).then(res => {
+    //   console.log(res)
+    // }).catch(console.error)
 
     // console.log(response)
 

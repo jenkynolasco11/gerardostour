@@ -14,7 +14,7 @@ const defaultState = {
     ticketQty : 1,
     luggageQty : 0,
     ticketType : 'REGULAR',
-
+    id : 0,
     ride : -1,
 
     // Person details
@@ -172,6 +172,8 @@ class TicketForm extends Component {
 
     const data = { ...this.state }
 
+    console.log(data)
+
     await this.props.submitTicket(data)
 
     this.props.onSubmitData()
@@ -296,13 +298,10 @@ class TicketForm extends Component {
   }
 
   componentDidMount() {
+    const { ticket = {} } = this.props
     const { payment } = this.state
 
-    return this.setState({ payment : { ...payment, ...this._calculateFees() }})
-  }
-
-  componentWillUnmount() {
-    this.setState({ ...defaultState })
+    return this.setState({ ...defaultState, payment : { ...payment, ...this._calculateFees() }, ...ticket, isModify : !!ticket.id })
   }
 
   render() {
@@ -329,6 +328,28 @@ const TicketFormTop = props => (
   </div>
 )
 
+// const TicketFormBottom = props => {
+//   return (
+//     <List className="review-actions" style={{ position : 'absolute', bottom : 0 }}>
+//       <p> Save Ticket? </p>
+//       <CardActions>
+//         <Button
+//           // raised
+//           icon={ <MdThumbDown /> }
+//           onClick={ props.onCancel }
+//           label="Cancel"
+//         />
+//         <Button
+//           // raised
+//           type="submit"
+//           icon={ <MdThumbUp /> }
+//           label="Accept"
+//         />
+//       </CardActions>
+//     </List>
+//   )
+// }
+
 const Form = props => (
   <Dialog
     className="ticket-form dialog"
@@ -336,6 +357,8 @@ const Form = props => (
   >
     <TicketFormTop { ...props } />
     <TicketForm { ...props } />
+    {/* <ListDivider />
+    <TicketFormBottom { ...props } /> */}
   </Dialog>
 )
 

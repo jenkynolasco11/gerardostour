@@ -15,17 +15,8 @@ class Body extends Component {
     return (
       <div className="main-body">
         <Switch>
-          <Route exact path="/ride" component={
-            () => {
-              this.props.setHeader('Rides')
-              return <Ride.RideConsult />
-            }
-          } />
-          <Route exact path="/ticket" component={
-            () => {
-              this.props.setHeader('Tickets')
-              return <Ticket.TicketConsult />
-          }} />
+          <Route exact path="/ride" component={ Ride.RideConsult } />
+          <Route exact path="/ticket" component={ Ticket.TicketConsult } />
           {/*
             <Route exact path="/ride/create-modify" component={ Ride.RideForm } />
               <Route exact path="/ticket/create-modify" component={ Ticket.TicketForm } />

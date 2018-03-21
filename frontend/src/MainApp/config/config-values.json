@@ -95,5 +95,5 @@
     "UM" : "United States Minor Outlying Islands",
     "VI" : "Virgin Islands"
   },
-  "url" : "http://localhost:8000/api/v1"
+  "url" : "/api/v1"
 }

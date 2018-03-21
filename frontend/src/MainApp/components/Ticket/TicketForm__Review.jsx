@@ -1,14 +1,16 @@
-import React /*, { Component }*/ from 'react'
+import React from 'react'
 import { CardTitle, CardActions } from 'react-toolbox/lib/card'
 import { List, ListItem, ListDivider } from 'react-toolbox/lib/list'
 import Button from 'react-toolbox/lib/button/Button'
 import {
+  MdBuild,
   MdThumbUp,
   MdThumbDown,
   MdAttachMoney,
   MdPhone,
   MdEmail,
   MdPerson,
+  MdDeleteForever
 } from 'react-icons/lib/md'
 
 import configData from '../../config/config-values.json'
@@ -176,8 +178,8 @@ const ReviewPayment = props => {
   const { luggagePrice, prices } = configData
   const { fee, extraFee, totalAmount } = payment
 
-  
-  
+
+
   let dropOffFee = 0
   let pickUpFee = 0
 
@@ -194,12 +196,12 @@ const ReviewPayment = props => {
   const extraFeesCaption = `$${ parseFloat(extraFee).toFixed(2) }`
 
   const luggageFeeCaption = `    $${ parseFloat(luggagePrice * luggageQty).toFixed(2) } (${ luggageQty } extra luggage x ${ parseFloat(luggagePrice).toFixed(2) })`
-  const extraCaption = willPick 
-                      ? willDrop 
-                      ? `    $${ parseFloat(pickUpFee).toFixed(2) } Pick Up + $${ parseFloat(dropOffFee).toFixed(2) } Drop Off fees` 
-                      : `    $${ parseFloat(pickUpFee).toFixed(2) } Pick Up fee` 
-                      : willDrop 
-                      ? `    $${ parseFloat(dropOffFee).toFixed(2) } Drop off fee` 
+  const extraCaption = willPick
+                      ? willDrop
+                      ? `    $${ parseFloat(pickUpFee).toFixed(2) } Pick Up + $${ parseFloat(dropOffFee).toFixed(2) } Drop Off fees`
+                      : `    $${ parseFloat(pickUpFee).toFixed(2) } Pick Up fee`
+                      : willDrop
+                      ? `    $${ parseFloat(dropOffFee).toFixed(2) } Drop off fee`
                       : ''
   // const extraExtraCaption = ` $${ parseFloat(packFee).toFixed(2) } Package fee (${ packageQty } packages)`
 
@@ -257,12 +259,29 @@ const ReviewActions = props => {
           onClick={ props.onCancel }
           label="Cancel"
         />
-        <Button
-          // raised
-          type="submit"
-          icon={ <MdThumbUp /> }
-          label="Accept"
-        />
+        {
+          props.id ?
+          <Button
+            onClick={ props.onModify }
+            icon={ <MdBuild /> }
+            label="Modify"
+          />
+          :
+          <Button
+            // raised
+            type="submit"
+            icon={ <MdThumbUp /> }
+            label="Accept"
+          />
+        }
+        {
+          props.isModify &&
+          <Button
+            onClick={ props.onDelete }
+            label="Delete"
+            icon={ <MdDeleteForever/> }
+          />
+        }
       </CardActions>
     </List>
   )

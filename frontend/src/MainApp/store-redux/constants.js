@@ -1,5 +1,5 @@
 // actions/app.js
-
+export const SET_HEADER = 'SET_HEADER'
 export const TOGGLE_DRAWER = 'TOGGLE_DRAWER'
 export const SHOW_SNACKBAR = 'SHOW_SNACKBAR'
 export const SHOW_LOADER = 'SHOW_LOADER'

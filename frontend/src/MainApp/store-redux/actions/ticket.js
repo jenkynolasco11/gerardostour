@@ -15,7 +15,7 @@ import { url } from '../../config/config-values.json'
 
 // /*export */ const setSelectedTickets = payload => ({ type : 'SELECTED_TICKETS', payload })
 
-/*export */ const setTicketQueryOption = payload => ({ type : SET_TICKETS_OPTION, payload })
+// /*export */ const setTicketQueryOption = payload => ({ type : SET_TICKETS_OPTION, payload })
 
 export const clearTickets = payload => ({ type : CLEAR_TICKETS, payload })
 
@@ -24,22 +24,32 @@ export const clearTickets = payload => ({ type : CLEAR_TICKETS, payload })
 // Thunks
 // ///////////////////////
 export const retrieveTickets = query => async dispatch => {
-  const { skip, limit, sort, status, unassigned, isPackage, search, searchCriteria } = query
+  const { skip, limit, sort, unassigned, search, searchCriteria, type, status } = query
 
   try {
     dispatch(showLoader(true))
 
-    const { data } = await axios.get(`${ url }/ticket/all?skip=${ skip }&limit=${ limit }&sort=${ sort }&status=${ status }&unassigned=${ unassigned }&onlypackage=${ isPackage }&search=${ search }&searchCriteria=${ searchCriteria }`)
+    const URL =
+      `${ url }/ticket/all?` +
+      `skip=${ skip }&limit=${ limit }&sort=${ sort }&unassigned=${ unassigned }` +
+      `&search=${ search }&searchCriteria=${ searchCriteria }` +
+      `${ status ? `&status=${ status }` : '' }` +
+      `${ type ? `&type=${ type }` : '' }`
+
+    const { data } = await axios.get(URL)
 
     if(data.ok) {
       const { count, tickets } = data.data
 
       dispatch(addCount(count))
       dispatch(addTickets(tickets))
+    } else {
+      dispatch(addCount(0))
+      dispatch(addTickets([]))
     }
   } catch (e) {
     // console.log(e)
-    return dispatch(retrieveTickets(query))
+    return setTimeout(() => dispatch(retrieveTickets(query)), 100)
   }
 
   return dispatch(showLoader(false))
@@ -96,7 +106,7 @@ export const assignTicketsToRide = (tickets, ride) => async dispatch => {
 export default {
   retrieveTickets,
   submitTicketData,
-  setTicketQueryOption,
+  // setTicketQueryOption,
   assignTicketsToRide,
   clearTickets
   // retrieveRides,

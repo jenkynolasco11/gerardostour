@@ -47,7 +47,6 @@ const TypeTicket = props => (
         onChange={ e => props.onChange(e, 'ticketType') }
         value={ props.ticketType }
       />
-      
     </ListItem>
   </List>
 )
@@ -62,10 +61,11 @@ class TimeInfo extends Component{
   }
 
   async _requestRides(date, time) {
+    // console.log(date, time)
     let rids = []
 
     try {
-      const { data } = await axios.get(`${ url }/ride/date/${ date.getTime() }/hour/${ time }`)
+      const { data } = await axios.get(`${ url }/ride/date/${ new Date(date).getTime() }/hour/${ time }`)
 
       if(data.ok) {
         const { rides } = data.data
@@ -113,7 +113,7 @@ class TimeInfo extends Component{
             <DatePicker
               autoOk
               minDate={ getMinDate() }
-              value={ date }
+              value={ new Date(date) }
               onChange={ val => onChange(val, 'date') }
             />
           </ListItem>
@@ -152,7 +152,7 @@ class TimeInfo extends Component{
   }
 }
 
-// BUG-INFO : 
+// BUG-INFO :
 // THIS SHOULD ASSIGN A RIDE IF RETRIEVED FROM THE REQUEST WITH DATE AND HOUR
 // WHEN THE COMPONENT MOUNTS...
 const TripInfo = props => {
@@ -253,7 +253,7 @@ const AddressForm = props => {
             value={ prop.street }
             onChange={ val => props.onChange(val, onChangePropName, 'street')}
           />
-            <Input 
+            <Input
             label="City"
             value={ prop.city }
             onChange={ val => props.onChange(val, onChangePropName, 'city')}
@@ -267,7 +267,7 @@ const AddressForm = props => {
             label="State"
             selectedPosition="below"
           />
-          <Input 
+          <Input
             label="ZIP Code"
             value={ prop.zipcode }
             onChange={ val => props.onChange(onlyNumber(val), onChangePropName, 'zipcode')}
@@ -311,7 +311,7 @@ const ExtraInfo = props => {
   const isVIP = ticketType === 'VIP'
   const isSpecial = ticketType === 'SPECIAL'
   const isAirport = ticketType === 'AIRPORT'
-  
+
   const isAny = isPackage || isVIP || isSpecial || isAirport
 
   if(!isAny) return null
