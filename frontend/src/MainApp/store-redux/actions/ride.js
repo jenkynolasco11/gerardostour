@@ -38,7 +38,7 @@ export const retrieveRides = query => async dispatch => {
     }
   } catch (e) {
     console.log(e)
-    return dispatch(retrieveRides(query))
+    // return dispatch(retrieveRides(query))
   }
 
   return dispatch(showLoader(false))
@@ -78,7 +78,7 @@ export const assignBusToRides = (bus, rides = [], query) => async dispatch => {
     console.log(e)
   }
 
-  return dispatch(retrieveRides(query))
+  // return dispatch(retrieveRides(query))
   // return dispatch(showLoader(true))
 }
 

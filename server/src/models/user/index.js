@@ -16,12 +16,12 @@ const UserSchema = new Schema({
   lastSession : { type : Date, required : true, default : Date.now }
 })
 
-UserSchema.methods.generateHash = function(password) { 
-  return bcrypt.hashSync(password, bcrypt.genSaltSync(8), null) 
+UserSchema.methods.generateHash = function(password) {
+  return bcrypt.hashSync(password, bcrypt.genSaltSync(8), null)
 }
 
-UserSchema.methods.validPassword = function(password) { 
-  const isValid = bcrypt.compareSync(password, this.password) 
+UserSchema.methods.validPassword = function(password) {
+  const isValid = bcrypt.compareSync(password, this.password)
   // console.log(`Password is ${ isValid ? 'valid' : 'not valid' }`)
   return isValid
 }
@@ -36,7 +36,7 @@ UserSchema.pre('update', function(next) {
 
   next()
 })
-// UserSchema.pre('save', function(next) {  
+// UserSchema.pre('save', function(next) {
 //   this.password = this.generateHash(this.password)
 //   next()
 // })

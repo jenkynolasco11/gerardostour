@@ -2,6 +2,7 @@ import React from 'react'
 import { Link } from 'react-router-dom'
 import NavDrawer from 'react-toolbox/lib/layout/NavDrawer'
 import { List, ListItem, ListDivider, ListSubHeader } from 'react-toolbox/lib/list'
+import { Link as NavLink } from 'react-toolbox/lib/link'
 
 import linkList from './links-list.json'
 
@@ -14,7 +15,7 @@ const SubList = props => (
     {
       props.items.map((itm, i) => (
         <Link key={ i } to={ itm.route }>
-          <ListItem caption={ itm.name } selectable onClick={ props.onOverlayClick }/>
+          <ListItem caption={ itm.name } selectable onClick={ props.onOverlayClick } leftIcon={ itm.iconName } />
         </Link>
       ))
     }

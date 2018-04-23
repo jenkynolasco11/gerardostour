@@ -95,7 +95,7 @@
       "no-process-env" : [1],
       "no-process-exit" : [2],
       "no-restricted-modules" : [2, { "paths" : []}],
-      "no-sync" : [1],
+      "no-sync" : [2],
       ###### STYLISTIC ISSUES
       # "array-bracket-spacing" : [2, "never", {"singleValue" : false, "objectsInArrays" : false}],
       "block-spacing" : [2,  "never"],

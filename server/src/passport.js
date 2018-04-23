@@ -5,7 +5,7 @@ import { Strategy } from 'passport-local'
 import { User } from './models'
 
 passport.serializeUser((user, done) => {
-  console.log(`About to authenticate: ${ user.username }`)
+  console.log(`\nAbout to authenticate: ${ user.username }\n`)
 
   return done(null, user._id)
 })

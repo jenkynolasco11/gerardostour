@@ -3,8 +3,8 @@
     {
       "header" : "Menu",
       "items" : [
-        { "name" : "Tickets", "route" : "/ticket" },
-        { "name" : "Rides", "route" : "/ride" }
+        { "name" : "Tickets", "route" : "/ticket", "iconName" : "receipt" },
+        { "name" : "Rides", "route" : "/ride", "iconName" : "directions_bus" }
       ]
     }
   ]

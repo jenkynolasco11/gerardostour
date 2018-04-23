@@ -1,16 +1,21 @@
 import mongoose, { Schema } from 'mongoose'
 
-const ROUTES = [ 'NY', 'PA' ]
+const { ObjectId } = Schema.Types
+
+// const ROUTES = [ 'NY', 'PA' ]
 const STATUS = [ 'FINISHED', 'PENDING', 'ASSIGNED', 'ON-THE-WAY', 'CANCELLED' ]
 
 const RideSchema = new Schema({
   id : { type : Number, index : true, required : true },
-  bus : { type : Schema.Types.ObjectId, ref : 'bus', index : true },
-  frm : { type : String, enum : ROUTES, required : true },
-  to : { type : String, enum : ROUTES, required : true },
+  bus : { type : ObjectId, ref : 'bus', index : true },
+  // frm : { type : String, enum : ROUTES, required : true },
+  frm : { type : String, required : true },
+  // to : { type : String, enum : ROUTES, required : true },
+  to : { type : String, required : true },
   status : { type : String, enum : STATUS, index : true, default : 'PENDING' },
-  time : { type : Number, default : -1 },
-  date : { type : Date },
+  datetime : { type : Date, required : true, index : true },
+  // time : { type : Number, default : -1 },
+  // date : { type : Date },
   // Nothing important after this
   createdAt : { type : Date, default : Date.now },
   modifiedAt : { type : Date, default : Date.now },
@@ -18,21 +23,20 @@ const RideSchema = new Schema({
 
 const RideDetailsSchema = new Schema({
   ride : { type : Schema.Types.ObjectId, ref : 'ride', index : true },
-  seatsOccupied : { type : Number, default : 0 },
-  luggage : { type : Number, default : 0 },
+  seatsOccupied : { type : Number, default : () => 0 },
+  luggage : { type : Number, default : () => 0 },
   startTime : Date,
   endTime : Date,
-  createdAt : { type : Date, default : Date.now },
   modifiedAt : { type : Date, default : Date.now }
 })
 
 const RideFeesSchema = new Schema({
   ride : { type : Schema.Types.ObjectId, ref : 'ride', index : true },
-  gas : { type : Number, default : 0 },
-  toll : { type : Number, default : 0 },
-  wash : { type : Number, default : 0 },
-  other : { type : Number, default : 0 },
-  parking : { type : Number, default : 0 },
+  gas : { type : Number, default : () => 0 },
+  toll : { type : Number, default : () => 0 },
+  wash : { type : Number, default : () => 0 },
+  other : { type : Number, default : () => 0 },
+  parking : { type : Number, default : () => 0 },
   modifiedAt : { type : Date, default : Date.now },
   otherDetail : String,
 })

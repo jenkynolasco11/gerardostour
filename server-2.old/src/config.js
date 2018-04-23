@@ -1,6 +1,6 @@
 const user = 'database'
 const pass = 'database'
-const session = 'key for my session'  // generate this differently
+const session = 'key for my session'
 const database = 'generic'
 
 export const userDefault = 'admin'
@@ -16,12 +16,12 @@ export const TWILIO_PHONE_NUMBER = '+14134895573'
 export const HOURS_BEFORE_TO_REMIND = 2
 
 export default {
-  PORT,
-  DBURI,
-  KEY,
-  SESSIONID,
-  KEYS,
-  ALLOWED_USERS,
-  TWILIO_PHONE_NUMBER,
-  HOURS_BEFORE_TO_REMIND
+    PORT,
+    DBURI,
+    KEY,
+    SESSIONID,
+    KEYS,
+    ALLOWED_USERS,
+    TWILIO_PHONE_NUMBER,
+    HOURS_BEFORE_TO_REMIND
 }

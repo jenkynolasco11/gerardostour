@@ -49,7 +49,7 @@ export const retrieveTickets = query => async dispatch => {
     }
   } catch (e) {
     // console.log(e)
-    return setTimeout(() => dispatch(retrieveTickets(query)), 100)
+    // return setTimeout(() => dispatch(retrieveTickets(query)), 100)
   }
 
   return dispatch(showLoader(false))

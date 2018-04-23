@@ -1,30 +1,31 @@
 import Router from 'koa-router'
 import passport from 'koa-passport'
 
-import { ALLOWED_USERS } from '../../../config'
-import { User, Bus } from '../../../models'
+// import { ALLOWED_USERS } from '../../../config'
+import { User /*, Bus*/ } from '../../../models'
 
 const auth = new Router({ prefix : 'auth' })
 
-const setUserData = async usr => {
-  const getBusId = async user => {
-    try {
-      const { id } = await Bus.findOne({ user }, { id : 1, _id : 0 })
+const setUserData = usr => {
+// const setUserData = async usr => {
+// const getBusId = async user => {
+  //   try {
+  //     const { id } = await Bus.findOne({ user }, { id : 1, _id : 0 })
 
-      return id
-    } catch (e) {
-      console.log(`Driver with username {${ usr.username }} attempted to login with no bus assigned.`)
-    }
+  //     return id
+  //   } catch (e) {
+  //     console.log(`Driver with username {${ usr.username }} attempted to login with no bus assigned.`)
+  //   }
 
-    return -1
-  }
+  //   return -1
+  // }
 
   const data = {
     username : usr.username,
     lastSession : usr.lastSession,
   }
 
-  if(usr.position === 'DRIVER' ) data.busId = await getBusId(usr._id)
+  // if(usr.position === 'DRIVER' ) data.busId = await getBusId(usr._id)
 
   return data
 }
@@ -51,14 +52,11 @@ const isAuthenticated = async (ctx, next) => {
 
 auth.post('/login', isAuthenticated, ctx =>
   passport.authenticate('local', async (err, user, msg) => {
-    const { driverToken } = ctx.request.body
-
-    // console.log(`This says that the user was ${ ctx.isAuthenticated() ? '' : 'not ' }authenticated`)
-    // console.log(`Testing this: ${ ctx.session.isNew }`)
+    // const { driverToken } = ctx.request.body
 
     if(user) {
-      if(driverToken && user.position !== 'DRIVER') return ctx.body = { ok : false, data : null, message : 'Not a valid Driver' }
-      else if(!driverToken && !ALLOWED_USERS.includes(user.position)) return ctx.body = { ok : false, data : null, message : 'You are not authorized to log in. Contact an Admin.' }
+      // if(driverToken && user.position !== 'DRIVER') return ctx.body = { ok : false, data : null, message : 'Not a valid Driver' }
+      // else if(!driverToken && !ALLOWED_USERS.includes(user.position)) return ctx.body = { ok : false, data : null, message : 'You are not authorized to log in. Contact an Admin.' }
 
       await User.findByIdAndUpdate(user, { lastSession : Date.now() })
       await ctx.login(user)

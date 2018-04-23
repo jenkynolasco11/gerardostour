@@ -78,7 +78,7 @@ export const checkAuth = () => async dispatch => {
 
   // window.sessionStorage.removeItem('session:user')
   // return setTimeout(checkAuth(username), 2000)
-  return
+  // return
 }
 
 export const logUserOut = (username = '') => async dispatch => {

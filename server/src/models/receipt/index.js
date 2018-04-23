@@ -6,19 +6,38 @@ const CARD_TYPES = [ '', 'VISA', 'MASTERCARD', 'AMERICAN EXPRESS', 'DISCOVERY' ]
 const ReceiptSchema = new Schema({
   id : { type : Number, index : true, required : true, unique : true },
   paymentType : { type : String, index : true, enum : PAY_TYPES },
-  fee : { type : Number, default : () => 0 },
-  extraFee : { type : Number, default : () => 0 },
-  totalAmount : { type : Number, default : () => 0 },
+  // fee : { type : Number, default : () => 0 },
+  // extraFee : { type : Number, default : () => 0 },
+  // totalAmount : { type : Number, default : () => 0 },
   cardBrand : { type : String, enum : CARD_TYPES },
   luggageQty : Number,
   ticketQty : Number,
   cardLastDigits : Number,
   createdAt : { type : Date, default : Date.now },
   confirmationNumber : { type : String, index : true, required : true },
+  tickets : [{
+    // ride : { type : String,  },
+    // datetime : Date,
+
+  }],
+  reminded : { }
 })
 
-ReceiptSchema.methods.verifyConfirmation = function(number) {
-  return this.confirmationNumber === number
-}
+// const ReceiptDetailsSchema = new Schema({
 
-export default mongoose.model('receipt', ReceiptSchema, 'receipt')
+// })
+
+// const ReceiptFeeSchema = new Schema({
+//   receipt : { type : Schema.Types.ObjectId, unique : { index : true }},
+//   // paymentType : { type : String, index : true, enum : PAY_TYPES },
+//   fee : { type : Number, default : () => 0 },
+//   extraFee : { type : Number, default : () => 0 },
+//   totalAmount : { type : Number, default : () => 0 },
+// })
+
+// ReceiptSchema.methods.verifyConfirmation = function(number) {
+//   return this.confirmationNumber === number
+// }
+
+// export const ReceiptFee = mongoose.model('receiptFee', ReceiptFeeSchema, 'receiptFee')
+export const Receipt = mongoose.model('receipt', ReceiptSchema, 'receipt')

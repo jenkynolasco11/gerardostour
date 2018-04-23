@@ -1,14 +1,21 @@
 import React from 'react'
 import { Provider } from 'react-redux'
-import { ConnectedRouter } from 'react-router-redux'
+import ThemeProvider from 'react-toolbox/lib/ThemeProvider'
 
 import store, { history } from './store'
+// import theme from '../toolbox/theme.js'
+
+import MainApp from './components'
+
+// import './toolbox/theme.css'
 
 const App = () => (
     <Provider store={ store }>
-        <ConnectedRouter history={ history }>
-            <div />
-        </ConnectedRouter>
+        {/* <ThemeProvider theme={ theme }> */}
+            {/* <ConnectedRouter history={ history }> */}
+                <MainApp />
+            {/* </ConnectedRouter> */}
+        {/* </ThemeProvider> */}
     </Provider>
 )
 

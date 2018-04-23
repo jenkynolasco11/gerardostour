@@ -1,21 +1,26 @@
 import mongoose, { Schema } from 'mongoose'
 
+const { ObjectId } = Schema.Types
+
 const STATUS_TYPES = [ 'STANDBY', 'OK', 'DAMAGED', 'DISABLED' ]
 
 const BusSchema = new Schema({
   id : { type : Number, unique : { index : true }, required : true },
-  user : { type : Schema.Types.ObjectId, ref : 'user' },
+  user : { type : ObjectId, ref : 'user' },
   name : { type : String, unique : { index : true }},
-  active : { type : Boolean, default : false },
-  status : { type : String, default : 'STANDBY', enum : STATUS_TYPES },
+  active : { type : Boolean, default : () => false },
+  status : { type : String, default : () => 'STANDBY', enum : STATUS_TYPES },
   createdAt : { type : Date, default : Date.now },
   modifiedAt : { type : Date, default : Date.now }
 })
 
 const BusDetailsSchema = new Schema({
-  bus : { type : Schema.Types.ObjectId, ref : 'bus', unique : { index : true }, required : true },
-  seatQty : { type : Number, default : 0 },
-  luggageQty : { type : Number, default : 0 },
+  bus : { type : ObjectId, ref : 'bus', unique : { index : true }, required : true },
+  seatQty : { type : Number, default : () => 0 },
+  luggageQty : { type : Number, default : () => 0 },
+
+  // *other stats
+  plate : { type : String, unique : { index : true }},
   modifiedAt : { type : Date, default : Date.now }
 })
 
